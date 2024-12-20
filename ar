@@ -1,0 +1,252 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Apel Hub",
+    SubTitle = "Anime RNG TD[🍀]",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+
+local Tabs = {
+    Credits = Window:AddTab({Title = "Credits", Icon = "book"}),
+    Farm = Window:AddTab({ Title = "Farming", Icon = "align-center" }),
+    Misc = Window:AddTab({Title = "Misс", Icon = "diamond"}),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+
+}
+
+local Options = Fluent.Options
+local player = game:GetService("Players").LocalPlayer
+local character = player.Character
+
+
+local DropFolder = game:GetService("Workspace"):FindFirstChild("DropFolder") -- DropFolder
+if DropFolder then
+    print('Найдено')
+else
+    local DropFolder = Instance.new("Folder", game:GetService("Workspace"))
+    DropFolder.Name = "DropFolder"
+end
+
+    local bb=game:service'VirtualUser'
+    game:service'Players'.LocalPlayer.Idled:connect(function()
+    bb:CaptureController()bb:ClickButton2(Vector2.new())end)
+
+do
+    local AutoCollect = Tabs.Farm:AddToggle("Collect", {Title = "Auto Collect", Default = false, Description = "Collecting chests and potions"})
+
+    AutoCollect:OnChanged(function(sbor) -- Auto collect
+        getgenv().collecting2 = sbor
+        while getgenv().collecting2 == true do
+            if not getgenv().collecting2  then return end
+            task.wait(0.25)
+            if DropFolder then
+                for _, drop in ipairs(DropFolder:GetChildren()) do
+                    if drop:IsA("Model") then
+                        if character and character:FindFirstChild("HumanoidRootPart") then
+                            drop:FindFirstChild("Main").CFrame = character.HumanoidRootPart.CFrame
+                        end
+                    end
+                end
+            end
+        end
+    end)
+
+    local FastRoll = Tabs.Farm:AddToggle("Fast Roll", {Title = "Fast Roll", Default = false, Description = "DONT USE WITH UNIVERSAL LUCK. To work Auto Roll MUST BE ACTIVATED"})
+
+    FastRoll:OnChanged(function(fast) -- Fast Roll
+        getgenv().megakrytka = fast
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local remoteFunction = ReplicatedStorage:WaitForChild("Msg"):WaitForChild("RemoteFunction")
+        local serverMsgSetting = ReplicatedStorage:WaitForChild("ServerMsg"):WaitForChild("Setting")
+        local player = game:GetService("Players").LocalPlayer
+        local fastMagic = player:FindFirstChild("GamePass"):FindFirstChild("FastMagic")
+        local args1 = {
+        "RNG\230\138\189\229\143\150"
+        }
+
+        local function callRemoteFunction(args)
+            local success, response = pcall(function()
+                return remoteFunction:InvokeServer(unpack(args))
+            end)
+        end
+
+        local function callServerMsgSetting(args)
+            local success, response = pcall(function()
+                return serverMsgSetting:InvokeServer(unpack(args))
+            end)
+        end
+
+        local args = {
+            "AutoRoll",
+            1
+        }
+
+        if fastMagic then
+            fastMagic.Value = 1 
+        else
+            warn("FastMagic не найден!")
+        end
+
+        callServerMsgSetting(args)
+
+        while getgenv().megakrytka == true do
+            if not getgenv().megakrytka then return end
+            callRemoteFunction(args1)
+            wait(0.15)
+        end
+
+    end)
+    local AutoClaim = Tabs.Farm:AddToggle("Auto Collect Friend Gifts", {Title = "Auto Collect Friend Gifts", Default = false, Description = "Collecting gifts"})
+
+    AutoClaim:OnChanged(function(claim) -- Auto Claim Friend Gifts
+        getgenv().claiming = claim
+        local giftgui = player:FindFirstChild("PlayerGui"):FindFirstChild("ScreenGui"):FindFirstChild("同玩奖励"):FindFirstChild("Frame"):FindFirstChild("Scroll")
+        while getgenv().claiming == true do
+            if not getgenv().claiming then return end
+            wait(0.1)
+            if giftgui then
+                for _, id in ipairs(giftgui:GetChildren()) do
+                    if id:IsA("Frame") then
+                        local friend = id.Name
+                        if player and giftgui then
+                            local args = {
+                                [1] = "\229\165\189\229\143\139\229\144\140\231\142\169\229\165\150\229\138\177",
+                                [2] = friend
+                            }
+                            game:GetService("ReplicatedStorage"):WaitForChild("Msg"):WaitForChild("RemoteEvent"):FireServer(unpack(args))
+                        end
+                    end
+                end
+            end
+        end
+    end)
+
+    local AutoArtifact = Tabs.Farm:AddToggle("Auto Open Artifact Chests", {Title = "Auto Open Artifact Chests", Default = false, Description = "Openning Artifact Chests"}) -- Auto open artifact chests
+
+    AutoArtifact:OnChanged(function(OpenChest)
+        getgenv().autoopen = OpenChest
+        local chestids = player:FindFirstChild("PlayerGui"):FindFirstChild("ScreenGui"):FindFirstChild("神剑"):FindFirstChild("Frame"):FindFirstChild("宝箱页面"):FindFirstChild("宝箱背包"):FindFirstChild("宝箱背包")
+    
+        while getgenv().autoopen == true do
+            if not getgenv().autoopen then return end
+            wait(0.1)
+            if  chestids then
+                for _, chestid in ipairs(chestids:GetChildren()) do
+                    if chestid:IsA("Frame") then
+                        local idchest = chestid.Name
+                        local numberofchests = chestid:FindFirstChild("Frame"):FindFirstChild("数量").Text
+                        if tostring(numberofchests) ~= "x0" then
+                            local args = {
+                                [1] = "\229\188\128\229\144\175\228\184\128\228\184\170\231\165\158\229\137\145\229\174\157\231\174\177",
+                                [2] = idchest
+                            }
+                            
+                            game:GetService("ReplicatedStorage"):WaitForChild("Msg"):WaitForChild("RemoteFunction"):InvokeServer(unpack(args))
+                        end
+                    end
+                end
+            end
+        end
+        
+    end)
+
+    local AutoCraft = Tabs.Farm:AddToggle("Auto Craft", {Title = "Auto Craft Artifact", Default = false, Description = "Auto crafting artifacts"}) -- Auto craft artifacts
+
+    AutoCraft:OnChanged(function(crafting)
+        getgenv().autocraft = crafting
+        while getgenv().autocraft == true do
+            if not getgenv().autocraft then return end
+            wait(1)
+            local args = {
+                [1] = "\229\144\136\230\136\144\229\133\168\233\131\168\231\165\158\229\137\145"
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Msg"):WaitForChild("RemoteFunction"):InvokeServer(unpack(args))            
+        end
+    end)
+
+
+
+    local FreeGamepass = Tabs.Farm:AddButton({ -- Free Gamepasses
+        Title = "Free Gamepasses",
+        Content = "",
+        Description = "Quick Enchant + Fast Roll + Magic Roll (Others dont work)",
+        Callback = function()
+            player:FindFirstChild("GamePass"):FindFirstChild("FastMagic").Value = 1
+            player:FindFirstChild("GamePass"):FindFirstChild("Fast-Hatch").Value = 1
+            player:FindFirstChild("GamePass"):FindFirstChild("MagicHatch").Value = 1
+        end
+    })
+
+
+    local SpeedSlider = Tabs.Misc:AddSlider("WalkSpeed",{
+        Title = "WalkSpeed",
+        Description = "WalkSpeed slider",
+        Default = 50,
+        Min = 1,
+        Max = 200,
+        Rounding = 1,
+        Callback = function(Value)
+            character.Humanoid.WalkSpeed = Value
+        end
+    })
+    local DiscordButton = Tabs.Credits:AddButton({Title = "Discord Link", Content = "", Description = "Will copy in clipboard", Callback = function()
+        setclipboard("https://discord.gg/4gDAbj2VXG")
+    end})
+end
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("Apel Hub")
+SaveManager:SetFolder("Apel Hub/".."Anime RNG TD")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+SaveManager:LoadAutoloadConfig()
+
+-- Gui to Lua
+-- Version: 3.2
+
+-- Instances:
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "Menu"
+local Frame = Instance.new("Frame")
+Frame.Name = "Menu Button"
+local ImageButton = Instance.new("ImageButton")
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
+
+--Properties:
+
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.167999998, 0, 0.230493277, 0)
+Frame.Size = UDim2.new(0.040533334, 0, 0.0681614354, 0)
+
+ImageButton.Parent = Frame
+ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ImageButton.BorderSizePixel = 0
+ImageButton.Size = UDim2.new(1, 0, 1, 0)
+ImageButton.Image = "http://www.roblox.com/asset/?id=181239831"
+ImageButton.MouseButton1Up:Connect(function()
+	game:GetService("VirtualInputManager"):SendKeyEvent(true,"LeftControl",false,game)
+end)
+
+UIAspectRatioConstraint.Parent = ImageButton
+
+UIAspectRatioConstraint_2.Parent = Frame
