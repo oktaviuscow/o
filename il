@@ -131,37 +131,41 @@
     -- Version: 3.2
 
     -- Instances:
+local Menu = game.Players.LocalPlayer.PlayerGui:FindFirstChild("Menu")
+if Menu then
+    print("Найдено меню")
+else
+    local Menu = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
+Menu.Name = "Menu"
+local Frame = Instance.new("Frame")
+Frame.Name = "Menu Button"
+local ImageButton = Instance.new("ImageButton")
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
 
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "Menu"
-    local Frame = Instance.new("Frame")
-    Frame.Name = "Menu Button"
-    local ImageButton = Instance.new("ImageButton")
-    local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
-    local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
+--Properties:
 
-    --Properties:
+Menu.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+Menu.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+Frame.Parent = Menu
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.167999998, 0, 0.230493277, 0)
+Frame.Size = UDim2.new(0.040533334, 0, 0.0681614354, 0)
 
-    Frame.Parent = ScreenGui
-    Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    Frame.BorderSizePixel = 0
-    Frame.Position = UDim2.new(0.167999998, 0, 0.230493277, 0)
-    Frame.Size = UDim2.new(0.040533334, 0, 0.0681614354, 0)
+ImageButton.Parent = Frame
+ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ImageButton.BorderSizePixel = 0
+ImageButton.Size = UDim2.new(1, 0, 1, 0)
+ImageButton.Image = "http://www.roblox.com/asset/?id=181239831"
+ImageButton.MouseButton1Up:Connect(function()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true,"LeftControl",false,game)
+end)
 
-    ImageButton.Parent = Frame
-    ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    ImageButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    ImageButton.BorderSizePixel = 0
-    ImageButton.Size = UDim2.new(1, 0, 1, 0)
-    ImageButton.Image = "http://www.roblox.com/asset/?id=181239831"
-    ImageButton.MouseButton1Up:Connect(function()
-        game:GetService("VirtualInputManager"):SendKeyEvent(true,"LeftControl",false,game)
-    end)
+UIAspectRatioConstraint.Parent = ImageButton
 
-    UIAspectRatioConstraint.Parent = ImageButton
-
-    UIAspectRatioConstraint_2.Parent = Frame
+UIAspectRatioConstraint_2.Parent = Frame
+end
