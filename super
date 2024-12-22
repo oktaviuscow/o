@@ -52,11 +52,11 @@ SaveManager:LoadAutoloadConfig()
 -- Version: 3.2
 
 -- Instances:
-local Menu = game.Players.LocalPlayer.PlayerGui:FindFirstChild("Menu")
+local Menu = game:GetService("CoreGui"):FindFirstChild("Menu")
 if Menu then
     print("Найдено меню")
 else
-    local Menu = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
+    local Menu = Instance.new("ScreenGui")
 Menu.Name = "Menu"
 local Frame = Instance.new("Frame")
 Frame.Name = "Menu Button"
@@ -65,8 +65,8 @@ local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
 local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
 
 --Properties:
-
-Menu.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local coreGui = game:GetService("CoreGui")
+Menu.Parent = coreGui
 Menu.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 Frame.Parent = Menu
@@ -90,3 +90,4 @@ UIAspectRatioConstraint.Parent = ImageButton
 
 UIAspectRatioConstraint_2.Parent = Frame
 end
+
