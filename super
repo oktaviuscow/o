@@ -79,8 +79,8 @@ local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
 local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
 
 --Properties:
-
-Menu.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local coreGui = game:GetService("CoreGui")
+Menu.Parent = coreGui
 Menu.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 Frame.Parent = Menu
