@@ -44,8 +44,8 @@ do
     AutoCollect:OnChanged(function(sbor) -- Auto collect
         getgenv().collecting2 = sbor
         while getgenv().collecting2 == true do
-            if not getgenv().collecting2  then return end
-            task.wait(0.25)
+            if not getgenv().collecting2 then return end
+            wait()
             if DropFolder then
                 for _, drop in ipairs(DropFolder:GetChildren()) do
                     if drop:IsA("Model") then
