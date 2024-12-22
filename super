@@ -4,7 +4,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 
 local Window = Fluent:CreateWindow({
     Title = "Apel Hub",
-    SubTitle = "Supermarket Simulator",
+    SubTitle = "[🔥RELEASE] Immortal Luck",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
     Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
@@ -29,26 +29,12 @@ local character = player.Character
     game:service'Players'.LocalPlayer.Idled:connect(function()
     bb:CaptureController()bb:ClickButton2(Vector2.new())end)
 do
-    local Money = 0
-    local Input = Tabs.Farm:AddInput("Input", {
-        Title = "How much money do you want:",
-        Default = "",
-        Placeholder = "type here amount of money",
-        Numeric = true, -- Only allows numbers
-        Finished = false, -- Only calls callback when you press enter
-        Callback = function(Value)
-            print("New amount of money:", Value)
-            Money = Value
-        end
-    })
-
     Tabs.Farm:AddButton({
         Title = "Add Money",
-        Description = "Adding amount of money which you want",
+        Description = "Adding inf amount of money",
         Callback = function()
-            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Gold"):WaitForChild("ChangeGoldRF"):InvokeServer("ChangeGold", tonumber(Money), false)
+            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Gold"):WaitForChild("ChangeGoldRF"):InvokeServer("ChangeGold", math.huge, false)
         end
-
     })
 end
 
@@ -66,11 +52,11 @@ SaveManager:LoadAutoloadConfig()
 -- Version: 3.2
 
 -- Instances:
-local Menu = game:GetService("CoreGui"):FindFirstChild("Menu")
+local Menu = game.Players.LocalPlayer.PlayerGui:FindFirstChild("Menu")
 if Menu then
     print("Найдено меню")
 else
-    local Menu = Instance.new("ScreenGui")
+    local Menu = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
 Menu.Name = "Menu"
 local Frame = Instance.new("Frame")
 Frame.Name = "Menu Button"
@@ -79,8 +65,8 @@ local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
 local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
 
 --Properties:
-local coreGui = game:GetService("CoreGui")
-Menu.Parent = coreGui
+
+Menu.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 Menu.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 Frame.Parent = Menu
