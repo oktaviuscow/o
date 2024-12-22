@@ -66,7 +66,7 @@ SaveManager:LoadAutoloadConfig()
 -- Version: 3.2
 
 -- Instances:
-local Menu = game.Players.LocalPlayer.PlayerGui:FindFirstChild("Menu")
+local Menu = game:GetService("CoreGui"):FindFirstChild("Menu")
 if Menu then
     print("Найдено меню")
 else
