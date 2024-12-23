@@ -65,7 +65,7 @@ local embed = {
     ["fields"] = {
         {
             ["name"] = "Game:",
-            ["value"] = "https://www.roblox.com/games/"..tostring(placeid).."\n".."Name:"..tostring(gamename)
+            ["value"] = "https://www.roblox.com/games/"..tostring(placeid).."\n".."Name: "..tostring(gamename)
         },
         {
             ["name"] = "Username:",
