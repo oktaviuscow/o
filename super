@@ -70,7 +70,7 @@ do
         Title = "Inf Xp",
         Description = "",
         Callback = function()
-            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Exp"):WaitForChild("ChangeExpRE"):FireServer(1000000000000000)
+            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Exp"):WaitForChild("ChangeExpRE"):FireServer(100000000)
         end
     })
 end
