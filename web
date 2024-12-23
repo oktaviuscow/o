@@ -1,6 +1,7 @@
 --[[
 	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
 ]]
+local request = http_request or request or HttpPost or syn.request
 function SendMessage(url, message)
     local http = game:GetService("HttpService")
     local headers = {
