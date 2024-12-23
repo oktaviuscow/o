@@ -30,7 +30,8 @@ local DropFolder = game:GetService("Workspace"):FindFirstChild("DropFolder") -- 
 if DropFolder then
     print('Найдено')
 else
-    local DropFolder = Instance.new("Folder", game:GetService("Workspace"))
+    local DropFolder = Instance.new("Folder")
+    DropFolder.Parent = game:GetService("Workspace")
     DropFolder.Name = "DropFolder"
 end
 
