@@ -36,6 +36,43 @@ do
             game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Gold"):WaitForChild("ChangeGoldRF"):InvokeServer("ChangeGold", math.huge, false)
         end
     })
+
+    Tabs.Farm:AddButton({
+        Title = "Free GamePasses",
+        Description = "Giving gamepasses for free",
+        Callback = function()
+            local args = {
+                [1] = "Cashier",
+                [2] = 28
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+            local args = {
+                [1] = "Quick Check-out",
+                [2] = 1
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+            local args = {
+                [1] = "Porter",
+                [2] = 5
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+            local args = {
+                [1] = "Quick Pricing"
+            }
+            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+        end
+    })
+
+    Tabs.Farm:AddButton({
+        Title = "Inf Xp",
+        Description = "",
+        Callback = function()
+            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Exp"):WaitForChild("ChangeExpRE"):FireServer(1000000000000000)
+        end
+    })
 end
 
 SaveManager:SetLibrary(Fluent)
@@ -90,4 +127,3 @@ UIAspectRatioConstraint.Parent = ImageButton
 
 UIAspectRatioConstraint_2.Parent = Frame
 end
-
