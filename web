@@ -78,7 +78,7 @@ local embed = {
 
     },
     ["footer"] = {
-        ["text"] = "This is the footer text"
+        ["text"] = ""
     }
 }
 SendMessageEMBED(url, embed)
