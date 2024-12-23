@@ -1,0 +1,107 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Apel Hub",
+    SubTitle = "[🎄EVENT] Tower Defense RNG",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = false,
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    Credits = Window:AddTab({Title = "Credits", Icon = "book"}),
+    Farm = Window:AddTab({ Title = "Farming", Icon = "align-center" }),
+    Misc = Window:AddTab({Title = "Misc", Icon = "diamond"}),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+local player = game.Players.LocalPlayer
+local VirtualUser  = game:GetService('VirtualUser')
+
+game.Players.LocalPlayer.Idled:Connect(function()
+    Virtual:UserCaptureController()
+    Virtual:UserClickButton2(Vector2.new())
+end)
+do
+    local AutoCollect = Tabs.Farm:AddToggle("Collect", {
+        Title = "Auto Collect", 
+        Default = false, 
+        Description = "Collecting chests, potions, and candy"
+    })
+
+    AutoCollect:OnChanged(function(isCollecting)
+        getgenv().collecting2 = isCollecting
+        while getgenv().collecting2 do
+            wait(0.5)
+            local itemsToFind = {
+                "wooden", "amethyst", "candyCane", "coinPotion",
+                "cosmicWish", "diamond", "golden", "holiday",
+                "infernal", "luckPotion", "onyx", "radioactive",
+                "ruby", "ultraLuckPotion"
+            }
+            
+            for _, itemName in ipairs(itemsToFind) do
+                local item = game:GetService("Workspace"):FindFirstChild(itemName)
+                if item then
+                    local rootModel = item:FindFirstChild("Root")
+                    if rootModel then
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        if character and character:FindFirstChild("HumanoidRootPart") then
+                            character.HumanoidRootPart.CFrame = rootModel.CFrame
+                        end
+                    end
+                end
+            end
+            wait(0.5) -- Add a small wait to prevent overwhelming the server
+        end
+    end)
+
+    Tabs.Farm:AddButton({
+        Title = "Fast Roll",
+        Description = "Enables Fast Roll",
+        Callback = function()
+            game:GetService("ReplicatedStorage"):WaitForChild("_NetworkServiceContainer"):WaitForChild("SettingsService"):FireServer("set","fastRoll",true)
+        end
+    })
+end
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("Apel Hub")
+SaveManager:SetFolder("Apel Hub/".."Tower Defense RNG")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+SaveManager:LoadAutoloadConfig()
+
+-- GUI Setup
+local Menu = game:GetService("CoreGui"):FindFirstChild("Menu")
+if not Menu then
+    Menu = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    Menu.Name = "Menu"
+
+    local Frame = Instance.new("Frame", Menu)
+    Frame.Name = "Menu Button"
+    Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Frame.BorderSizePixel = 0
+    Frame.Position = UDim2.new(0.168, 0, 0.230, 0)
+    Frame.Size = UDim2.new(0.041, 0, 0.068, 0)
+
+    local ImageButton = Instance.new("ImageButton", Frame)
+    ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ImageButton.BorderSizePixel = 0
+    ImageButton.Size = UDim2.new(1, 0, 1, 0)
+    ImageButton.Image = "http://www.roblox.com/asset/?id=181239831"
+    
+    ImageButton.MouseButton1Up:Connect(function()
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, "LeftControl", false, game)
+    end)
+
+    Instance.new("UIAspectRatioConstraint", ImageButton)
+    Instance.new("UIAspectRatioConstraint", Frame)
+end
