@@ -30,8 +30,7 @@ local DropFolder = game:GetService("Workspace"):FindFirstChild("DropFolder") -- 
 if DropFolder then
     print('Найдено')
 else
-    local DropFolder = Instance.new("Folder")
-    DropFolder.Parent = game:GetService("Workspace")
+    local DropFolder = Instance.new("Folder", game:GetService("Workspace"))
     DropFolder.Name = "DropFolder"
 end
 
@@ -42,22 +41,22 @@ end
 do
     local AutoCollect = Tabs.Farm:AddToggle("Collect", {Title = "Auto Collect", Default = false, Description = "Collecting chests and potions"})
 
-    AutoCollect:OnChanged(function(sbor) -- Auto collect
-        getgenv().collecting2 = sbor
-        while getgenv().collecting2 == true do
-            if not getgenv().collecting2 then return end
-            wait()
-            if DropFolder then
-                for _, drop in ipairs(DropFolder:GetChildren()) do
-                    if drop:IsA("Model") then
-                        if character and character:FindFirstChild("HumanoidRootPart") then
-                            drop:FindFirstChild("Main").CFrame = character.HumanoidRootPart.CFrame
-                        end
-                    end
-                end
+AutoCollect:OnChanged(function(sbor) -- Auto collect
+    getgenv().collecting2 = sbor
+    while getgenv().collecting2 do
+
+        for _, drop in ipairs(DropFolder:GetChildren()) do
+            if drop:IsA("Model") and drop:FindFirstChild("Main") and character:FindFirstChild("HumanoidRootPart") then
+                pcall(function()
+                    drop.Main.CFrame = character.HumanoidRootPart.CFrame
+                end)
             end
         end
-    end)
+
+        wait(0.1) -- Уменьшаем нагрузку
+    end
+end)
+
 
     local FastRoll = Tabs.Farm:AddToggle("Fast Roll", {Title = "Fast Roll", Default = false, Description = "DONT USE WITH UNIVERSAL LUCK. To work Auto Roll MUST BE ACTIVATED"})
 
