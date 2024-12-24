@@ -1,17 +1,18 @@
     local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
     local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
     local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+    local MarketplaceService = game:GetService("MarketplaceService")
+    local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
 
     local Window = Fluent:CreateWindow({
         Title = "Apel Hub",
-        SubTitle = "[🔥RELEASE] Immortal Luck",
+        SubTitle = tostring(gamename),
         TabWidth = 160,
         Size = UDim2.fromOffset(580, 460),
         Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
         Theme = "Darker",
         MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
     })
-
 
     local Tabs = {
         Credits = Window:AddTab({Title = "Credits", Icon = "book"}),
