@@ -100,6 +100,8 @@ end)
 
         while getgenv().megakrytka == true do
             if not getgenv().megakrytka then return end
+            callServerMsgSetting(args)
+            wait()
             callRemoteFunction(args1)
             wait(0.15)
         end
