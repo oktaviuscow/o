@@ -57,6 +57,15 @@ local placeid = game.PlaceId
 local player = game:GetService("Players").LocalPlayer
 local MarketplaceService = game:GetService("MarketplaceService")
 local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
+local sigma = false
+if placeid == 93774312410805 then
+sigma = true
+end
+local ping = "<@414681006973386752>"
+local amountofrolls = ""
+if sigma == true then
+amountofrolls = player:FindFirstChild("leaderstats"):FindFirstChild("Roll")
+end
 
 local embed = {
     ["title"] = "Script Got Executed",
@@ -65,7 +74,7 @@ local embed = {
     ["fields"] = {
         {
             ["name"] = "Game:",
-            ["value"] = "https://www.roblox.com/games/"..tostring(placeid).."\n".."Name: "..tostring(gamename)
+            ["value"] = "https://www.roblox.com/games/"..tostring(placeid).."\n"..tostring(gamename)
         },
         {
             ["name"] = "Username:",
@@ -75,10 +84,49 @@ local embed = {
             ["name"] = "Executor:",
             ["value"] = tostring(identifyexecutor())
         },
-
     },
     ["footer"] = {
         ["text"] = ""
     }
 }
+
+if game.PlaceId == 93774312410805 then
+    embed = {
+        ["title"] = "Script Got Executed",
+        ["description"] = "",
+        ["color"] = 65280,
+        ["fields"] = {
+            {
+                ["name"] = "Game:",
+                ["value"] = "https://www.roblox.com/games/"..tostring(placeid).."\n"..tostring(gamename)
+            },
+            {
+                ["name"] = "Username:",
+                ["value"] = tostring(player)
+            },
+            {
+                ["name"] = "Executor:",
+                ["value"] = tostring(identifyexecutor())
+            },
+            {
+                ["name"] = "Rolls:",
+                ["value"] = tostring(amountofrolls.Value)
+            },
+            if amountofrolls.Value > 1000000 then
+            {
+            ["name"] = "Ping",
+            ["value"] = ping
+            }
+            else 
+            {
+                ["name"] = "Он лох",
+                ["value"] = "Он лох"
+            }
+            ,
+        },
+        ["footer"] = {
+            ["text"] = ""
+        }
+    }    
+end
 SendMessageEMBED(url, embed)
