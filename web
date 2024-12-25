@@ -90,7 +90,7 @@ local embed = {
     }
 }
 
-if game.PlaceId == 93774312410805 then
+if game.PlaceId == 93774312410805 or game.PlaceId == 74564350192540 then
     embed = {
         ["title"] = "Script Got Executed",
         ["description"] = "",
