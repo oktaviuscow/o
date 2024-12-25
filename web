@@ -58,7 +58,7 @@ local player = game:GetService("Players").LocalPlayer
 local MarketplaceService = game:GetService("MarketplaceService")
 local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
 local sigma = false
-if placeid == 93774312410805 then
+if placeid == 93774312410805 or placeid == 74564350192540 then
 sigma = true
 end
 local ping = "<@414681006973386752>"
