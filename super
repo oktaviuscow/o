@@ -43,28 +43,50 @@ do
         Title = "Free GamePasses",
         Description = "Giving gamepasses for free",
         Callback = function()
-            local args = {
-                [1] = "Cashier",
-                [2] = 28
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
-            local args = {
-                [1] = "Quick Check-out",
-                [2] = 1
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
-            local args = {
-                [1] = "Porter",
-                [2] = 5
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
-            local args = {
-                [1] = "Quick Pricing"
-            }
-            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+            function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
+
+local args = {
+    [1] = "One-Click pricing",
+    [2] = 10
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+
+function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
+
+local args = {
+    [1] = "Quick-checkout",
+    [2] = 10
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+
+function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
+
+local args = {
+    [1] = "Porter",
+    [2] = 10
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+
+function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
+
+local args = {
+    [1] = "Cashier",
+    [2] = 10
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+
+function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
+
+local args = {
+    [1] = "SpeedUp",
+    [2] = 5
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
         end
     })
 
