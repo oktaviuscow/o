@@ -112,7 +112,7 @@ end)
             callServerMsgSetting(args)
             wait()
             callRemoteFunction(args1)
-            wait(0.15)
+            wait()
         end
 
     end)
