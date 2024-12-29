@@ -46,7 +46,9 @@ do
 AutoCollect:OnChanged(function(sbor) -- Auto collect
     getgenv().collecting2 = sbor
     while getgenv().collecting2 do
-
+        if not game.Workspace:FindFirstChild("DropFolder") then
+            continue
+        end
         for _, drop in ipairs(DropFolder:GetChildren()) do
             if drop:IsA("Model") and drop:FindFirstChild("Main") and character:FindFirstChild("HumanoidRootPart") then
                 pcall(function()
@@ -55,7 +57,7 @@ AutoCollect:OnChanged(function(sbor) -- Auto collect
             end
         end
 
-        wait(0.1) -- Уменьшаем нагрузку
+        wait(0.1)
     end
 end)
 
@@ -103,7 +105,7 @@ end)
             callServerMsgSetting(args)
             wait()
             callRemoteFunction(args1)
-            wait()
+            wait(0.15)
         end
 
     end)
