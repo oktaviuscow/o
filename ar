@@ -1,4 +1,4 @@
-    local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 local MarketplaceService = game:GetService("MarketplaceService")
@@ -46,6 +46,12 @@ do
 AutoCollect:OnChanged(function(sbor) -- Auto collect
     getgenv().collecting2 = sbor
     while getgenv().collecting2 do
+        local DropFolder = game:GetService("Workspace"):FindFirstChild("DropFolder") -- DropFolder
+        if DropFolder then
+        else
+            local DropFolder = Instance.new("Folder", game:GetService("Workspace"))
+            DropFolder.Name = "DropFolder"
+        end
         if not game.Workspace:FindFirstChild("DropFolder") then
             task.wait()
             continue
