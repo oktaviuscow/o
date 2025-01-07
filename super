@@ -46,47 +46,67 @@ do
             function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
 
 local args = {
-    [1] = "One-Click pricing",
-    [2] = 10
+    [1] = "Cashier",
+    [2] = 16,
+    [3] = true
 }
-
+ 
 game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
 
-function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
+for _, actor in (getdeletedactors and getdeletedactors()) or (getactors and getactors()) do 
+    run_on_actor(actor, Script)
+end
 
-local args = {
-    [1] = "Quick-checkout",
-    [2] = 10
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+wait()
 
 function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
 
 local args = {
     [1] = "Porter",
-    [2] = 10
+    [2] = 10,
+    [3] = true
 }
-
+ 
 game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+
+for _, actor in (getdeletedactors and getdeletedactors()) or (getactors and getactors()) do 
+    run_on_actor(actor, Script)
+end
+
+wait()
 
 function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
 
 local args = {
-    [1] = "Cashier",
-    [2] = 10
+    [1] = "Quick-checkout",
+    [2] = 1100,
+    [3] = true
 }
-
+ 
 game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+
+for _, actor in (getdeletedactors and getdeletedactors()) or (getactors and getactors()) do 
+    run_on_actor(actor, Script)
+end
+
+wait()
 
 function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
 
 local args = {
-    [1] = "SpeedUp",
-    [2] = 5
+    [1] = "Quick Pricing",
+    [2] = 110,
+    [3] = true
 }
-
+ 
 game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"):WaitForChild("GamePassRE"):FireServer(unpack(args))
+
+for _, actor in (getdeletedactors and getdeletedactors()) or (getactors and getactors()) do 
+    run_on_actor(actor, Script)
+end
+
+
+
         end
     })
 
@@ -94,7 +114,18 @@ game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Goods"
         Title = "Inf Xp",
         Description = "",
         Callback = function()
-            game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Exp"):WaitForChild("ChangeExpRE"):FireServer(100000000)
+            function getNil(name,class) for _,v in next, getnilinstances() do if v.ClassName==class and v.Name==name then return v;end end end
+
+local args = {
+    [1] = 160000000000000000,
+    [2] = true
+}
+ 
+game:GetService("ReplicatedStorage"):WaitForChild("Events"):WaitForChild("Exp"):WaitForChild("ChangeExpRE"):FireServer(unpack(args))
+
+for _, actor in (getdeletedactors and getdeletedactors()) or (getactors and getactors()) do 
+    run_on_actor(actor, Script)
+end
         end
     })
 end
