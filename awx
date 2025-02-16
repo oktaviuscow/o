@@ -1,306 +1,527 @@
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-local MarketplaceService = game:GetService("MarketplaceService")
-local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
+    local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+    local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+    local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+    local MarketplaceService = game:GetService("MarketplaceService")
+    local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
 
-local Window = Fluent:CreateWindow({
-    Title = "Apel Hub",
-    SubTitle = tostring(gamename),
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
-    Theme = "Darker",
-    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
-})
-
-
-local Tabs = {
-    Credits = Window:AddTab({Title = "Credits", Icon = "book"}),
-    Farm = Window:AddTab({ Title = "Farming", Icon = "align-center" }),
-    Eggs = Window:AddTab({Title = "Eggs", Icon = "egg"}),
-    Misc = Window:AddTab({Title = "Misс", Icon = "diamond"}),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
-
-}
-
-local Options = Fluent.Options
-local player = game:GetService("Players").LocalPlayer
-local character = player.Character
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remotes = ReplicatedStorage:WaitForChild("Remotes")
-
--- Список исключаемых имен
-local excludedNames = {
-    Islands = true,
-    Modules = true,
-    PetsModel = true,
-    Remotes = true,
-    Sound = true,
-    Trials = true,
-    VFX = true,
-    _Assets = true,
-    _Client = true,
-    _Islands = true
-}
-
-for i, v in ipairs(ReplicatedStorage:GetChildren()) do -- Меняем имя папке с ебанутым названием
-    if v:IsA("Folder") and not excludedNames[v.Name] then
-        -- Присваиваем найденной папке новое имя
-        v.Name = "StrangeRemotes"
-    end
-end
-
-for i, v in ipairs(ReplicatedStorage:FindFirstChild("StrangeRemotes"):GetChildren()) do -- меняем названия ивентов
-    v.Name = i
-end
-
-    local bb=game:service'VirtualUser'
-    game:service'Players'.LocalPlayer.Idled:connect(function()
-    bb:CaptureController()bb:ClickButton2(Vector2.new())end)
-
-local dvoichka = "01010010 01100101 01110000 01101100 01101001 01100011 01100001 01110100 01100101 01100100 01010011 0" .."1110100 01101111 01110010 01100001 01100111 01100101 00101110 01010110 01101001 011011" .."10 01101110 01111001 01000110 01110010 01100001 01101101 01100101 01110111 01101111 01" .."110010 01101011 00101110 01001100 01101001 01100010 01110010 01100001 01110010 0111100" .."1 00101110 01000011 01101111 01101110 01101110 01100101 01100011 01110100 01101001 011" .."01111 01101110 00101110 01110100 01101000 01110010 01100101 01100001 01100100 01011111" .." 01110011 01100101 01100011 01110101 01110010 01101001 01110100 01111001 00111010 0011" .."0001 00001010 01010010 01100101 01110000 01101100 01101001 01100011 01100001 01110100 " .."01100101 01100100 01010011 01110100 01101111 01110010 01100001 01100111 01100101 00101" .."110 01010110 01101001 01101110 01101110 01111001 01000110 01110010 01100001 01101101 0" .."1100101 01110111 01101111 01110010 01101011 00101110 01001100 01101001 01100010 011100" .."10 01100001 01110010 01111001 00101110 01000011 01101111 01101110 01101110 01100101 01" .."100011 01110100 01101001 01101111 01101110 00111010 00110001 00110101 00110110 0010000" .."0 01100110 01110101 01101110 01100011 01110100 01101001 01101111 01101110 00100000 011" .."10011 01100101 01101110 01100100 00001010 01010010 01100101 01110000 01101100 01101001" .." 01100011 01100001 01110100 01100101 01100100 01010011 01110100 01101111 01110010 0110" .."0001 01100111 01100101 00101110 01010110 01101001 01101110 01101110 01111001 01000110 " .."01110010 01100001 01101101 01100101 01110111 01101111 01110010 01101011 00101110 01001" .."100 01101001 01100010 01110010 01100001 01110010 01111001 00101110 01000011 01101100 0" .."1101001 01100101 01101110 01110100 00101110 01010000 01110101 01101110 01100011 011010" .."00 01010011 01100101 01110100 01110101 01110000 00111010 00110100 00110000 00001010"
-    
-do
-    local function gainenergy() -- Получение энергии
-        local args = {
-            [1] = dvoichka,
-            [2] = "System",
-            [3] = "Click",
-            [4] = "Run"
-        }
-        
-        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("1"):FireServer(unpack(args))
-    end
-
-    local function dodamage() -- нанесение дамага
-        local args = {
-            [1] = dvoichka,
-            [2] = "System",
-            [3] = "Enemies",
-            [4] = "Damage"
-        }
-        
-        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("1"):FireServer(unpack(args))
-    end
-
-    local AutoClick = Tabs.Farm:AddToggle("Auto Click", {Title = "Auto Click", Default = false, Description = ""})
-
-    AutoClick:OnChanged(function(State)
-        getgenv().AutoClicking =  State
-        while getgenv().AutoClicking == true do
-            if not getgenv().AutoClicking == true then return end
-                task.wait()
-                gainenergy()
-                dodamage()
-        end
-    end)
-
-    local MapFolder = game:GetService("Workspace"):FindFirstChild("_Islands") -- Делает таблицу мап
-    local Maps = {}
-    if MapFolder then 
-        for i, v in ipairs(MapFolder:GetChildren()) do
-            if v:IsA("Folder") then
-                table.insert(Maps, v.Name)
-            end
-        end
-    end
-
-    local MapDropdown = Tabs.Farm:AddDropdown("Map Selector", { -- список мап
-        Title = "Select map for auto farm",
-        Values = Maps,
-        Multi = false,
-        Default = 1,
+    local Window = Fluent:CreateWindow({
+        Title = "Apel Hub",
+        SubTitle = tostring(gamename),
+        TabWidth = 160,
+        Size = UDim2.fromOffset(580, 460),
+        Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+        Theme = "Darker",
+        MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
     })
-    MapDropdown:SetValue("0")
-    getgenv().CurrentMap = "0"
 
-    local EnemiesFolder = game:GetService("Workspace"):FindFirstChild("_Enemies")
-    local Enemies = {} -- мобы
-    local nameSet = {} --исключение лишних
-    if EnemiesFolder then
-        for _, enemy in ipairs(EnemiesFolder:GetChildren()) do
-            local enemyname = enemy.Name
-            if enemyname and not nameSet[enemyname] then
-                if tonumber(getgenv().CurrentMap) == enemy:GetAttribute("Area") then
-                    table.insert(Enemies, enemyname)
-                    nameSet[enemyname] = true
+
+    local Tabs = {
+        Credits = Window:AddTab({Title = "Credits", Icon = "book"}),
+        Farm = Window:AddTab({ Title = "Farming", Icon = "align-center" }),
+        Raids = Window:AddTab({Title = "Raids", Icon = "apple"}),
+        Eggs = Window:AddTab({Title = "Eggs", Icon = "egg"}),
+        Misc = Window:AddTab({Title = "Misс", Icon = "diamond"}),
+        Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+
+    }
+
+    local Options = Fluent.Options
+    local player = game:GetService("Players").LocalPlayer
+    local character = player.Character
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+    -- Список исключаемых имен
+    local excludedNames = {
+        Islands = true,
+        Modules = true,
+        PetsModel = true,
+        Remotes = true,
+        Sound = true,
+        Trials = true,
+        VFX = true,
+        _Assets = true,
+        _Client = true,
+        _Islands = true
+    }
+
+    for i, v in ipairs(ReplicatedStorage:GetChildren()) do -- Меняем имя папке с ебанутым названием
+        if v:IsA("Folder") and not excludedNames[v.Name] then
+            -- Присваиваем найденной папке новое имя
+            v.Name = "StrangeRemotes"
+        end
+    end
+
+    for i, v in ipairs(ReplicatedStorage:FindFirstChild("StrangeRemotes"):GetChildren()) do -- меняем названия ивентов
+        v.Name = i
+    end
+
+        local bb=game:service'VirtualUser'
+        game:service'Players'.LocalPlayer.Idled:connect(function()
+        bb:CaptureController()bb:ClickButton2(Vector2.new())end)
+
+    local dvoichka = "01010010 01100101 01110000 01101100 01101001 01100011 01100001 01110100 01100101 01100100 01010011 0" .."1110100 01101111 01110010 01100001 01100111 01100101 00101110 01010110 01101001 011011" .."10 01101110 01111001 01000110 01110010 01100001 01101101 01100101 01110111 01101111 01" .."110010 01101011 00101110 01001100 01101001 01100010 01110010 01100001 01110010 0111100" .."1 00101110 01000011 01101111 01101110 01101110 01100101 01100011 01110100 01101001 011" .."01111 01101110 00101110 01110100 01101000 01110010 01100101 01100001 01100100 01011111" .." 01110011 01100101 01100011 01110101 01110010 01101001 01110100 01111001 00111010 0011" .."0001 00001010 01010010 01100101 01110000 01101100 01101001 01100011 01100001 01110100 " .."01100101 01100100 01010011 01110100 01101111 01110010 01100001 01100111 01100101 00101" .."110 01010110 01101001 01101110 01101110 01111001 01000110 01110010 01100001 01101101 0" .."1100101 01110111 01101111 01110010 01101011 00101110 01001100 01101001 01100010 011100" .."10 01100001 01110010 01111001 00101110 01000011 01101111 01101110 01101110 01100101 01" .."100011 01110100 01101001 01101111 01101110 00111010 00110001 00110101 00110110 0010000" .."0 01100110 01110101 01101110 01100011 01110100 01101001 01101111 01101110 00100000 011" .."10011 01100101 01101110 01100100 00001010 01010010 01100101 01110000 01101100 01101001" .." 01100011 01100001 01110100 01100101 01100100 01010011 01110100 01101111 01110010 0110" .."0001 01100111 01100101 00101110 01010110 01101001 01101110 01101110 01111001 01000110 " .."01110010 01100001 01101101 01100101 01110111 01101111 01110010 01101011 00101110 01001" .."100 01101001 01100010 01110010 01100001 01110010 01111001 00101110 01000011 01101100 0" .."1101001 01100101 01101110 01110100 00101110 01010000 01110101 01101110 01100011 011010" .."00 01010011 01100101 01110100 01110101 01110000 00111010 00110100 00110000 00001010"
+        
+    do
+        local function gainenergy() -- Получение энергии
+            local args = {
+                [1] = dvoichka,
+                [2] = "System",
+                [3] = "Click",
+                [4] = "Run"
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("1"):FireServer(unpack(args))
+        end
+
+        local function dodamage() -- нанесение дамага
+            local args = {
+                [1] = dvoichka,
+                [2] = "System",
+                [3] = "Enemies",
+                [4] = "Damage"
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("1"):FireServer(unpack(args))
+        end
+
+        local AutoClick = Tabs.Farm:AddToggle("Auto Click", {Title = "Auto Click", Default = false, Description = ""})
+
+        AutoClick:OnChanged(function(State)
+            getgenv().AutoClicking =  State
+            while getgenv().AutoClicking == true do
+                if not getgenv().AutoClicking == true then return end
+                    task.wait()
+                    gainenergy()
+                    dodamage()
+            end
+        end)
+
+        local MapFolder = game:GetService("Workspace"):FindFirstChild("_Islands") -- Делает таблицу мап
+        local Maps = {}
+        if MapFolder then 
+            for i, v in ipairs(MapFolder:GetChildren()) do
+                if v:IsA("Folder") then
+                    table.insert(Maps, v.Name)
                 end
             end
         end
-    end
 
-    local EnemyDropdown = Tabs.Farm:AddDropdown("Enemy Selector", { -- список мобов
-        Title = "Select enemy for auto farm",
-        Description = "Multi available",
-        Values = Enemies,
-        Multi = true,
-        Default = {},
-    })
-    local CurrentEnemy = {}
-    EnemyDropdown:OnChanged(function(Value)  -- Создаёт список атакуемых мобов в данный момент
-        for Value, State in next, Value do
-            table.insert(CurrentEnemy, Value)
-        end
-    end)
-    
-    function EnemyDropdown:GetSelectedValues()
-        local selected = {}
-        for value, state in pairs(self.Value) do
-            if state then
-                table.insert(selected, value)
-            end
-        end
-        return selected
-    end
+        local MapDropdown = Tabs.Farm:AddDropdown("Map Selector", { -- список мап
+            Title = "Select map for auto farm",
+            Values = Maps,
+            Multi = false,
+            Default = 1,
+        })
+        MapDropdown:SetValue("0")
+        getgenv().CurrentMap = "0"
 
-    local function RefreshEnemyDropdownWithNewEnemies()
-        local newEnemies = {}
-        local nameSet = {}
+        local EnemiesFolder = game:GetService("Workspace"):FindFirstChild("_Enemies")
+        local Enemies = {} -- мобы
+        local nameSet = {} --исключение лишних
         if EnemiesFolder then
             for _, enemy in ipairs(EnemiesFolder:GetChildren()) do
                 local enemyname = enemy.Name
                 if enemyname and not nameSet[enemyname] then
                     if tonumber(getgenv().CurrentMap) == enemy:GetAttribute("Area") then
-                        table.insert(newEnemies, enemyname)
+                        table.insert(Enemies, enemyname)
                         nameSet[enemyname] = true
                     end
                 end
             end
         end
-        EnemyDropdown:SetValues(newEnemies)
-    end
-    MapDropdown:OnChanged(function(Value)
-        getgenv().CurrentMap = Value
-        RefreshEnemyDropdownWithNewEnemies()
-    end)
 
-    local function RefreshMapsDropdownWithNewMap()
-        local newMaps = {}
-        local nameSet = {}
-        if MapFolder then
-            for _, maps in ipairs(MapFolder:GetChildren()) do
-                local MapName = maps.Name
-                if MapName and not nameSet[MapName] then
-                        table.insert(newMaps, MapName)
-                        nameSet[MapName] = true
+        local EnemyDropdown = Tabs.Farm:AddDropdown("Enemy Selector", { -- список мобов
+            Title = "Select enemy for auto farm",
+            Description = "Multi available",
+            Values = Enemies,
+            Multi = true,
+            Default = {},
+        })
+        local CurrentEnemy = {}
+        EnemyDropdown:OnChanged(function(Value)  -- Создаёт список атакуемых мобов в данный момент
+            for Value, State in next, Value do
+                table.insert(CurrentEnemy, Value)
+            end
+        end)
+        
+        function EnemyDropdown:GetSelectedValues()
+            local selected = {}
+            for value, state in pairs(self.Value) do
+                if state then
+                    table.insert(selected, value)
                 end
             end
+            return selected
         end
-        MapDropdown:SetValues(newMaps)
-        MapDropdown:SetValue(newMaps[1])
-    end
-    Tabs.Farm:AddButton({
-        Title = "Refresh Maps",
-        Description = "Change the map to your current map",
-        Callback = function()
-            RefreshMapsDropdownWithNewMap()
+
+        local function RefreshEnemyDropdownWithNewEnemies()
+            local newEnemies = {}
+            local nameSet = {}
+            if EnemiesFolder then
+                for _, enemy in ipairs(EnemiesFolder:GetChildren()) do
+                    local enemyname = enemy.Name
+                    if enemyname and not nameSet[enemyname] then
+                        if tonumber(getgenv().CurrentMap) == enemy:GetAttribute("Area") then
+                            table.insert(newEnemies, enemyname)
+                            nameSet[enemyname] = true
+                        end
+                    end
+                end
+            end
+            EnemyDropdown:SetValues(newEnemies)
         end
-    })
-    local AutoFarm = Tabs.Farm:AddToggle("Auto Farm", {Title = "Auto Farm", Default = false, Description = ""})
-    local function containsValue(value, table)
-        for _, v in ipairs(table) do
-            if v == value then
-                return true
+        MapDropdown:OnChanged(function(Value)
+            getgenv().CurrentMap = Value
+            RefreshEnemyDropdownWithNewEnemies()
+        end)
+
+        local function RefreshMapsDropdownWithNewMap()
+            local newMaps = {}
+            local nameSet = {}
+            if MapFolder then
+                for _, maps in ipairs(MapFolder:GetChildren()) do
+                    local MapName = maps.Name
+                    if MapName and not nameSet[MapName] then
+                            table.insert(newMaps, MapName)
+                            nameSet[MapName] = true
+                    end
+                end
+            end
+            MapDropdown:SetValues(newMaps)
+            MapDropdown:SetValue(newMaps[1])
+        end
+        Tabs.Farm:AddButton({
+            Title = "Refresh Maps",
+            Description = "Change the map to your current map",
+            Callback = function()
+                RefreshMapsDropdownWithNewMap()
+            end
+        })
+        local AutoFarm = Tabs.Farm:AddToggle("Auto Farm", {Title = "Auto Farm", Default = false, Description = ""})
+        local function containsValue(value, table)
+            for _, v in ipairs(table) do
+                if v == value then
+                    return true
+                end
+            end
+            return false
+        end
+
+
+    local speed = 1000 -- Set this lower to make it slower
+    local bodyvelocityenabled = false -- Set this to false if you are getting kicked
+
+    -- Function to move the character to the enemy using TweenService
+    local activeTween = nil  -- Variable to hold the active tween
+
+    local function moveToEnemy(enemy)
+        if character ~= nil then
+            local ts = game:GetService("TweenService")
+            local char = game.Players.LocalPlayer.Character
+            local targetPosition = enemy.HumanoidRootPart.Position
+            local hm = char.HumanoidRootPart
+            local dist = (hm.Position - targetPosition).magnitude
+            local tweenspeed = dist / tonumber(speed)
+            local ti = TweenInfo.new(tonumber(tweenspeed), Enum.EasingStyle.Linear)
+            local tp = {CFrame = CFrame.new(targetPosition)}
+            
+            -- Create the tween and store it in activeTween
+            activeTween = ts:Create(hm, ti, tp)
+            activeTween:Play()
+            
+            if bodyvelocityenabled == true then
+                local bv = Instance.new("BodyVelocity")
+                bv.Parent = hm
+                bv.MaxForce = Vector3.new(100000, 100000, 100000)
+                bv.Velocity = Vector3.new(0, 0, 0)
+                wait(tonumber(tweenspeed))
+                bv:Destroy()
             end
         end
-        return false
     end
 
-
-local speed = 1000 -- Set this lower to make it slower
-local bodyvelocityenabled = false -- Set this to false if you are getting kicked
-
--- Function to move the character to the enemy using TweenService
-local activeTween = nil  -- Variable to hold the active tween
-
-local function moveToEnemy(enemy)
-    if character ~= nil then
-        local ts = game:GetService("TweenService")
-        local char = game.Players.LocalPlayer.Character
-        local targetPosition = enemy.HumanoidRootPart.Position
-        local hm = char.HumanoidRootPart
-        local dist = (hm.Position - targetPosition).magnitude
-        local tweenspeed = dist / tonumber(speed)
-        local ti = TweenInfo.new(tonumber(tweenspeed), Enum.EasingStyle.Linear)
-        local tp = {CFrame = CFrame.new(targetPosition)}
-        
-        -- Create the tween and store it in activeTween
-        activeTween = ts:Create(hm, ti, tp)
-        activeTween:Play()
-        
-        if bodyvelocityenabled == true then
-            local bv = Instance.new("BodyVelocity")
-            bv.Parent = hm
-            bv.MaxForce = Vector3.new(100000, 100000, 100000)
-            bv.Velocity = Vector3.new(0, 0, 0)
-            wait(tonumber(tweenspeed))
-            bv:Destroy()
+    AutoFarm:OnChanged(function(autofarm)
+        getgenv().AutoAttack = autofarm
+        if  autofarm == false then
+            if activeTween then
+                task.wait(1)
+                activeTween:Cancel()  -- Stop the active tween
+                activeTween = nil      -- Reset the active tween variable
+            end
         end
-    end
-end
+        while getgenv().AutoAttack == true do
+            if not getgenv().AutoAttack == true then return end
+            task.wait()
+            local Values = {}
+            for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+                table.insert(Values, value)
+            end
 
-AutoFarm:OnChanged(function(autofarm)
-    getgenv().AutoAttack = autofarm
-    if  autofarm == false then
-        if activeTween then
-            for i = 1, 10 do
-            task.wait(1)
-            activeTween:Cancel()  -- Stop the active tween
-            activeTween = nil      -- Reset the active tween variable
-        end
-    end
-    end
-    while getgenv().AutoAttack == true do
-        if not getgenv().AutoAttack == true then return end
-        task.wait()
-        local Values = {}
-        for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
-            table.insert(Values, value)
-        end
-
-        for i, v in pairs(EnemiesFolder:GetChildren()) do
-            if v:IsA("Model") and v:GetAttribute("Minigame") == nil then
-                local rnenemyname = v.Name
-                if containsValue(rnenemyname, Values) then
-                    while v:GetAttribute("Health") > 0 and getgenv().AutoAttack do
-                        wait()
-                        moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+            for i, v in pairs(EnemiesFolder:GetChildren()) do
+                if v:IsA("Model") and v:GetAttribute("Minigame") == nil then
+                    local rnenemyname = v.Name
+                    if containsValue(rnenemyname, Values) then
+                        while v:GetAttribute("Health") > 0 and getgenv().AutoAttack do
+                            wait()
+                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+                        end
                     end
                 end
             end
         end
-    end
-end)
-
-    local AutoRebirth = Tabs.Farm:AddToggle("Auto Rank", {Title = "Auto Rank", Default = false, Description = ""})
-
-    AutoRebirth:OnChanged(function(autorebirth)
-        getgenv().autorebirthing = autorebirth
-        while getgenv().autorebirthing == true do
-            if not getgenv().autorebirthing == true then return end
-            task.wait(1)
-            local args = {
-                [1] = dvoichka,
-                [2] = "System",
-                [3] = "Ranks",
-                [4] = "Up"
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("7"):FireServer(unpack(args))
-            
-        end
     end)
-end
+        -- Auto Rank up
+        local AutoRebirth = Tabs.Farm:AddToggle("Auto Rank", {Title = "Auto Rank", Default = false, Description = ""})
+
+        AutoRebirth:OnChanged(function(autorebirth)
+            getgenv().autorebirthing = autorebirth
+            while getgenv().autorebirthing == true do
+                if not getgenv().autorebirthing == true then return end
+                task.wait(10)
+                local args = {
+                    [1] = dvoichka,
+                    [2] = "System",
+                    [3] = "Ranks",
+                    [4] = "Up"
+                }
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("7"):FireServer(unpack(args))
+                
+            end
+        end)
 
 
-SaveManager:SetLibrary(Fluent)
-InterfaceManager:SetLibrary(Fluent)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("Apel Hub")
-SaveManager:SetFolder("Apel Hub/".."Anime Arcane Simulator")
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
-SaveManager:LoadAutoloadConfig()
+        -- Auto Legacy
+        getgenv().LegacyRaidWaveLimit = 0
+        local LegacyRaidWaveLimit = Tabs.Raids:AddInput("LegacyRaidWaveLimit", {
+            Title = "Legacy Raid Wave Limit",
+            Default = 0, 
+            Description = "After this wave script will auto leave and join back",
+            Numeric = true,
+            Finished = false,
+            Callback = function(Value)
+                getgenv().LegacyRaidWaveLimit = tonumber(Value)
+            end
+        })
+        LegacyRaidWaveLimit:OnChanged(function(Value)
+            getgenv().LegacyRaidWaveLimit = tonumber(Value)
+            print(getgenv().LegacyRaidWaveLimit)
+        end)
+        local AutoLegacy = Tabs.Raids:AddToggle("Auto Legacy Raid",{
+            Title = "Auto Legacy Raid",
+            Default = false,
+            Description = ""
+        })
+
+        AutoLegacy:OnChanged(function(autolegacy)
+            getgenv().AutoLegacy = autolegacy
+
+            if  autolegacy == false then
+                if activeTween then
+                    task.wait(1)
+                    activeTween:Cancel()  -- Stop the active tween
+                    activeTween = nil      -- Reset the active tween variable
+                end
+            end
+            -- Coroutine for AutoDefense
+            coroutine.wrap(function()
+                while getgenv().AutoLegacy do
+                    task.wait(3)
+                    if tonumber(player:GetAttribute("CurrentArea")) ~= -3 then
+                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = -3}
+                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
+                    end
+                    
+                    if MapFolder:FindFirstChild("-3") then
+                        local currentWave = tonumber(MapFolder:FindFirstChild("-3"):GetAttribute("Wave"))
+                        -- Check if the current wave is greater than or equal to the limit
+                        if currentWave >= getgenv().LegacyRaidWaveLimit then
+                            local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
+                            game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
+                        end
+                    end
+                end
+            end)()
+        
+            -- Coroutine for AutoDefense2
+            coroutine.wrap(function()
+                while getgenv().AutoLegacy do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild("-3") then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -3 then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoLegacy do
+                                    wait()
+                                    if v.HumanoidRootPart then
+                                        pcall(function()
+                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+                                            end)
+                                        end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)()
+        end)
+        -- Auto Defense
+        getgenv().DefenseRaidWaveLimit = 0
+        local DefenseRaidWaveLimit = Tabs.Raids:AddInput("DefenseRaidWaveLimit", {
+            Title = "Defense Raid Wave Limit",
+            Default = 0, 
+            Description = "After this wave script will auto leave and join back",
+            Numeric = true,
+            Finished = false,
+            Callback = function(Value)
+                getgenv().LegacyRaidWaveLimit = tonumber(Value)
+            end
+        })
+        DefenseRaidWaveLimit:OnChanged(function(Value)
+            getgenv().DefenseRaidWaveLimit = tonumber(Value)
+            print(getgenv().DefenseRaidWaveLimit)
+        end)
+        local AutoDefense = Tabs.Raids:AddToggle("Auto Defense Raid",{
+            Title = "Auto Defense Raid",
+            Default = false,
+            Description = ""
+        })
+
+        AutoDefense:OnChanged(function(autodefense)
+            getgenv().AutoDefense = autodefense
+            getgenv().AutoDefense2 = autodefense
+            if  autodefense == false then
+                if activeTween then
+                    task.wait(1)
+                    activeTween:Cancel()  -- Stop the active tween
+                    activeTween = nil      -- Reset the active tween variable
+                end
+            end
+            -- Coroutine for AutoDefense
+            coroutine.wrap(function()
+                while getgenv().AutoDefense do
+                    task.wait(3)
+                    if tonumber(player:GetAttribute("CurrentArea")) ~= -4 then
+                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = -4}
+                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
+                    end
+                    
+                    if MapFolder:FindFirstChild("-4") then
+                        local currentWave = tonumber(MapFolder:FindFirstChild("-4"):GetAttribute("Wave"))
+                        -- Check if the current wave is greater than or equal to the limit
+                        if currentWave >= getgenv().DefenseRaidWaveLimit then
+                            local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
+                            game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
+                        end
+                    end
+                end
+            end)()
+        
+            -- Coroutine for AutoDefense2
+            coroutine.wrap(function()
+                while getgenv().AutoDefense2 do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild("-4") then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Defense" and v:GetAttribute("Area") == -4 then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoDefense2 do
+                                    wait()
+                                    if v.HumanoidRootPart then
+                                    pcall(function()
+                                        moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+                                        end)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)()
+        end)
+
+        getgenv().SoulsInvasionWaveLimit = 0
+        local SoulsRaidWaveLimit = Tabs.Raids:AddInput("SoulsRaidWaveLimit", {
+            Title = "Souls Invasion Raid Wave Limit",
+            Default = 0, 
+            Description = "After this wave script will auto leave and join back",
+            Numeric = true,
+            Finished = false,
+            Callback = function(Value)
+                getgenv().SoulsInvasionWaveLimit = tonumber(Value)
+            end
+        })
+        SoulsRaidWaveLimit:OnChanged(function(Value)
+            getgenv().SoulsInvasionWaveLimit = tonumber(Value)
+            print(getgenv().SoulsInvasionWaveLimit)
+        end)
+        local AutoInvasion = Tabs.Raids:AddToggle("Auto Invasion Raid",{
+            Title = "Auto Souls Invasion Raid",
+            Default = false,
+            Description = ""
+        })
+
+        AutoInvasion:OnChanged(function(autoinvasion)
+            getgenv().AutoInvasion = autoinvasion
+
+            if  autoinvasion == false then
+                if activeTween then
+                    task.wait(1)
+                    activeTween:Cancel()  -- Stop the active tween
+                    activeTween = nil      -- Reset the active tween variable
+                end
+            end
+            -- Coroutine for AutoDefense
+            coroutine.wrap(function()
+                while getgenv().AutoInvasion do
+                    task.wait(3)
+                    if tonumber(player:GetAttribute("CurrentArea")) ~= -5 then
+                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = -5}
+                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
+                    end
+                    
+                    if MapFolder:FindFirstChild("-5") then
+                        local currentWave = tonumber(MapFolder:FindFirstChild("-5"):GetAttribute("Wave"))
+                        -- Check if the current wave is greater than or equal to the limit
+                        if currentWave >= getgenv().SoulsInvasionWaveLimit then
+                            local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
+                            game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
+                        end
+                    end
+                end
+            end)()
+        
+            -- Coroutine for AutoDefense2
+            coroutine.wrap(function()
+                while getgenv().AutoInvasion do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild("-5") then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -5 then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoInvasion do
+                                    wait()
+                                    if v.HumanoidRootPart then
+                                        pcall(function()
+                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+                                            end)
+                                        end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)()
+        end)
+
+    end
+
+
+    SaveManager:SetLibrary(Fluent)
+    InterfaceManager:SetLibrary(Fluent)
+    SaveManager:IgnoreThemeSettings()
+    SaveManager:SetIgnoreIndexes({})
+    InterfaceManager:SetFolder("Apel Hub")
+    SaveManager:SetFolder("Apel Hub/".."Anime Arcane Simulator")
+    InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+    SaveManager:BuildConfigSection(Tabs.Settings)
+    SaveManager:LoadAutoloadConfig()
 
