@@ -18,7 +18,7 @@
     local Tabs = {
         Credits = Window:AddTab({Title = "Credits", Icon = "book"}),
         Farm = Window:AddTab({ Title = "Farming", Icon = "align-center" }),
-        Raids = Window:AddTab({Title = "Raids", Icon = "apple"}),
+        Raids = Window:AddTab({Title = "Raids & Trial", Icon = "apple"}),
         Eggs = Window:AddTab({Title = "Eggs", Icon = "egg"}),
         Misc = Window:AddTab({Title = "Misс", Icon = "diamond"}),
         Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
@@ -289,6 +289,102 @@
                 game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("7"):FireServer(unpack(args))
                 
             end
+        end)
+
+        -- Auto Trial
+        getgenv().TrialWaveLimit = 0
+        local TrialWaveLimit = Tabs.Raids:AddInput("TrialWaveLimit", {
+            Title = "Trial Wave Limit",
+            Default = 0, 
+            Description = "After this wave script will auto leave",
+            Numeric = true,
+            Finished = false,
+            Callback = function(Value)
+                getgenv().TrialWaveLimit = tonumber(Value)
+            end
+        })
+        TrialWaveLimit:OnChanged(function(Value)
+            getgenv().TrialWaveLimit = tonumber(Value)
+            print(getgenv().TrialWaveLimit)
+        end)
+        local AutoTrial = Tabs.Raids:AddToggle("Auto Trial",{
+            Title = "Auto Trial",
+            Default = false,
+            Description = ""
+        })
+        AutoTrial:OnChanged(function(autotrial)
+            getgenv().AutoTrial = autotrial
+
+            if  autotrial == false then
+                if activeTween then
+                    task.wait(1)
+                    activeTween:Cancel()  -- Stop the active tween
+                    activeTween = nil      -- Reset the active tween variable
+                end
+            end
+
+            local function checkTime()
+                while getgenv().AutoTrial == true do
+                    local currentTime = os.date("*t")  -- Получаем текущее время
+                    local minutes = currentTime.min
+            
+                    -- Проверяем, если минуты равны 0 или 30
+                    if (minutes == 59 or minutes == 29) and tonumber(player:GetAttribute("CurrentArea")) ~= -2 then
+                        wait(1)
+                        local args = {
+                            [1] = dvoichka,
+                            [2] = "System",
+                            [3] = "Islands",
+                            [4] = "Teleport",
+                            [5] = -2,
+                            [6] = "Easy"
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
+                    end
+            
+                    -- Ждем 1 секунду перед следующей проверкой
+                    wait(1)
+                end
+            end
+            
+            -- Запускаем функцию проверки времени в отдельном потоке
+            coroutine.wrap(checkTime)()
+
+            coroutine.wrap(function()
+                while getgenv().AutoTrial do
+                    task.wait(3)
+                    if MapFolder:FindFirstChild("-2") then
+                        local currentWave = tonumber(MapFolder:FindFirstChild("-2"):GetAttribute("Wave"))
+                        -- Check if the current wave is greater than or equal to the limit
+                        if currentWave >= getgenv().TrialWaveLimit then
+                            local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
+                            game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
+                        end
+                    end
+                end
+            end)()
+
+            coroutine.wrap(function()
+                while getgenv().AutoTrial do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild("-2") then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Trials" and v:GetAttribute("Area") == -2 then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoTrial do
+                                    wait()
+                                    if v.HumanoidRootPart then
+                                        pcall(function()
+                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+                                            end)
+                                        end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)()
+
         end)
 
 
