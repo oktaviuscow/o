@@ -314,20 +314,20 @@ end)
     })
     AutoTrial:OnChanged(function(autotrial)
         getgenv().AutoTrial = autotrial
-
-        if  autotrial == false then
+    
+        if autotrial == false then
             if activeTween then
                 task.wait(1)
                 activeTween:Cancel()  -- Stop the active tween
                 activeTween = nil      -- Reset the active tween variable
             end
         end
-
+    
         local function checkTime()
             while getgenv().AutoTrial == true do
                 local currentTime = os.date("*t")  -- Получаем текущее время
                 local minutes = currentTime.min
-        
+    
                 -- Проверяем, если минуты равны 0 или 30
                 if (minutes == 59 or minutes == 29) and tonumber(player:GetAttribute("CurrentArea")) ~= -2 then
                     wait(1)
@@ -342,7 +342,7 @@ end)
                     
                     game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
                 end
-        
+    
                 -- Ждем 1 секунду перед следующей проверкой
                 wait(1)
             end
@@ -350,53 +350,40 @@ end)
         
         -- Запускаем функцию проверки времени в отдельном потоке
         coroutine.wrap(checkTime)()
-
-        coroutine.wrap(function()
-            while getgenv().AutoTrial do
-                task.wait(3)
-                if MapFolder:FindFirstChild("-2") then
-                    local maxWave = 0  -- Инициализируем максимальное значение как очень маленькое число
-                    -- Перебираем все дочерние элементы в папке
-                    for _, model in ipairs(MapFolder:FindFirstChild("-2"):GetChildren()) do
-                        if model:IsA("Model") then  -- Проверяем, является ли элемент моделью
-                            local waveValue = model:GetAttribute("Wave")  -- Получаем значение атрибута "Wave"
-                            
-                            -- Проверяем, если значение атрибута существует и является числом
-                            if waveValue and type(waveValue) == "number" then
-                                maxWave = math.max(maxWave, waveValue)  -- Обновляем максимальное значение
-                            end
-                        end
-                    end
-                    local currentWave = maxWave
-                    -- Check if the current wave is greater than or equal to the limit
-                    if currentWave >= getgenv().TrialWaveLimit then
-                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
-                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
-                    end
-                end
-            end
-        end)()
-
-        coroutine.wrap(function()
-            while getgenv().AutoTrial do
-                task.wait()  -- Wait a bit before checking the wave
-                if MapFolder:FindFirstChild("-2") then
-                    for i, v in pairs(EnemiesFolder:GetChildren()) do
-                        if v:IsA("Model") and v:GetAttribute("Minigame") == "Trials" and v:GetAttribute("Area") == -2 then
-                            while v:GetAttribute("Health") > 0 and getgenv().AutoTrial do
-                                wait()
-                                if v.HumanoidRootPart then
-                                    pcall(function()
-                                        moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+    
+        local function startAutoTrial()
+            coroutine.wrap(function()
+                while getgenv().AutoTrial do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild("-2") then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Trials" and v:GetAttribute("Area") == -2 then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoTrial do
+                                    wait()
+                                    -- Проверяем наличие HumanoidRootPart
+                                    if not v:FindFirstChild("HumanoidRootPart") then
+                                        if activeTween then
+                                            activeTween:Cancel()  -- Останавливаем активный tween
+                                            activeTween = nil      -- Сбрасываем переменную активного tween
+                                        end
+                                        print("Не удалось найти HumanoidRootPart для врага: " .. v.Name)  -- Выводим сообщение
+                                        break  -- Выходим из цикла, чтобы перезапустить корутину
+                                    else
+                                        -- Если HumanoidRootPart найден, продолжаем
+                                        pcall(function()
+                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
                                         end)
                                     end
+                                end
                             end
                         end
                     end
                 end
-            end
-        end)()
-
+            end)()
+        end
+    
+        -- Запускаем корутину для AutoDefense2
+        startAutoTrial()
     end)
 
 
@@ -424,14 +411,15 @@ end)
 
     AutoLegacy:OnChanged(function(autolegacy)
         getgenv().AutoLegacy = autolegacy
-
-        if  autolegacy == false then
+    
+        if autolegacy == false then
             if activeTween then
                 task.wait(1)
                 activeTween:Cancel()  -- Stop the active tween
                 activeTween = nil      -- Reset the active tween variable
             end
         end
+    
         -- Coroutine for AutoDefense
         coroutine.wrap(function()
             while getgenv().AutoLegacy do
@@ -453,25 +441,38 @@ end)
         end)()
     
         -- Coroutine for AutoDefense2
-        coroutine.wrap(function()
-            while getgenv().AutoLegacy do
-                task.wait()  -- Wait a bit before checking the wave
-                if MapFolder:FindFirstChild("-3") then
-                    for i, v in pairs(EnemiesFolder:GetChildren()) do
-                        if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -3 then
-                            while v:GetAttribute("Health") > 0 and getgenv().AutoLegacy do
-                                wait()
-                                if v.HumanoidRootPart then
-                                    pcall(function()
-                                        moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+        local function startAutoDefense2()
+            coroutine.wrap(function()
+                while getgenv().AutoLegacy do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild("-3") then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -3 then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoLegacy do
+                                    wait()
+                                    -- Проверяем наличие HumanoidRootPart
+                                    if not v:FindFirstChild("HumanoidRootPart") then
+                                        if activeTween then
+                                            activeTween:Cancel()  -- Останавливаем активный tween
+                                            activeTween = nil      -- Сбрасываем переменную активного tween
+                                        end
+                                        break  -- Выходим из цикла, чтобы перезапустить корутину
+                                    else
+                                        -- Если HumanoidRootPart найден, продолжаем
+                                        pcall(function()
+                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
                                         end)
                                     end
+                                end
                             end
                         end
                     end
                 end
-            end
-        end)()
+            end)()
+        end
+    
+        -- Запускаем корутину для AutoDefense2
+        startAutoDefense2()
     end)
     -- Auto Defense
     getgenv().DefenseRaidWaveLimit = 0
@@ -498,13 +499,15 @@ end)
     AutoDefense:OnChanged(function(autodefense)
         getgenv().AutoDefense = autodefense
         getgenv().AutoDefense2 = autodefense
-        if  autodefense == false then
+    
+        if autodefense == false then
             if activeTween then
                 task.wait(1)
                 activeTween:Cancel()  -- Stop the active tween
                 activeTween = nil      -- Reset the active tween variable
             end
         end
+    
         -- Coroutine for AutoDefense
         coroutine.wrap(function()
             while getgenv().AutoDefense do
@@ -526,25 +529,38 @@ end)
         end)()
     
         -- Coroutine for AutoDefense2
-        coroutine.wrap(function()
-            while getgenv().AutoDefense2 do
-                task.wait()  -- Wait a bit before checking the wave
-                if MapFolder:FindFirstChild("-4") then
-                    for i, v in pairs(EnemiesFolder:GetChildren()) do
-                        if v:IsA("Model") and v:GetAttribute("Minigame") == "Defense" and v:GetAttribute("Area") == -4 then
-                            while v:GetAttribute("Health") > 0 and getgenv().AutoDefense2 do
-                                wait()
-                                if v.HumanoidRootPart then
-                                pcall(function()
-                                    moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
-                                    end)
+        local function startAutoDefense2()
+            coroutine.wrap(function()
+                while getgenv().AutoDefense2 do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild("-4") then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Defense" and v:GetAttribute("Area") == -4 then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoDefense2 do
+                                    wait()
+                                    -- Проверяем наличие HumanoidRootPart
+                                    if not v:FindFirstChild("HumanoidRootPart") then
+                                        if activeTween then
+                                            activeTween:Cancel()  -- Останавливаем активный tween
+                                            activeTween = nil      -- Сбрасываем переменную активного tween
+                                        end
+                                        break  -- Выходим из цикла, чтобы перезапустить корутину
+                                    else
+                                        -- Если HumanoidRootPart найден, продолжаем
+                                        pcall(function()
+                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+                                        end)
+                                    end
                                 end
                             end
                         end
                     end
                 end
-            end
-        end)()
+            end)()
+        end
+    
+        -- Запускаем корутину для AutoDefense2
+        startAutoDefense2()
     end)
 
     getgenv().SoulsInvasionWaveLimit = 0
@@ -570,14 +586,15 @@ end)
 
     AutoInvasion:OnChanged(function(autoinvasion)
         getgenv().AutoInvasion = autoinvasion
-
-        if  autoinvasion == false then
+    
+        if autoinvasion == false then
             if activeTween then
                 task.wait(1)
                 activeTween:Cancel()  -- Stop the active tween
                 activeTween = nil      -- Reset the active tween variable
             end
         end
+    
         -- Coroutine for AutoDefense
         coroutine.wrap(function()
             while getgenv().AutoInvasion do
@@ -599,27 +616,39 @@ end)
         end)()
     
         -- Coroutine for AutoDefense2
-        coroutine.wrap(function()
-            while getgenv().AutoInvasion do
-                task.wait()  -- Wait a bit before checking the wave
-                if MapFolder:FindFirstChild("-5") then
-                    for i, v in pairs(EnemiesFolder:GetChildren()) do
-                        if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -5 then
-                            while v:GetAttribute("Health") > 0 and getgenv().AutoInvasion do
-                                wait()
-                                if v.HumanoidRootPart then
-                                    pcall(function()
-                                        moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+        local function startAutoDefense()
+            coroutine.wrap(function()
+                while getgenv().AutoInvasion do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild("-5") then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -5 then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoInvasion do
+                                    task.wait()
+                                    -- Проверяем наличие HumanoidRootPart
+                                    if not v:FindFirstChild("HumanoidRootPart") then
+                                        if activeTween then
+                                            activeTween:Cancel()  -- Останавливаем активный tween
+                                            activeTween = nil      -- Сбрасываем переменную активного tween
+                                        end
+                                        break  -- Выходим из цикла, чтобы перезапустить корутину
+                                    else
+                                        -- Если HumanoidRootPart найден, продолжаем
+                                        pcall(function()
+                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
                                         end)
                                     end
+                                end
                             end
                         end
                     end
                 end
-            end
-        end)()
+            end)()
+        end
+    
+        -- Запускаем корутину для AutoDefense2
+        startAutoDefense()
     end)
-
 end
 
 
