@@ -19,8 +19,6 @@ local Tabs = {
     Credits = Window:AddTab({Title = "Credits", Icon = "book"}),
     Farm = Window:AddTab({ Title = "Farming", Icon = "align-center" }),
     Raids = Window:AddTab({Title = "Raids & Trial", Icon = "apple"}),
-    Eggs = Window:AddTab({Title = "Eggs", Icon = "egg"}),
-    Misc = Window:AddTab({Title = "Misс", Icon = "diamond"}),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 
 }
