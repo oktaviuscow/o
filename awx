@@ -647,6 +647,93 @@ end)
         -- Запускаем корутину для AutoDefense2
         startAutoDefense()
     end)
+
+    getgenv().CursedRaidWaveLimit = 0
+    local CursedRaidWaveLimit = Tabs.Raids:AddInput("CursedRaidWaveLimit", {
+        Title = "Cursed Raid Wave Limit",
+        Default = 0, 
+        Description = "After this wave script will auto leave and join back",
+        Numeric = true,
+        Finished = false,
+        Callback = function(Value)
+            getgenv().CursedRaidWaveLimit = tonumber(Value)
+        end
+    })
+    CursedRaidWaveLimit:OnChanged(function(Value)
+        getgenv().CursedRaidWaveLimit = tonumber(Value)
+        print(getgenv().CursedRaidWaveLimit)
+    end)
+    local AutoCursed = Tabs.Raids:AddToggle("Auto Cursed Raid",{
+        Title = "Auto Cursed Raid",
+        Default = false,
+        Description = ""
+    })
+
+    AutoCursed:OnChanged(function(autocursed)
+        getgenv().AutoCursed = autocursed
+    
+        if autocursed == false then
+            if activeTween then
+                task.wait(1)
+                activeTween:Cancel()  -- Stop the active tween
+                activeTween = nil      -- Reset the active tween variable
+            end
+        end
+    
+        -- Coroutine for AutoDefense
+        coroutine.wrap(function()
+            while getgenv().AutoCursed do
+                task.wait(3)
+                if tonumber(player:GetAttribute("CurrentArea")) ~= -6 then
+                    local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = -6}
+                    game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
+                end
+                
+                if MapFolder:FindFirstChild("-6") then
+                    local currentWave = tonumber(MapFolder:FindFirstChild("-6"):GetAttribute("Wave"))
+                    -- Check if the current wave is greater than or equal to the limit
+                    if currentWave >= getgenv().CursedRaidWaveLimit then
+                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
+                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
+                    end
+                end
+            end
+        end)()
+    
+        -- Coroutine for AutoDefense2
+        local function startAutoDefense2()
+            coroutine.wrap(function()
+                while getgenv().AutoCursed do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild("-6") then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -6 then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoCursed do
+                                    wait()
+                                    -- Проверяем наличие HumanoidRootPart
+                                    if not v:FindFirstChild("HumanoidRootPart") then
+                                        if activeTween then
+                                            activeTween:Cancel()  -- Останавливаем активный tween
+                                            activeTween = nil      -- Сбрасываем переменную активного tween
+                                        end
+                                        break  -- Выходим из цикла, чтобы перезапустить корутину
+                                    else
+                                        -- Если HumanoidRootPart найден, продолжаем
+                                        pcall(function()
+                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+                                        end)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)()
+        end
+    
+        -- Запускаем корутину для AutoDefense2
+        startAutoDefense2()
+    end)
 end
 
 
