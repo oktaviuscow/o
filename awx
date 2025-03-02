@@ -794,7 +794,7 @@ end)
                     task.wait()  -- Wait a bit before checking the wave
                     if MapFolder:FindFirstChild("-7") then
                         for i, v in pairs(EnemiesFolder:GetChildren()) do
-                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -7 then
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Defense" and v:GetAttribute("Area") == -7 then
                                 while v:GetAttribute("Health") > 0 and getgenv().AutoCursed do
                                     wait()
                                     -- Проверяем наличие HumanoidRootPart
