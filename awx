@@ -289,6 +289,122 @@ end)
         end
     end)
 
+    local RaidDropdown = Tabs.Raids:AddDropdown("Raid Dropdown", {
+        Title = "Choose Raid for autofarm",
+        Description = "",
+        Values = {"Legacy Raid", "Souls Invasion", "Defense", "Cursed Raid", "Clover Defense"},
+        Multi = false
+    })
+    
+    local selectedRaidArea = 0
+    local currentgamemode = "Raid"
+    RaidDropdown:OnChanged(function(value)
+        if value == "Legacy Raid" then
+            selectedRaidArea = -3
+            currentgamemode = "Raid"
+        elseif value == "Souls Invasion" then
+            selectedRaidArea = -5
+            currentgamemode = "Raid"
+        elseif value == "Defense" then
+            selectedRaidArea = -4
+            currentgamemode = "Defense"
+        elseif value == "Cursed Raid" then
+            selectedRaidArea = -6
+            currentgamemode = "Raid"
+        elseif value == "Clover Defense" then
+            selectedRaidArea = -7 
+            currentgamemode = "Defense"
+        end
+    end)
+
+    getgenv().RaidWaveLimit = 0
+    local RaidWaveLimit = Tabs.Raids:AddInput("RaidFarmLimit", {
+        Title = "Raid  Wave Limit",
+        Default = 0, 
+        Description = "After this wave script will auto leave and join back",
+        Numeric = true,
+        Finished = false,
+        Callback = function(Value)
+            getgenv().RaidWaveLimit = tonumber(Value)
+        end
+    })
+    RaidWaveLimit:OnChanged(function(Value)
+        getgenv().RaidFarmLimit = tonumber(Value)
+        print(getgenv().RaidWaveLimit)
+    end)
+
+    local AutoRaid = Tabs.Raids:AddToggle("Auto Raid",{
+        Title = "Auto Farm Raid",
+        Default = false,
+        Description = ""
+    })
+
+    AutoRaid:OnChanged(function(autoraid)
+        getgenv().AutoRaid = autoraid
+    
+        if autoraid == false then
+            if activeTween then
+                task.wait(1)
+                activeTween:Cancel()  -- Stop the active tween
+                activeTween = nil      -- Reset the active tween variable
+            end
+        end
+    
+        -- Coroutine for AutoDefense
+        coroutine.wrap(function()
+            while getgenv().AutoRaid do
+                task.wait(3)
+                if tonumber(player:GetAttribute("CurrentArea")) ~= selectedRaidArea then
+                    local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = selectedRaidArea}
+                    game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
+                end
+                
+                if MapFolder:FindFirstChild(tostring(selectedRaidArea)) then
+                    local currentWave = tonumber(MapFolder:FindFirstChild(tostring(selectedRaidArea)):GetAttribute("Wave"))
+                    -- Check if the current wave is greater than or equal to the limit
+                    if currentWave >= getgenv().RaidWaveLimit then
+                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
+                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
+                    end
+                end
+            end
+        end)()
+    
+        -- Coroutine for AutoDefense2
+        local function startAutoDefense2()
+            coroutine.wrap(function()
+                while getgenv().AutoRaid do
+                    task.wait()  -- Wait a bit before checking the wave
+                    if MapFolder:FindFirstChild(tostring(selectedRaidArea)) then
+                        for i, v in pairs(EnemiesFolder:GetChildren()) do
+                            if v:IsA("Model") and v:GetAttribute("Minigame") == currentgamemode and v:GetAttribute("Area") == selectedRaidArea then
+                                while v:GetAttribute("Health") > 0 and getgenv().AutoRaid do
+                                    wait()
+                                    -- Проверяем наличие HumanoidRootPart
+                                    if not v:FindFirstChild("HumanoidRootPart") then
+                                        if activeTween then
+                                            activeTween:Cancel()  -- Останавливаем активный tween
+                                            activeTween = nil      -- Сбрасываем переменную активного tween
+                                        end
+                                        break  -- Выходим из цикла, чтобы перезапустить корутину
+                                    else
+                                        -- Если HumanoidRootPart найден, продолжаем
+                                        pcall(function()
+                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
+                                        end)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)()
+        end
+    
+        -- Запускаем корутину для AutoDefense2
+        startAutoDefense2()
+    end)
+
     -- Auto Trial
     getgenv().TrialWaveLimit = 0
     local TrialWaveLimit = Tabs.Raids:AddInput("TrialWaveLimit", {
@@ -385,442 +501,7 @@ end)
     end)
 
 
-    -- Auto Legacy
-    getgenv().LegacyRaidWaveLimit = 0
-    local LegacyRaidWaveLimit = Tabs.Raids:AddInput("LegacyRaidWaveLimit", {
-        Title = "Legacy Raid Wave Limit",
-        Default = 0, 
-        Description = "After this wave script will auto leave and join back",
-        Numeric = true,
-        Finished = false,
-        Callback = function(Value)
-            getgenv().LegacyRaidWaveLimit = tonumber(Value)
-        end
-    })
-    LegacyRaidWaveLimit:OnChanged(function(Value)
-        getgenv().LegacyRaidWaveLimit = tonumber(Value)
-        print(getgenv().LegacyRaidWaveLimit)
-    end)
-    local AutoLegacy = Tabs.Raids:AddToggle("Auto Legacy Raid",{
-        Title = "Auto Legacy Raid",
-        Default = false,
-        Description = ""
-    })
 
-    AutoLegacy:OnChanged(function(autolegacy)
-        getgenv().AutoLegacy = autolegacy
-    
-        if autolegacy == false then
-            if activeTween then
-                task.wait(1)
-                activeTween:Cancel()  -- Stop the active tween
-                activeTween = nil      -- Reset the active tween variable
-            end
-        end
-    
-        -- Coroutine for AutoDefense
-        coroutine.wrap(function()
-            while getgenv().AutoLegacy do
-                task.wait(3)
-                if tonumber(player:GetAttribute("CurrentArea")) ~= -3 then
-                    local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = -3}
-                    game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
-                end
-                
-                if MapFolder:FindFirstChild("-3") then
-                    local currentWave = tonumber(MapFolder:FindFirstChild("-3"):GetAttribute("Wave"))
-                    -- Check if the current wave is greater than or equal to the limit
-                    if currentWave >= getgenv().LegacyRaidWaveLimit then
-                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
-                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
-                    end
-                end
-            end
-        end)()
-    
-        -- Coroutine for AutoDefense2
-        local function startAutoDefense2()
-            coroutine.wrap(function()
-                while getgenv().AutoLegacy do
-                    task.wait()  -- Wait a bit before checking the wave
-                    if MapFolder:FindFirstChild("-3") then
-                        for i, v in pairs(EnemiesFolder:GetChildren()) do
-                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -3 then
-                                while v:GetAttribute("Health") > 0 and getgenv().AutoLegacy do
-                                    wait()
-                                    -- Проверяем наличие HumanoidRootPart
-                                    if not v:FindFirstChild("HumanoidRootPart") then
-                                        if activeTween then
-                                            activeTween:Cancel()  -- Останавливаем активный tween
-                                            activeTween = nil      -- Сбрасываем переменную активного tween
-                                        end
-                                        break  -- Выходим из цикла, чтобы перезапустить корутину
-                                    else
-                                        -- Если HumanoidRootPart найден, продолжаем
-                                        pcall(function()
-                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
-                                        end)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)()
-        end
-    
-        -- Запускаем корутину для AutoDefense2
-        startAutoDefense2()
-    end)
-    -- Auto Defense
-    getgenv().DefenseRaidWaveLimit = 0
-    local DefenseRaidWaveLimit = Tabs.Raids:AddInput("DefenseRaidWaveLimit", {
-        Title = "Defense Raid Wave Limit",
-        Default = 0, 
-        Description = "After this wave script will auto leave and join back",
-        Numeric = true,
-        Finished = false,
-        Callback = function(Value)
-            getgenv().LegacyRaidWaveLimit = tonumber(Value)
-        end
-    })
-    DefenseRaidWaveLimit:OnChanged(function(Value)
-        getgenv().DefenseRaidWaveLimit = tonumber(Value)
-        print(getgenv().DefenseRaidWaveLimit)
-    end)
-    local AutoDefense = Tabs.Raids:AddToggle("Auto Defense Raid",{
-        Title = "Auto Defense Raid",
-        Default = false,
-        Description = ""
-    })
-
-    AutoDefense:OnChanged(function(autodefense)
-        getgenv().AutoDefense = autodefense
-        getgenv().AutoDefense2 = autodefense
-    
-        if autodefense == false then
-            if activeTween then
-                task.wait(1)
-                activeTween:Cancel()  -- Stop the active tween
-                activeTween = nil      -- Reset the active tween variable
-            end
-        end
-    
-        -- Coroutine for AutoDefense
-        coroutine.wrap(function()
-            while getgenv().AutoDefense do
-                task.wait(3)
-                if tonumber(player:GetAttribute("CurrentArea")) ~= -4 then
-                    local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = -4}
-                    game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
-                end
-                
-                if MapFolder:FindFirstChild("-4") then
-                    local currentWave = tonumber(MapFolder:FindFirstChild("-4"):GetAttribute("Wave"))
-                    -- Check if the current wave is greater than or equal to the limit
-                    if currentWave >= getgenv().DefenseRaidWaveLimit then
-                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
-                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
-                    end
-                end
-            end
-        end)()
-    
-        -- Coroutine for AutoDefense2
-        local function startAutoDefense2()
-            coroutine.wrap(function()
-                while getgenv().AutoDefense2 do
-                    task.wait()  -- Wait a bit before checking the wave
-                    if MapFolder:FindFirstChild("-4") then
-                        for i, v in pairs(EnemiesFolder:GetChildren()) do
-                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Defense" and v:GetAttribute("Area") == -4 then
-                                while v:GetAttribute("Health") > 0 and getgenv().AutoDefense2 do
-                                    wait()
-                                    -- Проверяем наличие HumanoidRootPart
-                                    if not v:FindFirstChild("HumanoidRootPart") then
-                                        if activeTween then
-                                            activeTween:Cancel()  -- Останавливаем активный tween
-                                            activeTween = nil      -- Сбрасываем переменную активного tween
-                                        end
-                                        break  -- Выходим из цикла, чтобы перезапустить корутину
-                                    else
-                                        -- Если HumanoidRootPart найден, продолжаем
-                                        pcall(function()
-                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
-                                        end)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)()
-        end
-    
-        -- Запускаем корутину для AutoDefense2
-        startAutoDefense2()
-    end)
-
-    getgenv().SoulsInvasionWaveLimit = 0
-    local SoulsRaidWaveLimit = Tabs.Raids:AddInput("SoulsRaidWaveLimit", {
-        Title = "Souls Invasion Raid Wave Limit",
-        Default = 0, 
-        Description = "After this wave script will auto leave and join back",
-        Numeric = true,
-        Finished = false,
-        Callback = function(Value)
-            getgenv().SoulsInvasionWaveLimit = tonumber(Value)
-        end
-    })
-    SoulsRaidWaveLimit:OnChanged(function(Value)
-        getgenv().SoulsInvasionWaveLimit = tonumber(Value)
-        print(getgenv().SoulsInvasionWaveLimit)
-    end)
-    local AutoInvasion = Tabs.Raids:AddToggle("Auto Invasion Raid",{
-        Title = "Auto Souls Invasion Raid",
-        Default = false,
-        Description = ""
-    })
-
-    AutoInvasion:OnChanged(function(autoinvasion)
-        getgenv().AutoInvasion = autoinvasion
-    
-        if autoinvasion == false then
-            if activeTween then
-                task.wait(1)
-                activeTween:Cancel()  -- Stop the active tween
-                activeTween = nil      -- Reset the active tween variable
-            end
-        end
-    
-        -- Coroutine for AutoDefense
-        coroutine.wrap(function()
-            while getgenv().AutoInvasion do
-                task.wait(3)
-                if tonumber(player:GetAttribute("CurrentArea")) ~= -5 then
-                    local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = -5}
-                    game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
-                end
-                
-                if MapFolder:FindFirstChild("-5") then
-                    local currentWave = tonumber(MapFolder:FindFirstChild("-5"):GetAttribute("Wave"))
-                    -- Check if the current wave is greater than or equal to the limit
-                    if currentWave >= getgenv().SoulsInvasionWaveLimit then
-                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
-                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
-                    end
-                end
-            end
-        end)()
-    
-        -- Coroutine for AutoDefense2
-        local function startAutoDefense()
-            coroutine.wrap(function()
-                while getgenv().AutoInvasion do
-                    task.wait()  -- Wait a bit before checking the wave
-                    if MapFolder:FindFirstChild("-5") then
-                        for i, v in pairs(EnemiesFolder:GetChildren()) do
-                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -5 then
-                                while v:GetAttribute("Health") > 0 and getgenv().AutoInvasion do
-                                    task.wait()
-                                    -- Проверяем наличие HumanoidRootPart
-                                    if not v:FindFirstChild("HumanoidRootPart") then
-                                        if activeTween then
-                                            activeTween:Cancel()  -- Останавливаем активный tween
-                                            activeTween = nil      -- Сбрасываем переменную активного tween
-                                        end
-                                        break  -- Выходим из цикла, чтобы перезапустить корутину
-                                    else
-                                        -- Если HumanoidRootPart найден, продолжаем
-                                        pcall(function()
-                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
-                                        end)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)()
-        end
-    
-        -- Запускаем корутину для AutoDefense2
-        startAutoDefense()
-    end)
-
-    getgenv().CursedRaidWaveLimit = 0
-    local CursedRaidWaveLimit = Tabs.Raids:AddInput("CursedRaidWaveLimit", {
-        Title = "Cursed Raid Wave Limit",
-        Default = 0, 
-        Description = "After this wave script will auto leave and join back",
-        Numeric = true,
-        Finished = false,
-        Callback = function(Value)
-            getgenv().CursedRaidWaveLimit = tonumber(Value)
-        end
-    })
-    CursedRaidWaveLimit:OnChanged(function(Value)
-        getgenv().CursedRaidWaveLimit = tonumber(Value)
-        print(getgenv().CursedRaidWaveLimit)
-    end)
-    local AutoCursed = Tabs.Raids:AddToggle("Auto Cursed Raid",{
-        Title = "Auto Cursed Raid",
-        Default = false,
-        Description = ""
-    })
-
-    AutoCursed:OnChanged(function(autocursed)
-        getgenv().AutoCursed = autocursed
-    
-        if autocursed == false then
-            if activeTween then
-                task.wait(1)
-                activeTween:Cancel()  -- Stop the active tween
-                activeTween = nil      -- Reset the active tween variable
-            end
-        end
-    
-        -- Coroutine for AutoDefense
-        coroutine.wrap(function()
-            while getgenv().AutoCursed do
-                task.wait(3)
-                if tonumber(player:GetAttribute("CurrentArea")) ~= -6 then
-                    local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = -6}
-                    game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
-                end
-                
-                if MapFolder:FindFirstChild("-6") then
-                    local currentWave = tonumber(MapFolder:FindFirstChild("-6"):GetAttribute("Wave"))
-                    -- Check if the current wave is greater than or equal to the limit
-                    if currentWave >= getgenv().CursedRaidWaveLimit then
-                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
-                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
-                    end
-                end
-            end
-        end)()
-    
-        -- Coroutine for AutoDefense2
-        local function startAutoDefense2()
-            coroutine.wrap(function()
-                while getgenv().AutoCursed do
-                    task.wait()  -- Wait a bit before checking the wave
-                    if MapFolder:FindFirstChild("-6") then
-                        for i, v in pairs(EnemiesFolder:GetChildren()) do
-                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Raid" and v:GetAttribute("Area") == -6 then
-                                while v:GetAttribute("Health") > 0 and getgenv().AutoCursed do
-                                    wait()
-                                    -- Проверяем наличие HumanoidRootPart
-                                    if not v:FindFirstChild("HumanoidRootPart") then
-                                        if activeTween then
-                                            activeTween:Cancel()  -- Останавливаем активный tween
-                                            activeTween = nil      -- Сбрасываем переменную активного tween
-                                        end
-                                        break  -- Выходим из цикла, чтобы перезапустить корутину
-                                    else
-                                        -- Если HumanoidRootPart найден, продолжаем
-                                        pcall(function()
-                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
-                                        end)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)()
-        end
-    
-        -- Запускаем корутину для AutoDefense2
-        startAutoDefense2()
-    end)
-
-    getgenv().CloverDefenseLimit = 0
-    local CloverDefenseLimit = Tabs.Raids:AddInput("CloverDefenseLimit", {
-        Title = "Clover Defense Wave Limit",
-        Default = 0, 
-        Description = "After this wave script will auto leave and join back",
-        Numeric = true,
-        Finished = false,
-        Callback = function(Value)
-            getgenv().CursedRaidWaveLimit = tonumber(Value)
-        end
-    })
-    CloverDefenseLimit:OnChanged(function(Value)
-        getgenv().CloverDefenseLimit = tonumber(Value)
-        print(getgenv().CloverDefenseLimit)
-    end)
-    local AutoClover = Tabs.Raids:AddToggle("Auto Clover Defense",{
-        Title = "Auto Clover Defense",
-        Default = false,
-        Description = ""
-    })
-
-    AutoClover:OnChanged(function(autoclover)
-        getgenv().AutoClover = autoclover
-    
-        if autoclover == false then
-            if activeTween then
-                task.wait(1)
-                activeTween:Cancel()  -- Stop the active tween
-                activeTween = nil      -- Reset the active tween variable
-            end
-        end
-    
-        -- Coroutine for AutoDefense
-        coroutine.wrap(function()
-            while getgenv().AutoClover do
-                task.wait(3)
-                if tonumber(player:GetAttribute("CurrentArea")) ~= -7 then
-                    local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = -7}
-                    game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("10"):FireServer(unpack(args))
-                end
-                
-                if MapFolder:FindFirstChild("-7") then
-                    local currentWave = tonumber(MapFolder:FindFirstChild("-7"):GetAttribute("Wave"))
-                    -- Check if the current wave is greater than or equal to the limit
-                    if currentWave >= getgenv().CloverDefenseLimit then
-                        local args = {[1] = dvoichka, [2] = "System", [3] = "Islands", [4] = "Teleport", [5] = 0}
-                        game:GetService("ReplicatedStorage"):WaitForChild("StrangeRemotes"):WaitForChild("5"):FireServer(unpack(args))
-                    end
-                end
-            end
-        end)()
-    
-        -- Coroutine for AutoDefense2
-        local function startAutoDefense2()
-            coroutine.wrap(function()
-                while getgenv().AutoClover do
-                    task.wait()  -- Wait a bit before checking the wave
-                    if MapFolder:FindFirstChild("-7") then
-                        for i, v in pairs(EnemiesFolder:GetChildren()) do
-                            if v:IsA("Model") and v:GetAttribute("Minigame") == "Defense" and v:GetAttribute("Area") == -7 then
-                                while v:GetAttribute("Health") > 0 and getgenv().AutoCursed do
-                                    wait()
-                                    -- Проверяем наличие HumanoidRootPart
-                                    if not v:FindFirstChild("HumanoidRootPart") then
-                                        if activeTween then
-                                            activeTween:Cancel()  -- Останавливаем активный tween
-                                            activeTween = nil      -- Сбрасываем переменную активного tween
-                                        end
-                                        break  -- Выходим из цикла, чтобы перезапустить корутину
-                                    else
-                                        -- Если HumanoidRootPart найден, продолжаем
-                                        pcall(function()
-                                            moveToEnemy(v) -- Use the BodyVelocity function to move to the enemy
-                                        end)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end)()
-        end
-    
-        -- Запускаем корутину для AutoDefense2
-        startAutoDefense2()
-    end)
 end
 
 
