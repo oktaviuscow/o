@@ -90,43 +90,4 @@ local embed = {
     }
 }
 
-if game.PlaceId == 93774312410805 or game.PlaceId == 74564350192540 then
-    embed = {
-        ["title"] = "Script Got Executed",
-        ["description"] = "",
-        ["color"] = 65280,
-        ["fields"] = {
-            {
-                ["name"] = "Game:",
-                ["value"] = "https://www.roblox.com/games/"..tostring(placeid).."\n"..tostring(gamename)
-            },
-            {
-                ["name"] = "Username:",
-                ["value"] = tostring(player)
-            },
-            {
-                ["name"] = "Executor:",
-                ["value"] = tostring(identifyexecutor())
-            },
-            {
-                ["name"] = "Rolls:",
-                ["value"] = tostring(amountofrolls.Value)
-            },
-            if amountofrolls.Value > 1000000 then
-            {
-            ["name"] = "Ping",
-            ["value"] = ping
-            }
-            else 
-            {
-                ["name"] = "Он лох",
-                ["value"] = "Он лох"
-            }
-            ,
-        },
-        ["footer"] = {
-            ["text"] = ""
-        }
-    }    
-end
 SendMessageEMBED(url, embed)
