@@ -684,15 +684,10 @@ do
             
             local function checkcurrentwave()
                 while getgenv().AutoTrial do
-                    task.wait(1)
+                    task.wait(10)
                     local waveText = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Trial.Frame.Frame.Content.Frame.Wave.Wave.Text
                     local waveNumber = tonumber(string.match(waveText, "%d+"))
                     local trialWaveLimit = tonumber(getgenv().TrialWaveLimit)
-            
-                    print("Текущая волна:", waveNumber)
-                    print("Лимит волн:", trialWaveLimit)
-                    print("StopFarmingTrial:", getgenv().StopFarmingTrial)
-            
                     if waveNumber and trialWaveLimit and waveNumber >= trialWaveLimit and not getgenv().StopFarmingTrial then
                         print("Достигнут лимит волн, телепортируем...")
                         getgenv().StopFarmingTrial = true
