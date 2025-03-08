@@ -260,12 +260,21 @@ do
     local function getPets()
         local pets = {}
         for _, value in ipairs(workspace.Server.Pets:GetChildren()) do
-            if value.Info:FindFirstChild("Player").Value == game:GetService("Players").LocalPlayer then
-                table.insert(pets, value)
+            local inputString = value.Name
+            local nickname = string.match(inputString, "^(.-)---")
+            if nickname then
+                if nickname == tostring(player) then
+                    if value.Info and value.Info.Player then
+                        if value.Info:FindFirstChild("Player").Value == game:GetService("Players").LocalPlayer then
+                            table.insert(pets, value)
+                        end
+                    end
+                end
             end
         end
         return pets
     end
+
 
     local function teleportToNearestEnemy()
         local selectedEnemies = {}
@@ -625,7 +634,6 @@ do
         end
     end
 
-    local waveText = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Trial.Frame.Frame.Content.Frame.Wave.Wave.Text
     getgenv().StopFarmingTrial = false
     AutoTrial:OnChanged(function(state)
         getgenv().AutoTrial = state
@@ -677,6 +685,7 @@ do
             local function checkcurrentwave()
                 while getgenv().AutoTrial do
                     task.wait(1)
+                    local waveText = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Trial.Frame.Frame.Content.Frame.Wave.Wave.Text
                     local waveNumber = tonumber(string.match(waveText, "%d+"))
                     local trialWaveLimit = tonumber(getgenv().TrialWaveLimit)
             
@@ -724,11 +733,13 @@ do
             
         end
     })
+
     local function delayedTeleport()
         task.wait(10)  -- Задержка в 10 секунд
         teleportToSavedPosition()  -- Вызов функции телепортации
     end
     coroutine.wrap(delayedTeleport)()
+    
 end
 
 
