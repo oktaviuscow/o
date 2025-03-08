@@ -730,18 +730,13 @@ do
     })
 
 
-    local RemoveEggAnimation = Tabs.Eggs:CreateToggle("Remove Egg Animation",{Title = "Remove Egg Animation", Default = false, Description = ""})
-    
-    RemoveEggAnimation:OnChanged(function(state)
-        getgenv().RemoveEggAnimation = state
-        while getgenv().RemoveEggAnimation do
-            task.wait()
-            local statement = player:GetAttribute("Egg_Animation")
-            if statement == true then
-                player:SetAttribute("Egg_Animation", false)
-            end
+    local RemoveEggAnimation = Tabs.Eggs:CreateButton("Remove Egg Animation",{
+        Title = "Remove Egg Animation", 
+        Description = "",
+        Callback = function()
+            game:GetService("Players").LocalPlayer.PlayerScripts.Shalom.General.Scripts.Eggs.Egg_Template:Destroy()
         end
-    end)
+    })
 
 
 
