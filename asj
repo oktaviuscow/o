@@ -1,0 +1,487 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local MarketplaceService = game:GetService("MarketplaceService")
+local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
+
+local Window = Fluent:CreateWindow({
+    Title = "Apel Hub",
+    SubTitle = tostring(gamename),
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+
+local Tabs = {
+    Credits = Window:AddTab({Title = "Credits", Icon = "book"}),
+    Farm = Window:AddTab({ Title = "Farming", Icon = "align-center" }),
+    Trials = Window:AddTab({Title = "Trial", Icon = "apple"}),
+    Eggs = Window:AddTab({Title = "Eggs", Icon = "egg"}),
+    Misc = Window:AddTab({Title = " Misc", Icon = "diamond"}),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+
+}
+
+local Options = Fluent.Options
+local player = game:GetService("Players").LocalPlayer
+local character = player.Character
+local hmr = character.HumanoidRootPart
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+    local bb=game:service'VirtualUser'
+    game:service'Players'.LocalPlayer.Idled:connect(function()
+    bb:CaptureController()bb:ClickButton2(Vector2.new())end)
+
+do
+
+    local AutoClick = Tabs.Misc:AddToggle("Auto Click", {Title = "Auto Click", Default = false, Description = ""})
+
+    AutoClick:OnChanged(function(State)-- Auto Click
+        getgenv().AutoClicking = State
+        while getgenv().AutoClicking == true do
+            if not getgenv().AutoClicking == true then return end
+                task.wait()
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer("Enemies", "World", "Click")
+        end
+    end)
+
+
+    local AutoCollect = Tabs.Misc:AddToggle("Auto Collect", {Title = "Auto Collect Drops", Default = false, Description = ""})
+
+    local dropfolder = game:GetService("Workspace").Client.Drops
+
+    AutoCollect:OnChanged(function(State) -- Auto Collect Drops
+        getgenv().AutoCollecting =  State
+        while getgenv().AutoCollecting == true do
+            if not getgenv().AutoCollecting == true then return end
+                task.wait()
+                for i, v in ipairs(dropfolder:GetChildren()) do
+                    v.CFrame = hmr.CFrame
+                end
+        end
+    end)
+
+    local EnemiesFolder = workspace.Client.Enemies
+    local ServerEnemiesFolder = workspace.Server.Enemies
+    local Enemies = {}
+    local nameSet = {}
+
+    if EnemiesFolder then
+        for _, enemy in ipairs(EnemiesFolder:GetChildren()) do
+            local enemyname = enemy.Name
+            if enemyname and not nameSet[enemyname] then
+                table.insert(Enemies, enemyname)
+                nameSet[enemyname] = true
+            end
+        end
+    end
+    
+    local EnemyDropdown = Tabs.Farm:AddDropdown("Enemy", {Title = "Enemy Selector", Description = "Select enemy for farm", Values = Enemies, Multi = true, Default = {}})
+
+    local CurrentEnemy = {}
+    EnemyDropdown:OnChanged(function(Value)
+        for Value, State in next, Value do
+            table.insert(CurrentEnemy, Value)
+        end
+    end)
+
+    function EnemyDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    local function RefreshEnemyDropdownWithNewEnemies()
+        local newEnemies = {}
+        local nameSet = {}
+        if EnemiesFolder then
+            for _, enemy in ipairs(EnemiesFolder:GetChildren()) do
+                local enemyname = enemy.Name
+                if enemyname and not nameSet[enemyname] then
+                    table.insert(newEnemies, enemyname)
+                    nameSet[enemyname] = true
+                end
+            end
+        end
+        EnemyDropdown:SetValues(newEnemies)
+    end
+    local AutoFarmSelectedMobs = Tabs.Farm:AddToggle("AutoFarm", {Title = "Auto Farm Selected Mobs", Default = false, Description = ""})
+
+    local AutoFarmWithTeleport = Tabs.Farm:AddToggle("AutoFarm", {Title = "Auto Farm With Teleport", Default = false, Description = ""})
+
+    AutoFarmWithTeleport:OnChanged(function(state)
+        getgenv().AutoFarmWithTeleport = state
+    end)
+
+    Tabs.Farm:AddButton({
+        Title = "Refresh Enemies",
+        Description = "Update Enemies Dropdown with your current enemies on map",
+        Callback = function()
+            RefreshEnemyDropdownWithNewEnemies()
+        end
+    })
+
+
+    local function containsValue(value, table)
+        for _, v in ipairs(table) do
+            if v == value then
+                return true
+            end
+        end
+        return false
+    end
+
+
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local rootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    
+    local teleportRadius = 10
+    local teleportRadiusForPet = 20
+    
+    local function findNearestEnemy(selectedEnemies)
+        local closestEnemy = nil
+        local closestDistance = math.huge
+    
+        for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local distance = (rootPart.Position - enemy.Position).Magnitude
+    
+                if containsValue(enemy.Name, selectedEnemies) and distance < closestDistance then
+                    closestDistance = distance
+                    closestEnemy = enemy
+                end
+            end
+        end
+    
+        return closestEnemy
+    end
+
+    local function findNearestEnemyWithoutContains()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+    
+        for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local distance = (rootPart.Position - enemy.Position).Magnitude
+    
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestEnemy = enemy
+                end
+            end
+        end
+    
+        return closestEnemy
+    end
+    
+
+
+    local function getEquipedPets()
+        local EquipedPets = {}
+        for _, value in ipairs(workspace.Server.Pets:GetChildren()) do
+            if value.Info:FindFirstChild("Player").Value == game:GetService("Players").LocalPlayer then
+                table.insert(EquipedPets, value:GetAttribute("ID"))
+            end
+        end
+        return EquipedPets
+    end
+
+    local function getPets()
+        local pets = {}
+        for _, value in ipairs(workspace.Server.Pets:GetChildren()) do
+            if value.Info:FindFirstChild("Player").Value == game:GetService("Players").LocalPlayer then
+                table.insert(pets, value)
+            end
+        end
+        return pets
+    end
+
+    local function teleportToNearestEnemy()
+        local selectedEnemies = {}
+        for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+            table.insert(selectedEnemies, value)
+        end
+    
+        local nearestEnemy = findNearestEnemy(selectedEnemies)
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+
+
+            local pets = getPets()
+            for i, v in pets do
+                    local petrootpart = v.HumanoidRootPart
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+            
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+            end
+        end
+    end
+
+    local function teleportToNearestEnemyWithoutContains()
+
+    
+        local nearestEnemy = findNearestEnemyWithoutContains()
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+
+
+            local pets = getPets()
+            for i, v in pets do
+                    local petrootpart = v.HumanoidRootPart
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+            
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+            end
+        end
+    end
+
+    local function sendPetsOnEnemy()
+        local selectedEnemies = {}
+        for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+            table.insert(selectedEnemies, value)
+        end
+        local nearestEnemy = findNearestEnemy(selectedEnemies)
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnNearestEnemy()
+        local nearestEnemy = findNearestEnemyWithoutContains()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    AutoFarmSelectedMobs:OnChanged(function(state)
+        getgenv().AutoFarm = state
+    
+        while getgenv().AutoFarm do
+            task.wait()
+            local Values = {}
+            for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+                table.insert(Values, value)
+            end
+    
+            -- Проверяем состояние врагов в каждом цикле
+            for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
+                if enemy:IsA("Part") and containsValue(enemy.Name, Values) then
+                    -- Проверяем здоровье и состояние врага
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true then
+                        sendPetsOnEnemy()
+                        if getgenv().AutoFarmWithTeleport == true then
+                            teleportToNearestEnemy()
+                        end
+
+                    end
+                end
+            end
+        end
+    end)
+    
+    local AutoFarmNearest = Tabs.Farm:AddToggle("Auto Farm Nearest", {Title = "Auto Farm Nearest", Default = false, Description = ""})
+
+    AutoFarmNearest:OnChanged(function(state)
+        getgenv().AutoFarmNearest = state
+        while getgenv().AutoFarmNearest do
+            task.wait()
+
+            for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
+                if enemy:IsA("Part") then
+                    -- Проверяем здоровье и состояние врага
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true then
+                        sendPetsOnNearestEnemy()
+                        if getgenv().AutoFarmWithTeleport == true then
+                            teleportToNearestEnemyWithoutContains()
+                        end
+                        wait(0.1)
+
+                    end
+                end
+            end
+        end
+        
+    end)
+
+    local eggfolder = workspace.Server.Eggs
+    local egglist = {}
+    local eggset = {}
+    if eggfolder then
+        for _, egg in ipairs(eggfolder:GetChildren()) do
+            local eggname = egg.Name
+            if eggname and not eggset[eggname] then
+                table.insert(egglist, eggname)
+                eggset[eggname] = true
+            end
+        end
+    end
+
+    local currenteggforfarm = nil
+    local EggsDropDown = Tabs.Eggs:AddDropdown("Eggs", {Title = "Select Egg For Auto Open", Description = "", Values = egglist, Multi = false, Default = 1,})
+    EggsDropDown:OnChanged(function(Value)
+        currenteggforfarm = Value
+        print(currenteggforfarm)
+    end)
+
+    local AutoOpenEggs = Tabs.Eggs:AddToggle("Auto Open Eggs", {Title = "Auto Open Selected Egg", Default = false, Description = ""})
+
+    AutoOpenEggs:OnChanged(function(state)
+        getgenv().AutoOpenEggs = state
+        while getgenv().AutoOpenEggs do
+            task.wait()
+
+            local args = {
+                [1] = "General",
+                [2] = "Eggs",
+                [3] = "Multi",
+                [4] = currenteggforfarm,
+                [5] = "Yen"
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+            
+        end
+    end)
+
+    getgenv().TrialWaveLimit = 0
+    local TrialWaveLimit = Tabs.Trials:AddInput("TrialWaveLimit", {
+        Title = "Trial Wave Limit",
+        Default = 0, 
+        Description = "On this wave script will auto leave",
+        Numeric = true,
+        Finished = false,
+        Callback = function(Value)
+            getgenv().TrialWaveLimit = tonumber(Value)
+        end
+    })
+    TrialWaveLimit:OnChanged(function(Value)
+        getgenv().TrialWaveLimit = tonumber(Value)
+    end)
+    
+    local AutoTrial = Tabs.Trials:AddToggle("Auto Trial",{
+        Title = "Auto Trial",
+        Default = false,
+        Description = ""
+    })
+
+    AutoTrial:OnChanged(function(state)
+        getgenv().AutoTrial = state
+        while getgenv().AutoTrial do
+            local function checkTime()
+                while getgenv().AutoTrial == true do
+                    local currentTime = os.date("*t")  -- Получаем текущее время
+                    local minutes = currentTime.min
+        
+                    -- Проверяем, если минуты равны 0 или 30
+                    if (minutes == 0) then
+                        wait(1)
+
+                    end
+        
+                    -- Ждем 1 секунду перед следующей проверкой
+                    wait(1)
+                end
+            end
+
+            coroutine.wrap(checkTime)()
+        end
+    end)
+
+
+end
+
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("Apel Hub")
+SaveManager:SetFolder("Apel Hub/"..tostring(gamename))
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+SaveManager:LoadAutoloadConfig()
+
+local Menu = game:GetService("CoreGui"):FindFirstChild("Menu")
+if Menu then
+    print("Найдено меню")
+else
+    local Menu = Instance.new("ScreenGui")
+Menu.Name = "Menu"
+local Frame = Instance.new("Frame")
+Frame.Name = "Menu Button"
+local ImageButton = Instance.new("ImageButton")
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
+
+--Properties:
+local coreGui = game:GetService("CoreGui")
+Menu.Parent = coreGui
+Menu.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame.Parent = Menu
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.167999998, 0, 0.230493277, 0)
+Frame.Size = UDim2.new(0.040533334, 0, 0.0681614354, 0)
+
+ImageButton.Parent = Frame
+ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ImageButton.BorderSizePixel = 0
+ImageButton.Size = UDim2.new(1, 0, 1, 0)
+ImageButton.Image = "http://www.roblox.com/asset/?id=181239831"
+ImageButton.MouseButton1Up:Connect(function()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true,"LeftControl",false,game)
+end)
+
+UIAspectRatioConstraint.Parent = ImageButton
+
+UIAspectRatioConstraint_2.Parent = Frame
+end
