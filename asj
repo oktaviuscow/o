@@ -689,10 +689,6 @@ do
                     local waveNumber = tonumber(string.match(waveText, "%d+"))
                     local trialWaveLimit = tonumber(getgenv().TrialWaveLimit)
             
-                    print("Текущая волна:", waveNumber)
-                    print("Лимит волн:", trialWaveLimit)
-                    print("StopFarmingTrial:", getgenv().StopFarmingTrial)
-            
                     if waveNumber and trialWaveLimit and waveNumber >= trialWaveLimit and not getgenv().StopFarmingTrial then
                         print("Достигнут лимит волн, телепортируем...")
                         getgenv().StopFarmingTrial = true
