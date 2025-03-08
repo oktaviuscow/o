@@ -244,7 +244,7 @@ do
             local nickname = string.match(inputString, "^(.-)---")
             if nickname then
                 if nickname == tostring(player) then
-                    if value.Info then
+                    if value.Info and value.Info.Player then
                         if value.Info:FindFirstChild("Player").Value == game:GetService("Players").LocalPlayer then
                         table.insert(EquipedPets, value:GetAttribute("ID"))
                         end
