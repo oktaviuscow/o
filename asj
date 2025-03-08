@@ -240,8 +240,18 @@ do
     local function getEquipedPets()
         local EquipedPets = {}
         for _, value in ipairs(workspace.Server.Pets:GetChildren()) do
-            if value.Info:FindFirstChild("Player").Value == game:GetService("Players").LocalPlayer then
-                table.insert(EquipedPets, value:GetAttribute("ID"))
+            local inputString = value.Name
+            local nickname = string.match(inputString, "^(.-)---")
+            if nickname then
+                if nickname == tostring(player) then
+                    if value.Info then
+                        if value.Info:FindFirstChild("Player").Value == game:GetService("Players").LocalPlayer then
+                        table.insert(EquipedPets, value:GetAttribute("ID"))
+                        end
+                    else
+                        print("unluck")
+                    end
+                end
             end
         end
         return EquipedPets
