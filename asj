@@ -730,7 +730,7 @@ do
     })
 
 
-    local RemoveEggAnimation = Tabs.Eggs:CreateButton("Remove Egg Animation",{
+    local RemoveEggAnimation = Tabs.Eggs:CreateButton({
         Title = "Remove Egg Animation", 
         Description = "",
         Callback = function()
