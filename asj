@@ -634,7 +634,7 @@ do
         end
     end
 
-    getgenv().StopFarmingTrial = false
+    getgenv().StopFarmingTrial = true
     AutoTrial:OnChanged(function(state)
         getgenv().AutoTrial = state
     
@@ -739,7 +739,7 @@ do
         teleportToSavedPosition()  -- Вызов функции телепортации
     end
     coroutine.wrap(delayedTeleport)()
-    
+
 end
 
 
