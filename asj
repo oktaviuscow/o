@@ -1,31 +1,55 @@
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 local MarketplaceService = game:GetService("MarketplaceService")
 local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
+local ApelHubFolder = "Apel Hub"
 
-local Window = Fluent:CreateWindow({
+
+local Window = Library:CreateWindow({
     Title = "Apel Hub",
     SubTitle = tostring(gamename),
     TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
+    Size = UDim2.fromOffset(400, 320),
     Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
-    Theme = "Darker",
+    Resize = true, -- Resize this ^ Size according to a 1920x1080 screen, good for mobile users but may look weird on some devices
+    MinSize = Vector2.new(100, 100),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
 })
 
 
 local Tabs = {
-    Credits = Window:AddTab({Title = "Credits", Icon = "book"}),
-    Farm = Window:AddTab({ Title = "Farming", Icon = "align-center" }),
-    Trials = Window:AddTab({Title = "Trial", Icon = "apple"}),
-    Eggs = Window:AddTab({Title = "Eggs", Icon = "egg"}),
-    Misc = Window:AddTab({Title = " Misc", Icon = "diamond"}),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+    Credits = Window:CreateTab({Title = "Credits", Icon = "book"}),
+    Farm = Window:CreateTab({ Title = "Farming", Icon = "align-center" }),
+    Trials = Window:CreateTab({Title = "Trial", Icon = "apple"}),
+    Eggs = Window:CreateTab({Title = "Eggs", Icon = "egg"}),
+    Misc = Window:CreateTab({Title = " Misc", Icon = "diamond"}),
+    Settings = Window:CreateTab({ Title = "Settings", Icon = "settings" })
 
 }
 
-local Options = Fluent.Options
+Tabs.Credits:CreateParagraph("Aligned Paragraph", {
+    Title = "Discord",
+    Content = "https://discord.gg/4gDAbj2VXG\n Dev - Apelsinka",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Center
+})
+
+Tabs.Credits:CreateButton({
+    Title = "Copy Discord link",
+    Description = "Click it",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Center,
+    Callback = function()
+        local link = "https://discord.gg/4gDAbj2VXG"
+        setclipboard(link)
+    end
+})
+
+
+local Options = Library.Options
 local player = game:GetService("Players").LocalPlayer
 local character = player.Character
 local hmr = character.HumanoidRootPart
@@ -35,9 +59,38 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
     game:service'Players'.LocalPlayer.Idled:connect(function()
     bb:CaptureController()bb:ClickButton2(Vector2.new())end)
 
+
+local folderName = "Apel Hub"
+local PositionfileName = "Saved Position.txt"
+local WorldfileName = "Saved World.txt"    
+local PositionfolderPath = folderName .. "\\" .. PositionfileName
+local WorldfolderPath = folderName .. "\\" .. WorldfileName
+
+-- Проверяем, существует ли папка
+if not isfolder(folderName) then
+    makefolder(folderName)  -- Создаем папку, если она не существует
+    print("Папка '" .. folderName .. "' была создана.")
+else
+    print("Папка '" .. folderName .. "' уже существует.")
+end
+
+-- Проверяем, существует ли файл
+if not isfile(PositionfolderPath) or not isfile(WorldfolderPath) then
+    local positionforsave = "139.8529052734375, 377.14923095703125, 3295.7548828125"
+    local worldforsave = "Piece Village"
+    writefile(PositionfolderPath, tostring(positionforsave))  -- Записываем значение в файл
+    writefile(WorldfolderPath, worldforsave)
+    print("Файл '" .. PositionfileName.."and"..WorldfileName .. "' был создан и записан.")
+else
+    print("Файл '" .. PositionfileName.."and"..WorldfileName .. "' был создан и записан.")
+end
+
+
+
+
 do
 
-    local AutoClick = Tabs.Misc:AddToggle("Auto Click", {Title = "Auto Click", Default = false, Description = ""})
+    local AutoClick = Tabs.Misc:CreateToggle("Auto Click", {Title = "Auto Click", Default = false, Description = ""})
 
     AutoClick:OnChanged(function(State)-- Auto Click
         getgenv().AutoClicking = State
@@ -49,7 +102,7 @@ do
     end)
 
 
-    local AutoCollect = Tabs.Misc:AddToggle("Auto Collect", {Title = "Auto Collect Drops", Default = false, Description = ""})
+    local AutoCollect = Tabs.Misc:CreateToggle("Auto Collect", {Title = "Auto Collect Drops", Default = false, Description = ""})
 
     local dropfolder = game:GetService("Workspace").Client.Drops
 
@@ -79,7 +132,7 @@ do
         end
     end
     
-    local EnemyDropdown = Tabs.Farm:AddDropdown("Enemy", {Title = "Enemy Selector", Description = "Select enemy for farm", Values = Enemies, Multi = true, Default = {}})
+    local EnemyDropdown = Tabs.Farm:CreateDropdown("Enemy", {Title = "Enemy Selector", Description = "Select enemy for farm", Values = Enemies, Multi = true, Default = {}})
 
     local CurrentEnemy = {}
     EnemyDropdown:OnChanged(function(Value)
@@ -112,15 +165,15 @@ do
         end
         EnemyDropdown:SetValues(newEnemies)
     end
-    local AutoFarmSelectedMobs = Tabs.Farm:AddToggle("AutoFarm", {Title = "Auto Farm Selected Mobs", Default = false, Description = ""})
+    local AutoFarmSelectedMobs = Tabs.Farm:CreateToggle("AutoFarm", {Title = "Auto Farm Selected Mobs", Default = false, Description = ""})
 
-    local AutoFarmWithTeleport = Tabs.Farm:AddToggle("AutoFarm", {Title = "Auto Farm With Teleport", Default = false, Description = ""})
+    local AutoFarmWithTeleport = Tabs.Farm:CreateToggle("AutoFarm", {Title = "Auto Farm With Teleport", Default = false, Description = ""})
 
     AutoFarmWithTeleport:OnChanged(function(state)
         getgenv().AutoFarmWithTeleport = state
     end)
 
-    Tabs.Farm:AddButton({
+    Tabs.Farm:CreateButton({
         Title = "Refresh Enemies",
         Description = "Update Enemies Dropdown with your current enemies on map",
         Callback = function()
@@ -298,7 +351,7 @@ do
         end
         end
     end
-
+    getgenv().Busy = nil
     AutoFarmSelectedMobs:OnChanged(function(state)
         getgenv().AutoFarm = state
     
@@ -308,16 +361,22 @@ do
             for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
                 table.insert(Values, value)
             end
-    
+            for i, v in ipairs(workspace.Client.Maps:GetChildren()) do
+                if v.Name == "Lobby" then
+                    getgenv().Busy = true
+                else
+                    getgenv().Busy = false
+                end
+            end
             -- Проверяем состояние врагов в каждом цикле
             for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
                 if enemy:IsA("Part") and containsValue(enemy.Name, Values) then
                     -- Проверяем здоровье и состояние врага
-                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true then
-                        sendPetsOnEnemy()
-                        if getgenv().AutoFarmWithTeleport == true then
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true and getgenv().Busy == false then
+                        if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
                             teleportToNearestEnemy()
                         end
+                        sendPetsOnEnemy()
 
                     end
                 end
@@ -325,19 +384,24 @@ do
         end
     end)
     
-    local AutoFarmNearest = Tabs.Farm:AddToggle("Auto Farm Nearest", {Title = "Auto Farm Nearest", Default = false, Description = ""})
-
+    local AutoFarmNearest = Tabs.Farm:CreateToggle("Auto Farm Nearest", {Title = "Auto Farm Nearest", Default = false, Description = ""})
     AutoFarmNearest:OnChanged(function(state)
         getgenv().AutoFarmNearest = state
         while getgenv().AutoFarmNearest do
             task.wait()
-
+            for i, v in ipairs(workspace.Client.Maps:GetChildren()) do
+                if v.Name == "Lobby" then
+                    getgenv().Busy = true
+                else
+                    getgenv().Busy = false
+                end
+            end
             for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
                 if enemy:IsA("Part") then
                     -- Проверяем здоровье и состояние врага
-                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true then
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false then
                         sendPetsOnNearestEnemy()
-                        if getgenv().AutoFarmWithTeleport == true then
+                        if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
                             teleportToNearestEnemyWithoutContains()
                         end
                         wait(0.1)
@@ -363,13 +427,13 @@ do
     end
 
     local currenteggforfarm = nil
-    local EggsDropDown = Tabs.Eggs:AddDropdown("Eggs", {Title = "Select Egg For Auto Open", Description = "", Values = egglist, Multi = false, Default = 1,})
+    local EggsDropDown = Tabs.Eggs:CreateDropdown("Eggs", {Title = "Select Egg For Auto Open", Description = "", Values = egglist, Multi = false, Default = 1,})
     EggsDropDown:OnChanged(function(Value)
         currenteggforfarm = Value
         print(currenteggforfarm)
     end)
 
-    local AutoOpenEggs = Tabs.Eggs:AddToggle("Auto Open Eggs", {Title = "Auto Open Selected Egg", Default = false, Description = ""})
+    local AutoOpenEggs = Tabs.Eggs:CreateToggle("Auto Open Eggs", {Title = "Auto Open Selected Egg", Default = false, Description = ""})
 
     AutoOpenEggs:OnChanged(function(state)
         getgenv().AutoOpenEggs = state
@@ -388,9 +452,86 @@ do
             
         end
     end)
+    local savedWolrdString = readfile(WorldfolderPath)
+    getgenv().SavedWorld = tostring(savedWolrdString)
+        -- Чтение сохраненной позиции из файла
+    local savedPositionString = readfile(PositionfolderPath)
+    local positionValues = {}
+
+    -- Разделяем строку на отдельные координаты
+    for value in string.gmatch(savedPositionString, "[^,]+") do
+        table.insert(positionValues, tonumber(value))
+    end
+
+    -- Проверяем, что у нас есть три координаты
+    if #positionValues == 3 then
+        -- Создаем CFrame из координат
+        getgenv().SavedPosition = CFrame.new(positionValues[1], positionValues[2], positionValues[3])
+        print("Сохраненная позиция установлена:", getgenv().SavedPosition)
+    else
+        warn("Ошибка: неверное количество координат в файле.")
+    end
+
+    local currentPositionParagraph = Tabs.Trials:CreateParagraph("Current pos paragraph", {
+        Title = "Current Position",
+        Content = "World: "..savedWolrdString.."\nPosition: "..savedPositionString
+    })
+    
+    local function updatePositionAndMap()
+        -- Получаем текущее сохраненное состояние мира
+        for _, v in ipairs(workspace.Client.Maps:GetChildren()) do
+            getgenv().SavedWorld = v.Name
+            writefile(WorldfolderPath, v.Name)
+        end
+    
+        -- Получаем новую позицию
+        getgenv().SavedPosition = CFrame.new(character.HumanoidRootPart.Position)
+        writefile(PositionfolderPath, tostring(getgenv().SavedPosition.x)..","..tostring(getgenv().SavedPosition.y)..","..tostring(getgenv().SavedPosition.z))
+        -- Обновляем содержимое параграфа
+        currentPositionParagraph:SetValue("World: " .. tostring(getgenv().SavedWorld) .. "\nPosition: " .. tostring(getgenv().SavedPosition))
+    end
+    
+    Tabs.Trials:CreateButton({
+        Title = "Save New Position",
+        Description = "Change your position for auto teleport",
+        Callback = function()
+            -- Вызываем функцию обновления позиции и карты
+            updatePositionAndMap()
+        end
+    })
+    
+    local function teleportToSavedPosition()
+        if getgenv().SavedPosition and getgenv().SavedWorld then
+            local args = {
+                [1] = "General",
+                [2] = "Maps",
+                [3] = "Teleport",
+                [4] = getgenv().SavedWorld
+            }
+    
+            -- Отправляем запрос на телепортацию
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+            wait(2)
+    
+            -- Телепортируем персонажа на сохраненную позицию
+            character.HumanoidRootPart.CFrame = getgenv().SavedPosition
+        else
+            warn("Saved world or position is not set.")
+        end
+    end
+
+    Tabs.Trials:CreateButton({
+        Title = "Teleport To Saved Position",
+        Description = "",
+        Callback = function()
+            -- Вызываем функцию обновления позиции и карты
+            teleportToSavedPosition()
+        end
+    })
+    
 
     getgenv().TrialWaveLimit = 0
-    local TrialWaveLimit = Tabs.Trials:AddInput("TrialWaveLimit", {
+    local TrialWaveLimit = Tabs.Trials:CreateInput("TrialWaveLimit", {
         Title = "Trial Wave Limit",
         Default = 0, 
         Description = "On this wave script will auto leave",
@@ -404,23 +545,115 @@ do
         getgenv().TrialWaveLimit = tonumber(Value)
     end)
     
-    local AutoTrial = Tabs.Trials:AddToggle("Auto Trial",{
+    local AutoTrial = Tabs.Trials:CreateToggle("Auto Trial",{
         Title = "Auto Trial",
         Default = false,
         Description = ""
     })
 
+    local TrialEnemiesFolder = workspace.Server.Trial.Enemies
+
+    local function findNearestEnemyInTrial()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+    
+        for _, enemy in pairs(TrialEnemiesFolder:GetDescendants()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local distance = (rootPart.Position - enemy.Position).Magnitude
+    
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestEnemy = enemy
+                end
+            end
+        end
+    
+        return closestEnemy
+    end
+
+    local function teleportToNearestEnemyInTrial()
+
+    
+        local nearestEnemy = findNearestEnemyInTrial()
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+
+
+            local pets = getPets()
+            for i, v in pets do
+                    local petrootpart = v.HumanoidRootPart
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+            
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+            end
+        end
+    end
+
+    local function sendPetsOnNearestEnemyInTrial()
+        local nearestEnemy = findNearestEnemyInTrial()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local waveText = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Trial.Frame.Frame.Content.Frame.Wave.Wave.Text
+    getgenv().StopFarmingTrial = false
     AutoTrial:OnChanged(function(state)
         getgenv().AutoTrial = state
-        while getgenv().AutoTrial do
+    
             local function checkTime()
                 while getgenv().AutoTrial == true do
                     local currentTime = os.date("*t")  -- Получаем текущее время
                     local minutes = currentTime.min
-        
+                    local seconds = currentTime.sec
                     -- Проверяем, если минуты равны 0 или 30
-                    if (minutes == 0) then
+                    if (minutes == 0) and (seconds > 10) then
+                        getgenv().StopFarmingTrial = false
                         wait(1)
+                        local mapsf = workspace.Client.Maps
+                        for i ,v in ipairs(mapsf:GetChildren()) do
+                            if v.Name ~= "Lobby" then
+                                wait(1)
+                                local args = {
+                                    [1] = "General",
+                                    [2] = "Maps",
+                                    [3] = "Teleport",
+                                    [4] = "Lobby"
+                                }
+                        
+                                -- Отправляем запрос на телепортацию
+                                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        
+                            end
+                        end
+                        wait(2)
+                        local args = {
+                            [1] = "Enemies",
+                            [2] = "Trial_Easy",
+                            [3] = "Join"
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        
 
                     end
         
@@ -430,15 +663,56 @@ do
             end
 
             coroutine.wrap(checkTime)()
-        end
+            
+            local function checkcurrentwave()
+                while getgenv().AutoTrial do
+                    task.wait(1)
+                    local waveNumber = tonumber(string.match(waveText, "%d+"))
+                    local trialWaveLimit = tonumber(getgenv().TrialWaveLimit)
+                    if waveNumber and trialWaveLimit and waveNumber >= trialWaveLimit and getgenv().StopFarmingTrial == false then
+                        print("Достигнут лимит волн, телепортируем...")
+                        waveText = "WAVE 0"
+                        getgenv().StopFarmingTrial = true
+                        wait(1)
+                        teleportToSavedPosition()
+                    end
+                end
+            end
+
+            coroutine.wrap(checkcurrentwave)()
+            while getgenv().AutoTrial do
+                task.wait()
+                for _, enemy in ipairs(TrialEnemiesFolder:GetDescendants()) do
+                    if enemy:IsA("Part") then
+                        -- Проверяем здоровье и состояние врага
+                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoTrial == true and getgenv().StopFarmingTrial == false then
+                            teleportToNearestEnemyInTrial()
+                            sendPetsOnNearestEnemyInTrial()
+                            wait()
+                        end
+                    end
+                end
+
+            end
+
+
     end)
 
 
+    local DeleteNotifications = Tabs.Misc:CreateButton({
+        Title = "Enable/Disable Notifications",
+        Description = "",
+        Callback = function()
+            local notifications = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Notifications
+            notifications.Visible  = not notifications.Visible
+            
+        end
+    })
 end
 
 
-SaveManager:SetLibrary(Fluent)
-InterfaceManager:SetLibrary(Fluent)
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 InterfaceManager:SetFolder("Apel Hub")
