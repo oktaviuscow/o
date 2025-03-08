@@ -708,6 +708,8 @@ do
             
         end
     })
+    wait(5)
+    teleportToSavedPosition()
 end
 
 
@@ -759,3 +761,4 @@ UIAspectRatioConstraint.Parent = ImageButton
 
 UIAspectRatioConstraint_2.Parent = Frame
 end
+
