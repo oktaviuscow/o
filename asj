@@ -679,17 +679,23 @@ do
                     task.wait(1)
                     local waveNumber = tonumber(string.match(waveText, "%d+"))
                     local trialWaveLimit = tonumber(getgenv().TrialWaveLimit)
-                    if waveNumber and trialWaveLimit and waveNumber >= trialWaveLimit and getgenv().StopFarmingTrial == false then
+            
+                    print("Текущая волна:", waveNumber)
+                    print("Лимит волн:", trialWaveLimit)
+                    print("StopFarmingTrial:", getgenv().StopFarmingTrial)
+            
+                    if waveNumber and trialWaveLimit and waveNumber >= trialWaveLimit and not getgenv().StopFarmingTrial then
                         print("Достигнут лимит волн, телепортируем...")
-                        waveText = "WAVE 0"
                         getgenv().StopFarmingTrial = true
                         wait(1)
                         teleportToSavedPosition()
                     end
                 end
             end
-
+            
+            -- Запускаем корутину
             coroutine.wrap(checkcurrentwave)()
+
             while getgenv().AutoTrial do
                 task.wait()
                 for _, enemy in ipairs(TrialEnemiesFolder:GetDescendants()) do
@@ -718,8 +724,11 @@ do
             
         end
     })
-    wait(5)
-    teleportToSavedPosition()
+    local function delayedTeleport()
+        task.wait(10)  -- Задержка в 10 секунд
+        teleportToSavedPosition()  -- Вызов функции телепортации
+    end
+    coroutine.wrap(delayedTeleport)()
 end
 
 
