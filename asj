@@ -239,39 +239,65 @@ do
 
     local function getEquipedPets()
         local EquipedPets = {}
+        local player = game:GetService("Players").LocalPlayer  -- Получаем локального игрока
+    
         for _, value in ipairs(workspace.Server.Pets:GetChildren()) do
             local inputString = value.Name
             local nickname = string.match(inputString, "^(.-)---")
+    
             if nickname then
                 if nickname == tostring(player) then
-                    if value.Info and value.Info.Player then
-                        if value.Info:FindFirstChild("Player").Value == game:GetService("Players").LocalPlayer then
-                        table.insert(EquipedPets, value:GetAttribute("ID"))
+                    -- Проверяем, существует ли объект Info
+                    if value:FindFirstChild("Info") then
+                        local info = value.Info  -- Сохраняем ссылку на Info
+    
+                        -- Проверяем, существует ли объект Player внутри Info
+                        if info:FindFirstChild("Player") then
+                            if info.Player.Value == player then
+                                table.insert(EquipedPets, value:GetAttribute("ID"))
+                            end
+                        else
+                            print("Player не найден в Info.")
                         end
                     else
-                        print("unluck")
+                        print("Info не найден у питомца:", value.Name)
                     end
                 end
             end
         end
+    
         return EquipedPets
     end
 
     local function getPets()
         local pets = {}
+        local player = game:GetService("Players").LocalPlayer  -- Получаем локального игрока
+    
         for _, value in ipairs(workspace.Server.Pets:GetChildren()) do
             local inputString = value.Name
             local nickname = string.match(inputString, "^(.-)---")
+    
             if nickname then
                 if nickname == tostring(player) then
-                    if value.Info and value.Info.Player then
-                        if value.Info:FindFirstChild("Player").Value == game:GetService("Players").LocalPlayer then
-                            table.insert(pets, value)
+                    -- Проверяем, существует ли объект Info
+                    if value:FindFirstChild("Info") then
+                        local info = value.Info  -- Сохраняем ссылку на Info
+    
+                        -- Проверяем, существует ли объект Player внутри Info
+                        if info:FindFirstChild("Player") then
+                            if info.Player.Value == player then
+                                table.insert(pets, value)
+                            end
+                        else
+                            print("Player не найден в Info у питомца:", value.Name)
                         end
+                    else
+                        print("Info не найден у питомца:", value.Name)
                     end
                 end
             end
         end
+    
         return pets
     end
 
@@ -355,21 +381,38 @@ do
     local function sendPetsOnNearestEnemy()
         local nearestEnemy = findNearestEnemyWithoutContains()
         local EquipedPets = getEquipedPets()
-        for i, v in EquipedPets do
-            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
-            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
-            local args = {
-                [1] = "General",
-                [2] = "Pets",
-                [3] = "Attack",
-                [4] = v,
-                [5] = nearestEnemy
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
-        end
+    
+        if nearestEnemy then  -- Проверяем, что nearestEnemy существует
+            local info = nearestEnemy:FindFirstChild("Info")  -- Находим объект Info
+    
+            if info then  -- Проверяем, существует ли Info
+                for i, v in EquipedPets do
+                    local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+    
+                    if info:FindFirstChild("Pets") then  -- Проверяем, существует ли Pets
+                        if not info.Pets:FindFirstChild(rnpetcheck) then
+                            local args = {
+                                [1] = "General",
+                                [2] = "Pets",
+                                [3] = "Attack",
+                                [4] = v,
+                                [5] = nearestEnemy
+                            }
+    
+                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        end
+                    else
+                        print("Pets не найдены в Info.")
+                    end
+                end
+            else
+                print("Info не найден у ближайшего врага.")
+            end
+        else
+            print("Ближайший враг не найден.")
         end
     end
+
     getgenv().Busy = nil
     AutoFarmSelectedMobs:OnChanged(function(state)
         getgenv().AutoFarm = state
