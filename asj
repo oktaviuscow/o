@@ -329,7 +329,6 @@ do
 
         if nearestEnemy then
             local targetRootPart = nearestEnemy
-            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
             local pets = getPets()
             for i, v in pets do
                     local petrootpart = v.HumanoidRootPart
@@ -363,7 +362,6 @@ do
 
         if nearestEnemy then
             local targetRootPart = nearestEnemy
-            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
             local pets = getPets()
             for i, v in pets do
                     local petrootpart = v.HumanoidRootPart
@@ -659,7 +657,7 @@ do
         return closestEnemy
     end
 
-    local function teleportToNearestEnemyInTrial()
+    local function teleportMeToNearestEnemyInTrial()
 
     
         local nearestEnemy = findNearestEnemyInTrial()
@@ -673,13 +671,32 @@ do
         end
     end
 
+    local function teleportPetsToNearestEnemyInTrial()
+
+    
+        local nearestEnemy = findNearestEnemyInTrial()
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getPets()
+            for i, v in pets do
+                    local petrootpart = v.HumanoidRootPart
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+            
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+            end
+        end
+    end
+
     local function sendPetsOnNearestEnemyInTrial()
         local nearestEnemy = findNearestEnemyInTrial()
         local EquipedPets = getEquipedPets()
         for i, v in EquipedPets do
             local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
             if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
-            teleportPetsToNearestEnemyWithoutContains()
+            teleportPetsToNearestEnemyInTrial()
             local args = {
                 [1] = "General",
                 [2] = "Pets",
@@ -765,7 +782,7 @@ do
                     if enemy:IsA("Part") then
                         -- Проверяем здоровье и состояние врага
                         if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoTrial == true and getgenv().StopFarmingTrial == false then
-                            teleportToNearestEnemyInTrial()
+                            teleportMeToNearestEnemyInTrial()
                             sendPetsOnNearestEnemyInTrial()
                             wait()
                         end
@@ -867,4 +884,3 @@ UIAspectRatioConstraint.Parent = ImageButton
 
 UIAspectRatioConstraint_2.Parent = Frame
 end
-
