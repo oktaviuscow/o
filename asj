@@ -10,10 +10,10 @@ local Window = Library:CreateWindow({
     Title = "Apel Hub",
     SubTitle = tostring(gamename),
     TabWidth = 160,
-    Size = UDim2.fromOffset(400, 320),
+    Size = UDim2.fromOffset(600, 400),
     Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
     Resize = true, -- Resize this ^ Size according to a 1920x1080 screen, good for mobile users but may look weird on some devices
-    MinSize = Vector2.new(100, 100),
+    MinSize = Vector2.new(250, 250),
     Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
@@ -25,6 +25,7 @@ local Tabs = {
     Farm = Window:CreateTab({ Title = "Farming", Icon = "align-center" }),
     Trials = Window:CreateTab({Title = "Trial", Icon = "apple"}),
     Eggs = Window:CreateTab({Title = "Eggs", Icon = "egg"}),
+    Rerolls = Window:CreateTab({Title = "Auto", Icon = "refresh-ccw"}),
     Misc = Window:CreateTab({Title = " Misc", Icon = "diamond"}),
     Settings = Window:CreateTab({ Title = "Settings", Icon = "settings" })
 
@@ -912,11 +913,155 @@ end)
         end
     })
 
+    local function UpdatePassivesList()
+        local Passives = {}
+        local Players = game:GetService("Players")
+        local sigma = Players.LocalPlayer
+        local success, sigma2 = pcall(function()
+            return require(sigma.PlayerScripts.Shalom)
+        end)
+    
+        if not success then
+            return
+        end
+    
+        local passivesData = sigma2.Shared.Passives
+    
+        if type(passivesData) == "table" then
+            for passivename, d in pairs(passivesData) do
+                table.insert(Passives, passivename)
+            end
+        end
+    
+        -- Сортируем Passives по алфавиту, ставя "Fairy" в самый верх
+        table.sort(Passives, function(a, b)
+            if a == "Fairy" then
+                return true -- "Fairy" всегда выше
+            elseif b == "Fairy" then
+                return false -- "Fairy" всегда выше
+            else
+                return a < b -- Сравниваем по алфавиту
+            end
+        end)
+    
+        return Passives
+    end
+    
+    local Passivelist = UpdatePassivesList()
 
+    local function getExistingUnitIds()
+        local petsFolder = game:GetService("Players").LocalPlayer:FindFirstChild("Pets")
+        if petsFolder then
+            local existingUnitIds = {}
+            for _, child in pairs(petsFolder:GetChildren()) do
+                if child:IsA("Folder") then
+                    local stringfortable = tostring(child:GetAttribute("Name")) .. " | Passive: " .. tostring(child:GetAttribute("Passive")) .. " | Level: " .. tostring(child:GetAttribute("Level")) .. " | ID: " .. tostring(child.Name)
+                    table.insert(existingUnitIds, stringfortable) -- Добавляем имя папки (unitid) в список
+                end
+            end
+            return existingUnitIds
+        end
+    end
+    
+    local petslist = getExistingUnitIds()
+    
+    local PetsDropdown = Tabs.Rerolls:CreateDropdown("Pets Dropdown", {Title = "Select Pet For Auto Reroll Passive", Description = "", Values = petslist, Multi = false, Default = ""})
+    local PassivesDropdown = Tabs.Rerolls:CreateDropdown("Passives Dropdown", {Title = "Select Passive For Auto Reroll Passive", Description = "", Values = Passivelist, Multi = true, Default = {}})
+    
+    local function getselectedid()
+        local selectedPet = PetsDropdown.Value
+        if selectedPet and type(selectedPet) ~= "table" then
+            -- Извлекаем ID из выбранного питомца
+            local idStart = selectedPet:find("ID: ") -- Находим начало ID
+            if idStart then
+                local id = selectedPet:sub(idStart + 4) -- Извлекаем ID
+                return id
+            end
+        end
+        return nil -- Если ничего не выбрано или ID не найден
+    end
+    
+    local function updatePetsDropdownAndSelect()
+        local selectedId = getselectedid()
+        local newpetlist = getExistingUnitIds()
+        PetsDropdown:SetValues(newpetlist) -- Устанавливаем новые значения в выпадающий список
+    
+        -- Получаем ID выбранного питомца
+        if selectedId then
+            -- Ищем питомца с соответствующим ID в новом списке
+            for _, pet in pairs(newpetlist) do
+                if pet:find("ID: " .. selectedId) then
+                    PetsDropdown:SetValue(pet) -- Устанавливаем выбранный питомец
+                    break -- Выходим из цикла, если нашли
+                end
+            end
+        end
+    end
+    
+    local RefreshPets = Tabs.Rerolls:CreateButton({
+        Title = "Refresh Pets",
+        Description = "",
+        Callback = function()
+            updatePetsDropdownAndSelect() -- Обновляем и выбираем питомца
+        end
+    })
 
+    function PassivesDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
 
+    local function checkpassiveofpet(pet)
+        local petfolder = game:GetService("Players").LocalPlayer.Pets
+        local currentpet = petfolder:FindFirstChild(pet)
+        local selectedPassives = PassivesDropdown:GetSelectedValues()
+        if currentpet then
+            local currentpassive = tostring(currentpet:GetAttribute("Passive"))
+            return currentpassive
 
+        end
+    end
 
+    local function rerollPassive(pet)
+        local args = {
+            [1] = "General",
+            [2] = "Passives",
+            [3] = "Open",
+            [4] = pet,
+            [5] = "Ruby",
+            [6] = {}
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+
+    local AutoRerollPassive = Tabs.Rerolls:CreateToggle("Auto Reroll passive",{Title = "Auto Roll For Selected Passive", Description = "", Default = false})
+
+    AutoRerollPassive:OnChanged(function(state)
+        getgenv().AutoRollPassive = state
+        while getgenv().AutoRollPassive do
+            task.wait()
+            local selectedPetId = getselectedid()
+            local selectedPassives = PassivesDropdown:GetSelectedValues()
+            if selectedPetId then
+                local currentpassive = checkpassiveofpet(selectedPetId)
+                if containsValue(currentpassive, selectedPassives) then
+                    AutoRerollPassive:SetValue(false)
+                    PetsDropdown:SetValue("")
+                    updatePetsDropdownAndSelect()
+                    getgenv().AutoRollPassive = false
+                else
+                    rerollPassive(selectedPetId)
+                end
+            end
+        end
+
+    end)
 
 
 
