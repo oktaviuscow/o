@@ -302,7 +302,7 @@ do
     end
 
 
-    local function teleportToNearestEnemy()
+    local function teleportMeToNearestEnemyWithContains()
         local selectedEnemies = {}
         for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
             table.insert(selectedEnemies, value)
@@ -316,8 +316,20 @@ do
             if distanceToEnemy > teleportRadius then
                 rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
             end
+        end
+    end
 
+    local function teleportPetsToNearestEnemyWithContains()
+        local selectedEnemies = {}
+        for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+            table.insert(selectedEnemies, value)
+        end
+    
+        local nearestEnemy = findNearestEnemy(selectedEnemies)
 
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
             local pets = getPets()
             for i, v in pets do
                     local petrootpart = v.HumanoidRootPart
@@ -330,7 +342,7 @@ do
         end
     end
 
-    local function teleportToNearestEnemyWithoutContains()
+    local function teleportMeToNearestEnemyWithoutContains()
 
     
         local nearestEnemy = findNearestEnemyWithoutContains()
@@ -341,8 +353,17 @@ do
             if distanceToEnemy > teleportRadius then
                 rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
             end
+        end
+    end
 
+    local function teleportPetsToNearestEnemyWithoutContains()
 
+    
+        local nearestEnemy = findNearestEnemyWithoutContains()
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
             local pets = getPets()
             for i, v in pets do
                     local petrootpart = v.HumanoidRootPart
@@ -354,6 +375,9 @@ do
             end
         end
     end
+
+
+
 
     local function sendPetsOnEnemy()
         local selectedEnemies = {}
@@ -365,6 +389,7 @@ do
         for i, v in EquipedPets do
             local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
             if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+                teleportPetsToNearestEnemyWithContains()
             local args = {
                 [1] = "General",
                 [2] = "Pets",
@@ -391,6 +416,7 @@ do
     
                     if info:FindFirstChild("Pets") then  -- Проверяем, существует ли Pets
                         if not info.Pets:FindFirstChild(rnpetcheck) then
+                            teleportPetsToNearestEnemyWithoutContains()
                             local args = {
                                 [1] = "General",
                                 [2] = "Pets",
@@ -400,6 +426,7 @@ do
                             }
     
                             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+
                         end
                     else
                         print("Pets не найдены в Info.")
@@ -436,10 +463,9 @@ do
                     -- Проверяем здоровье и состояние врага
                     if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true and getgenv().Busy == false then
                         if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
-                            teleportToNearestEnemy()
+                            teleportMeToNearestEnemyWithContains()
                         end
                         sendPetsOnEnemy()
-
                     end
                 end
             end
@@ -464,7 +490,7 @@ do
                     if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false then
                         sendPetsOnNearestEnemy()
                         if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
-                            teleportToNearestEnemyWithoutContains()
+                            teleportMeToNearestEnemyWithoutContains()
                         end
                         wait(0.1)
 
@@ -644,17 +670,6 @@ do
             if distanceToEnemy > teleportRadius then
                 rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
             end
-
-
-            local pets = getPets()
-            for i, v in pets do
-                    local petrootpart = v.HumanoidRootPart
-                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
-            
-                    if distanceToPet > teleportRadiusForPet then
-                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
-                    end
-            end
         end
     end
 
@@ -664,6 +679,7 @@ do
         for i, v in EquipedPets do
             local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
             if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyWithoutContains()
             local args = {
                 [1] = "General",
                 [2] = "Pets",
