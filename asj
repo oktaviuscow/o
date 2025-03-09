@@ -100,7 +100,81 @@ else
     print("Файл '" .. PositionfileName.."and"..WorldfileName .. "' был создан и записан.")
 end
 
+local Players = game:GetService("Players")
+local sigma = Players.LocalPlayer
 
+-- Функция для получения существующих unitid из petsFolder
+local function getExistingUnitIds2(petsFolder)
+    local existingUnitIds2 = {}
+    for _, child in pairs(petsFolder:GetChildren()) do
+        if child:IsA("Folder") then
+            table.insert(existingUnitIds2, child.Name) -- Добавляем имя папки (unitid) в список
+        end
+    end
+    return existingUnitIds2
+end
+
+-- Функция для обновления petsFolder
+local function updatePetsFolder()
+    local success, sigma2 = pcall(function()
+        return require(sigma.PlayerScripts.Shalom)
+    end)
+
+    if not success then
+        return
+    end
+
+    -- Создаем папку Pets в LocalPlayer, если она еще не существует
+    local petsFolder = sigma:FindFirstChild("Pets")
+    if not petsFolder then
+        petsFolder = Instance.new("Folder")
+        petsFolder.Name = "Pets"
+        petsFolder.Parent = sigma
+    end
+
+    -- Получаем существующие unitid
+    local existingUnitIds2 = getExistingUnitIds2(petsFolder)
+
+    -- Получаем таблицу питомцев напрямую
+    local petsData = sigma2.Data.Pets
+    if type(petsData) == "table" then
+        for unitid, d in pairs(petsData) do
+            -- Проверяем, существует ли папка с таким именем
+            local petFolder = petsFolder:FindFirstChild(tostring(unitid))
+            if not petFolder then
+                -- Если папка не существует, создаем её
+                petFolder = Instance.new("Folder")
+                petFolder.Name = tostring(unitid) -- Устанавливаем имя папки как unitid
+                petFolder.Parent = petsFolder -- Добавляем папку в Pets
+            end
+
+            table.insert(existingUnitIds2, unitid)
+
+            -- Устанавливаем атрибуты
+            for nameofstat, valueofstat in pairs(d) do
+                local currentValue = petFolder:GetAttribute(nameofstat)
+                if currentValue == nil or currentValue ~= valueofstat then
+                    petFolder:SetAttribute(nameofstat, valueofstat) -- Устанавливаем атрибут
+                end
+            end
+        end
+    end
+
+    -- Удаляем папки питомцев, которые не соответствуют существующим unitid
+    for _, child in pairs(petsFolder:GetChildren()) do
+        if child:IsA("Folder") and not table.find(existingUnitIds2, child.Name) then
+            child:Destroy() -- Удаляем папку
+        end
+    end
+end
+
+-- Запускаем корутину для постоянного обновления
+coroutine.wrap(function()
+    while true do
+        updatePetsFolder() -- Обновляем petsFolder
+        task.wait() -- Ждем 5 секунд перед следующим обновлением
+    end
+end)()
 
 
 do
@@ -1040,6 +1114,8 @@ end)
             return existingUnitIds
         end
     end
+
+    
     
     local petslist = getExistingUnitIds()
     
