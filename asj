@@ -66,6 +66,10 @@ local PositionfileName = "Saved Position.txt"
 local WorldfileName = "Saved World.txt"    
 local PositionfolderPath = folderName .. "\\" .. PositionfileName
 local WorldfolderPath = folderName .. "\\" .. WorldfileName
+local RarityfileName = "Saved Rarities.txt"
+local RarityfolderPath = folderName .. "\\" .. RarityfileName
+local EnabledOrDisabledName = "Saved EnabledOrDisabled.txt"
+local EnabledOrDisabledfolderPath = folderName .. "\\" .. EnabledOrDisabledName
 
 -- Проверяем, существует ли папка
 if not isfolder(folderName) then
@@ -76,11 +80,21 @@ else
 end
 
 -- Проверяем, существует ли файл
-if not isfile(PositionfolderPath) or not isfile(WorldfolderPath) then
+if not isfile(PositionfolderPath) or not isfile(WorldfolderPath) or not isfile(RarityfolderPath) or not isfile(EnabledOrDisabledfolderPath) then
     local positionforsave = "139.8529052734375, 377.14923095703125, 3295.7548828125"
     local worldforsave = "Piece Village"
+    if not isfile(PositionfolderPath) then
     writefile(PositionfolderPath, tostring(positionforsave))  -- Записываем значение в файл
+    end
+    if not isfile(WorldfolderPath) then
     writefile(WorldfolderPath, worldforsave)
+    end
+    if not isfile(RarityfolderPath) then
+    writefile(RarityfolderPath, "")
+    end
+    if not isfile(EnabledOrDisabledfolderPath) then
+        writefile(EnabledOrDisabledfolderPath, "false")
+    end
     print("Файл '" .. PositionfileName.."and"..WorldfileName .. "' был создан и записан.")
 else
     print("Файл '" .. PositionfileName.."and"..WorldfileName .. "' был создан и записан.")
@@ -97,7 +111,7 @@ do
         getgenv().AutoClicking = State
         while getgenv().AutoClicking == true do
             if not getgenv().AutoClicking == true then return end
-                task.wait()
+                task.wait(0.01)
                 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer("Enemies", "World", "Click")
         end
     end)
@@ -526,7 +540,7 @@ do
     AutoOpenEggs:OnChanged(function(state)
         getgenv().AutoOpenEggs = state
         while getgenv().AutoOpenEggs do
-            task.wait()
+            task.wait(0.01)
 
             local args = {
                 [1] = "General",
@@ -540,9 +554,82 @@ do
             
         end
     end)
+    local function loadRarities()
+        if isfile(RarityfolderPath) then
+            local savedRaritiesString = readfile(RarityfolderPath)
+            local savedRarities = {} -- Создаем таблицу для сохраненных рарностей
+            for rarity in string.gmatch(savedRaritiesString, "([^,]+)") do
+                table.insert(savedRarities, rarity:match("^%s*(.-)%s*$")) -- Убираем пробелы
+            end
+            return savedRarities -- Возвращаем таблицу сохраненных рарностей
+        else
+            print("Файл рарностей не найден.")
+            return {}
+        end
+    end
+    
+    -- Функция для обновления файла с рарностями
+    local function updateRaritiesFile(selectedValues)
+        local currentRarities = loadRarities() -- Загружаем текущие рарности из файла
+    
+        -- Создаем таблицу для обновленных рарностей
+        local updatedRarities = {}
+    
+        -- Добавляем новые рарности
+        for _, rarity in pairs(selectedValues) do
+            if not table.find(currentRarities, rarity) then
+                table.insert(updatedRarities, rarity) -- Добавляем новую рарность
+            end
+        end
+    
+        -- Добавляем существующие рарности
+        for _, rarity in pairs(currentRarities) do
+            if table.find(selectedValues, rarity) then
+                table.insert(updatedRarities, rarity) -- Сохраняем рарность, если она все еще выбрана
+            end
+        end
+    
+        -- Записываем обновленный список в файл
+        local raritiesString = table.concat(updatedRarities, ", ")
+        writefile(RarityfolderPath, raritiesString) -- Записываем строку в файл
+    end
+    
+    local function loadSavedStateForAutoSell()
+        local savedstate = readfile(EnabledOrDisabledfolderPath)
+        if savedstate:lower() == "true" then
+            return true
+        elseif savedstate:lower() == "false" then
+            return false
+        else
+            error("Содержимое файла не является логическим значением (true/false).")
+        end
+    end
+    -- Загружаем ранее сохраненные рарности при старте
+    local savedRarities = loadRarities()
+    local savedstateforautosell = loadSavedStateForAutoSell()
 
-    local AutoSellDropDown = Tabs.Eggs:CreateDropdown("Auto Sell", {Title = "Select Rarity for Auto Sell", Description = "", Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical"}, Multi = true, Default = {} })
-    local AutoSell = Tabs.Eggs:CreateToggle("Auto Sell", {Title = "Auto sell Selected Rarities", Default = false, Description = ""})
+    local AutoSellDropDown = Tabs.Eggs:CreateDropdown("Auto Sell", {Title = "Select Rarity for Auto Sell", Description = "", Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical"}, Multi = true, Default = savedRarities })
+    
+    local AutoSell = Tabs.Eggs:CreateToggle("Auto Sell", {Title = "Auto sell Selected Rarities", Default = savedstateforautosell, Description = ""})
+
+    function AutoSellDropDown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    
+    AutoSellDropDown:OnChanged(function()
+        local selectedrnrarities = {}
+        for _, value in ipairs(AutoSellDropDown:GetSelectedValues()) do
+            table.insert(selectedrnrarities, value)
+        end
+        updateRaritiesFile(selectedrnrarities) -- Обновляем файл с рарностями
+    end)
 
     local function enableautosell(rarity)
         local args = {
@@ -573,15 +660,6 @@ do
         getgenv().AutoSellShiny = state
     end)
 
-    function AutoSellDropDown:GetSelectedValues()
-        local selected = {}
-        for value, state in pairs(self.Value) do
-            if state then
-                table.insert(selected, value)
-            end
-        end
-        return selected
-    end
 
     local function containsValueRarity(value, list)
     for _, v in ipairs(list) do
@@ -591,11 +669,11 @@ do
     end
     return false
 end
-
 AutoSell:OnChanged(function(state)
     getgenv().AutoSell = state
+    writefile(EnabledOrDisabledfolderPath, tostring(state)) -- Сохраняем текущее состояние в файл
     while getgenv().AutoSell do
-        task.wait(0.25) -- Задержка для предотвращения перегрузки
+        task.wait(0.15) -- Задержка для предотвращения перегрузки
         local RaritiesFolder = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Gacha.Frame.Pages.Sell.List.List
         if RaritiesFolder then
             local Values = {} -- Создаем таблицу для хранения выбранных значений
