@@ -966,7 +966,7 @@ end)
     local petslist = getExistingUnitIds()
     
     local PetsDropdown = Tabs.Rerolls:CreateDropdown("Pets Dropdown", {Title = "Select Pet For Auto Reroll Passive", Description = "", Values = petslist, Multi = false, Default = ""})
-    local PassivesDropdown = Tabs.Rerolls:CreateDropdown("Passives Dropdown", {Title = "Select Passive For Auto Reroll Passive", Description = "", Values = Passivelist, Multi = true, Default = {}})
+    local PassivesDropdown = Tabs.Rerolls:CreateDropdown("Passives Dropdown", {Title = "Select Passive For Auto Reroll Passive", Description = "Allows Multi", Values = Passivelist, Multi = true, Default = {}})
     
     local function getselectedid()
         local selectedPet = PetsDropdown.Value
