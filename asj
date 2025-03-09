@@ -540,8 +540,8 @@ do
         end
     end)
 
-    local AutoSellDropDown = Tabs.Eggs:CreateDropdown("Auto Sell", {Title = "Select Eggs for auto sell", Description = "", Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical"}, Multi = true, Default = {} })
-    local AutoSell = Tabs.Eggs:CreateToggle("Auto Sell", {Title = "Auto sell", Default = false, Description = ""})
+    local AutoSellDropDown = Tabs.Eggs:CreateDropdown("Auto Sell", {Title = "Select Rarity for Auto Sell", Description = "", Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical"}, Multi = true, Default = {} })
+    local AutoSell = Tabs.Eggs:CreateToggle("Auto Sell", {Title = "Auto sell Selected Rarities", Default = false, Description = ""})
 
     local function enableautosell(rarity)
         local args = {
