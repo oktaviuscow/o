@@ -956,7 +956,8 @@ end)
         end
     
         -- Получаем новую позицию
-        getgenv().SavedPosition = CFrame.new(character.HumanoidRootPart.Position)
+        local HumanoidRootPart = findHumanoidRootPart()
+        getgenv().SavedPosition = CFrame.new(HumanoidRootPart.Position)
         writefile(PositionfolderPath, tostring(getgenv().SavedPosition.x)..","..tostring(getgenv().SavedPosition.y)..","..tostring(getgenv().SavedPosition.z))
         -- Обновляем содержимое параграфа
         currentPositionParagraph:SetValue("World: " .. tostring(getgenv().SavedWorld) .. "\nPosition: " .. tostring(getgenv().SavedPosition))
@@ -984,8 +985,9 @@ end)
             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
             wait(2)
     
+            local HumanoidRootPart = findHumanoidRootPart()
             -- Телепортируем персонажа на сохраненную позицию
-            character.HumanoidRootPart.CFrame = getgenv().SavedPosition
+            HumanoidRootPart.CFrame = getgenv().SavedPosition
         else
             warn("Saved world or position is not set.")
         end
