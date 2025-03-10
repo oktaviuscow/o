@@ -323,6 +323,16 @@ do
 
     local dropfolder = game:GetService("Workspace").Client.Drops
 
+    local function findHumanoidRootPart()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                return rootPart -- Если найден, возвращаем его
+            end
+        end
+        
     AutoCollect:OnChanged(function(State) -- Auto Collect Drops
         getgenv().AutoCollecting =  State
         while getgenv().AutoCollecting == true do
@@ -413,15 +423,7 @@ do
 
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
-    local function findHumanoidRootPart()
-        local player = game.Players.LocalPlayer
-        local character = player.Character
-        if character then
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                return rootPart -- Если найден, возвращаем его
-            end
-        end
+    
     
         -- Если не найден, проверяем в Workspace.Server.Players
         local playersFolder = game.Workspace:FindFirstChild("Server") and game.Workspace.Server:FindFirstChild("Players")
