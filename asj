@@ -255,9 +255,9 @@ end)()
         if not success then
             return
         end
-
+    
         local Stock = Shalom.Data.Merchant.List
-        
+    
         local StockFolder = player:FindFirstChild("Stock")
         if not StockFolder then
             StockFolder = Instance.new("Folder")
@@ -265,7 +265,7 @@ end)()
             StockFolder.Parent = player
         end
         local ExistingStock = getExistingStock(StockFolder)
-
+    
         if type(Stock) == "table" then
             for StockName, NumberOfStock in pairs(Stock) do
                 -- Проверяем, существует ли папка с таким именем
@@ -274,26 +274,26 @@ end)()
                     -- Если папка не существует, создаем её
                     CheckStockFolder = Instance.new("Folder")
                     CheckStockFolder.Name = tostring(StockName) -- Устанавливаем имя папки как unitid
-                    CheckStockFolder.Parent = StockFolder -- Добавляем папку в Pets
+                    CheckStockFolder.Parent = StockFolder -- Добавляем папку в Stock
                 end
     
                 table.insert(ExistingStock, StockName)
-                
-
-                local currentValue = CheckStockFolder:GetAttribute(StockName)
+    
+                -- Заменяем пробелы на символы подчеркивания для атрибута
+                local safeAttributeName = StockName:gsub(" ", "_")
+    
+                local currentValue = CheckStockFolder:GetAttribute(safeAttributeName)
                 if currentValue == nil or currentValue ~= NumberOfStock then
-                    CheckStockFolder:SetAttribute(StockName, NumberOfStock) -- Устанавливаем атрибут
+                    CheckStockFolder:SetAttribute("Amount", NumberOfStock) -- Устанавливаем атрибут
                 end
-
             end
         end
-
+    
         for _, child in pairs(StockFolder:GetChildren()) do
             if child:IsA("Folder") and not table.find(ExistingStock, child.Name) then
                 child:Destroy() -- Удаляем папку
             end
         end
-
     end
 
     coroutine.wrap(function()
@@ -1505,7 +1505,7 @@ end)
                 for i, v in pairs(currentStockList) do
                     local currentcheck = v
                     if containsValue(currentcheck, selectedStocks) then
-                        local valueofstock = tonumber(StockFolder:FindFirstChild(currentcheck):GetAttribute(currentcheck))
+                        local valueofstock = tonumber(StockFolder:FindFirstChild(currentcheck):GetAttribute("Amount"))
                         if valueofstock > 0 then
                             buystock(currentcheck)
                         end
