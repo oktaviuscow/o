@@ -1504,7 +1504,7 @@ end)
                 -- Проверяем, есть ли хотя бы один выбранный аватар в текущем списке
                 for i, v in pairs(currentStockList) do
                     local currentcheck = v
-                    if containsValue(currentcheck, currentStockList) then
+                    if containsValue(currentcheck, selectedStocks) then
                         local valueofstock = tonumber(StockFolder:FindFirstChild(currentcheck):GetAttribute(currentcheck))
                         if valueofstock > 0 then
                             buystock(currentcheck)
