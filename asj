@@ -25,7 +25,8 @@ local Tabs = {
     Farm = Window:CreateTab({ Title = "Farming", Icon = "align-center" }),
     Trials = Window:CreateTab({Title = "Trial", Icon = "apple"}),
     Eggs = Window:CreateTab({Title = "Eggs", Icon = "egg"}),
-    Rerolls = Window:CreateTab({Title = "Auto", Icon = "refresh-ccw"}),
+    AutoBuy = Window:CreateTab({Title = "Auto Buy", Icon = "shopping-cart"}),
+    Rerolls = Window:CreateTab({Title = "Auto Rolls", Icon = "refresh-ccw"}),
     Misc = Window:CreateTab({Title = " Misc", Icon = "diamond"}),
     Settings = Window:CreateTab({ Title = "Settings", Icon = "settings" })
 
@@ -51,11 +52,9 @@ Tabs.Credits:CreateButton({
 
 
 local Options = Library.Options
-local player = game:GetService("Players").LocalPlayer
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 local character = player.Character
-local hmr = character.HumanoidRootPart
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
     local bb=game:service'VirtualUser'
     game:service'Players'.LocalPlayer.Idled:connect(function()
     bb:CaptureController()bb:ClickButton2(Vector2.new())end)
@@ -100,7 +99,6 @@ else
     print("Файл '" .. PositionfileName.."and"..WorldfileName .. "' был создан и записан.")
 end
 
-local Players = game:GetService("Players")
 local sigma = Players.LocalPlayer
 
 -- Функция для получения существующих unitid из petsFolder
@@ -177,6 +175,135 @@ coroutine.wrap(function()
 end)()
 
 
+    local ShalomPath = player.PlayerScripts.Shalom
+    local function getExistingAvatars(AvatarsFolder)
+        local existingAvatars = {}
+        for _, child in pairs(AvatarsFolder:GetChildren()) do
+            if child:IsA("Folder") then
+                table.insert(existingAvatars, child.Name) -- Добавляем имя папки (AvatarName) в список
+            end
+        end
+        return existingAvatars
+    end
+
+    local function updateAvatarsFolder()
+        local success, Shalom = pcall(function()
+            return require(ShalomPath)
+        end)
+    
+        if not success then
+            return
+        end
+
+        local Avatars = Shalom.Data.Inventory.Avatars
+        
+        local AvatarsFolder = player:FindFirstChild("Avatars")
+        if not AvatarsFolder then
+            AvatarsFolder = Instance.new("Folder")
+            AvatarsFolder.Name = "Avatars"
+            AvatarsFolder.Parent = player
+        end
+        local ExistingAvatars = getExistingAvatars(AvatarsFolder)
+
+        if type(Avatars) == "table" then
+            for AvatarName, d in pairs(Avatars) do
+                -- Проверяем, существует ли папка с таким именем
+                local AvatarFolder = AvatarsFolder:FindFirstChild(tostring(AvatarName))
+                if not AvatarFolder then
+                    -- Если папка не существует, создаем её
+                    AvatarFolder = Instance.new("Folder")
+                    AvatarFolder.Name = tostring(AvatarName) -- Устанавливаем имя папки как unitid
+                    AvatarFolder.Parent = AvatarsFolder -- Добавляем папку в Pets
+                end
+    
+                table.insert(ExistingAvatars, AvatarName)
+    
+            end
+        end
+
+        for _, child in pairs(AvatarsFolder:GetChildren()) do
+            if child:IsA("Folder") and not table.find(ExistingAvatars, child.Name) then
+                child:Destroy() -- Удаляем папку
+            end
+        end
+
+    end
+
+    coroutine.wrap(function()
+        while true do
+            updateAvatarsFolder() -- Обновляем petsFolder
+            task.wait() -- Ждем 5 секунд перед следующим обновлением
+        end
+    end)()
+
+    local ShalomPath = player.PlayerScripts.Shalom
+    local function getExistingStock(StockFolder)
+        local existingStock = {}
+        for _, child in pairs(StockFolder:GetChildren()) do
+            if child:IsA("Folder") then
+                table.insert(existingStock, child.Name) -- Добавляем имя папки (AvatarName) в список
+            end
+        end
+        return existingStock
+    end
+
+    local function updateStockFolder()
+        local success, Shalom = pcall(function()
+            return require(ShalomPath)
+        end)
+    
+        if not success then
+            return
+        end
+
+        local Stock = Shalom.Data.Merchant.List
+        
+        local StockFolder = player:FindFirstChild("Stock")
+        if not StockFolder then
+            StockFolder = Instance.new("Folder")
+            StockFolder.Name = "Stock"
+            StockFolder.Parent = player
+        end
+        local ExistingStock = getExistingStock(StockFolder)
+
+        if type(Stock) == "table" then
+            for StockName, NumberOfStock in pairs(Stock) do
+                -- Проверяем, существует ли папка с таким именем
+                local CheckStockFolder = StockFolder:FindFirstChild(tostring(StockName))
+                if not CheckStockFolder then
+                    -- Если папка не существует, создаем её
+                    CheckStockFolder = Instance.new("Folder")
+                    CheckStockFolder.Name = tostring(StockName) -- Устанавливаем имя папки как unitid
+                    CheckStockFolder.Parent = StockFolder -- Добавляем папку в Pets
+                end
+    
+                table.insert(ExistingStock, StockName)
+                
+
+                local currentValue = CheckStockFolder:GetAttribute(StockName)
+                if currentValue == nil or currentValue ~= NumberOfStock then
+                    CheckStockFolder:SetAttribute(StockName, NumberOfStock) -- Устанавливаем атрибут
+                end
+
+            end
+        end
+
+        for _, child in pairs(StockFolder:GetChildren()) do
+            if child:IsA("Folder") and not table.find(ExistingStock, child.Name) then
+                child:Destroy() -- Удаляем папку
+            end
+        end
+
+    end
+
+    coroutine.wrap(function()
+        while true do
+            updateStockFolder() -- Обновляем petsFolder
+            task.wait() -- Ждем 5 секунд перед следующим обновлением
+        end
+    end)()
+
+
 do
 
     local AutoClick = Tabs.Misc:CreateToggle("Auto Click", {Title = "Auto Click", Default = false, Description = ""})
@@ -200,9 +327,11 @@ do
         getgenv().AutoCollecting =  State
         while getgenv().AutoCollecting == true do
             if not getgenv().AutoCollecting == true then return end
+                local rootPart = findHumanoidRootPart()
+    
                 task.wait()
                 for i, v in ipairs(dropfolder:GetChildren()) do
-                    v.CFrame = hmr.CFrame
+                    v.CFrame = rootPart.CFrame
                 end
         end
     end)
@@ -284,7 +413,33 @@ do
 
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
-    local rootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    local function findHumanoidRootPart()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                return rootPart -- Если найден, возвращаем его
+            end
+        end
+    
+        -- Если не найден, проверяем в Workspace.Server.Players
+        local playersFolder = game.Workspace:FindFirstChild("Server") and game.Workspace.Server:FindFirstChild("Players")
+        if playersFolder then
+            -- Ищем модель игрока по имени
+            local playerModel = playersFolder:FindFirstChild(player.Name)
+            if playerModel then
+                local humanoidRootPart = playerModel:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
+                    return playerModel -- Если найден, возвращаем его
+                end
+            end
+        end
+    
+        -- Если не найден, возвращаем nil
+        return nil
+    end
+    
     
     local teleportRadius = 10
     local teleportRadiusForPet = 20
@@ -292,7 +447,7 @@ do
     local function findNearestEnemy(selectedEnemies)
         local closestEnemy = nil
         local closestDistance = math.huge
-    
+        local rootPart = findHumanoidRootPart()
         for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local distance = (rootPart.Position - enemy.Position).Magnitude
@@ -310,7 +465,7 @@ do
     local function findNearestEnemyWithoutContains()
         local closestEnemy = nil
         local closestDistance = math.huge
-    
+        local rootPart = findHumanoidRootPart()
         for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local distance = (rootPart.Position - enemy.Position).Magnitude
@@ -397,7 +552,7 @@ do
         for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
             table.insert(selectedEnemies, value)
         end
-    
+        local rootPart = findHumanoidRootPart()
         local nearestEnemy = findNearestEnemy(selectedEnemies)
 
         if nearestEnemy then
@@ -435,7 +590,7 @@ do
 
     
         local nearestEnemy = findNearestEnemyWithoutContains()
-
+        local rootPart = findHumanoidRootPart()
         if nearestEnemy then
             local targetRootPart = nearestEnemy
             local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
@@ -893,7 +1048,7 @@ end)
     local function findNearestEnemyInTrial()
         local closestEnemy = nil
         local closestDistance = math.huge
-    
+        local rootPart = findHumanoidRootPart()
         for _, enemy in pairs(TrialEnemiesFolder:GetDescendants()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local distance = (rootPart.Position - enemy.Position).Magnitude
@@ -912,7 +1067,7 @@ end)
 
     
         local nearestEnemy = findNearestEnemyInTrial()
-
+        local rootPart = findHumanoidRootPart()
         if nearestEnemy then
             local targetRootPart = nearestEnemy
             local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
@@ -1065,6 +1220,8 @@ end)
         end
     })
 
+    local Passivelist = {}
+    if require then
     local function UpdatePassivesList()
         local Passives = {}
         local Players = game:GetService("Players")
@@ -1098,9 +1255,12 @@ end)
     
         return Passives
     end
-    
-    local Passivelist = UpdatePassivesList()
 
+    
+    Passivelist = UpdatePassivesList()
+    else
+        Passivelist = {}
+    end
     local function getExistingUnitIds()
         local petsFolder = game:GetService("Players").LocalPlayer:FindFirstChild("Pets")
         if petsFolder then
@@ -1217,10 +1377,161 @@ end)
 
     end)
 
+    local function getlistofavatars()
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+        local Shalom = require(player.PlayerScripts.Shalom)
+        local Avatars = {}
+            local ListOfAvatars = Shalom.Shared.Avatars
+        
+            if type(ListOfAvatars) == "table" then
+                for i,v in pairs(ListOfAvatars) do
+                    if tostring(i) ~= "Hawk" then
+                        table.insert(Avatars, i)
+                    end
+                end
+            end
+
+            table.sort(Avatars)
+        return Avatars
+    end
+    local AvatarsList = getlistofavatars()
+
+    local AvatarsDropdown = Tabs.Rerolls:CreateDropdown("Avatars Dropdown", {Title = "Select Avatars For Auto Reroll", Description = "Allows Multi", Values = AvatarsList , Multi = true, Default = {}})
+    local AutoRerollAvatar = Tabs.Rerolls:CreateToggle("Auto Reroll Avatars",{Title = "Auto Roll For Selected Avatars", Description = "", Default = false})
+
+    function AvatarsDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    local function rerollAvatar()
+        local args = {
+            [1] = "General",
+            [2] = "Avatars",
+            [3] = "Open",
+            [4] = "Sapphire"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+    local function containsValueTable(selectedAvatars, currentAvatarslist)
+        -- Проверяем, являются ли входные данные таблицами
+        if type(selectedAvatars) ~= "table" then
+            warn("Ошибка: selectedAvatars не является таблицей. Получено: " .. type(selectedAvatars))
+            return false -- Если selectedAvatars не таблица, возвращаем false
+        end
+    
+        if type(currentAvatarslist) ~= "table" then
+            warn("Ошибка: currentAvatarslist не является таблицей. Получено: " .. type(currentAvatarslist))
+            return false -- Если currentAvatarslist не таблица, возвращаем false
+        end
+    
+        for _, selected in ipairs(selectedAvatars) do
+            for _, current in ipairs(currentAvatarslist) do
+                if selected == current then
+                    return true -- Если найдено совпадение, возвращаем true
+                end
+            end
+        end
+        return false -- Если совпадений не найдено, возвращаем false
+    end
+    
+    AutoRerollAvatar:OnChanged(function(state)
+        getgenv().AutoRerollAvatar = state
+        while getgenv().AutoRerollAvatar do
+            task.wait()
+            local selectedAvatars = AvatarsDropdown:GetSelectedValues()
+            if selectedAvatars then
+                local AvatarsFolder = player:FindFirstChild("Avatars")
+                local currentAvatarslist = getExistingAvatars(AvatarsFolder)
+    
+                local foundAvatar = false -- Флаг для отслеживания, найден ли аватар
+    
+                -- Проверяем, есть ли хотя бы один выбранный аватар в текущем списке
+                if containsValueTable(selectedAvatars, currentAvatarslist) then
+                    AutoRerollAvatar:SetValue(false)
+                    AvatarsDropdown:SetValue({})
+                    getgenv().AutoRerollAvatar = false
+                    foundAvatar = true -- Устанавливаем флаг, если аватар найден
+                    break -- Выходим из цикла, если нашли
+                end
+    
+                -- Если ни один аватар не найден, вызываем rerollAvatar
+                if not foundAvatar and getgenv().AutoRerollAvatar then
+                    rerollAvatar()
+                end
+            end
+        end
+    end)
+
+    Tabs.AutoBuy:CreateParagraph("Aligned Paragraph", {
+        Title = "Attention!",
+        Content = "You must buy at least 1 of each item in merchant to use this feature!\n(If you buy ruby - ruby will appear in the list after script re-execute)",
+        TitleAlignment = "Middle",
+        ContentAlignment = Enum.TextXAlignment.Center
+    })
+
+    local StockFolder = player:FindFirstChild("Stock")
+    local AvailableStock = getExistingStock(StockFolder)
+    local StockDropdown = Tabs.AutoBuy:CreateDropdown("Stock Dropdown", {Title = "Select Item For Auto Buy From Merchant", Description = "Allows Multi", Values = AvailableStock , Multi = true, Default = {}})
+
+    local AutoBuyStock = Tabs.AutoBuy:CreateToggle("Auto Buy Stock", {Title= "Auto Buy Selected From Merchant", Description = "Auto Buy Stock", Default = false})
+
+    local function buystock(nameofstock)
+        local args = {
+            [1] = "General",
+            [2] = "Merchant",
+            [3] = "Buy",
+            [4] = nameofstock,
+            [5] = 1,
+            [6] = "Trial Shard"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        
+    end
 
 
+    function StockDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
 
+    AutoBuyStock:OnChanged(function(state)
+        getgenv().AutoBuyStock = state
 
+        while getgenv().AutoBuyStock do
+            task.wait()
+            local selectedStocks = StockDropdown:GetSelectedValues()
+            if selectedStocks then
+                local StockFolder = player:FindFirstChild("Stock")
+                local currentStockList = getExistingStock(StockFolder)
+    
+                -- Проверяем, есть ли хотя бы один выбранный аватар в текущем списке
+                for i, v in pairs(currentStockList) do
+                    local currentcheck = v
+                    if containsValue(currentcheck, currentStockList) then
+                        local valueofstock = tonumber(StockFolder:FindFirstChild(currentcheck):GetAttribute(currentcheck))
+                        if valueofstock > 0 then
+                            buystock(currentcheck)
+                        end
+                    end
+                end
+            end
+        end
+
+    end)
 
 
 
