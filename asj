@@ -1016,8 +1016,8 @@ end)
         getgenv().TrialWaveLimit = tonumber(Value)
     end)
     
-    local AutoTrial = Tabs.Trials:CreateToggle("Auto Trial",{
-        Title = "Auto Trial",
+    local AutoJoinTrial = Tabs.Trials:CreateToggle("Auto Join And Leave Trial",{
+        Title = "Auto Join And Leave Trial",
         Default = false,
         Description = ""
     })
@@ -1096,7 +1096,7 @@ end)
     end
 
     getgenv().StopFarmingTrial = true
-    AutoTrial:OnChanged(function(state)
+    AutoJoinTrial:OnChanged(function(state)
         getgenv().AutoTrial = state
     
             local function checkTime()
@@ -1121,7 +1121,16 @@ end)
                         
                                 -- Отправляем запрос на телепортацию
                                 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
-        
+                                wait(2)
+                                local args = {
+                                    [1] = "General",
+                                    [2] = "Maps",
+                                    [3] = "Teleport",
+                                    [4] = "Lobby"
+                                }
+                        
+                                -- Отправляем запрос на телепортацию
+                                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
                             end
                         end
                         wait(2)
@@ -1132,7 +1141,14 @@ end)
                         }
                         
                         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        wait(1)
+                        local args = {
+                            [1] = "Enemies",
+                            [2] = "Trial_Easy",
+                            [3] = "Join"
+                        }
                         
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
 
                     end
         
@@ -1161,22 +1177,30 @@ end)
             -- Запускаем корутину
             coroutine.wrap(checkcurrentwave)()
 
-            while getgenv().AutoTrial do
-                task.wait()
-                for _, enemy in ipairs(TrialEnemiesFolder:GetDescendants()) do
-                    if enemy:IsA("Part") then
-                        -- Проверяем здоровье и состояние врага
-                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoTrial == true and getgenv().StopFarmingTrial == false then
-                            teleportMeToNearestEnemyInTrial()
-                            sendPetsOnNearestEnemyInTrial()
-                            wait()
-                        end
+    end)
+
+    local AutoAttackInTrial = Tabs.Trials:CreateToggle("Auto Attack in Trial", {
+        Title = "Auto Attack Enemies In Trial",
+        Description = "",
+        Default = false
+    })
+
+    AutoAttackInTrial:OnChanged(function(state)
+        getgenv().AutoAttackInTrial = state
+        while getgenv().AutoAttackInTrial do
+            task.wait()
+            for _, enemy in ipairs(TrialEnemiesFolder:GetDescendants()) do
+                if enemy:IsA("Part") then
+                    -- Проверяем здоровье и состояние врага
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoAttackInTrial == true and getgenv().StopFarmingTrial == false then
+                        teleportMeToNearestEnemyInTrial()
+                        sendPetsOnNearestEnemyInTrial()
+                        wait()
                     end
                 end
-
             end
 
-
+        end
     end)
 
 
