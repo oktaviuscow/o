@@ -332,7 +332,7 @@ do
                 return rootPart -- Если найден, возвращаем его
             end
         end
-        
+
     AutoCollect:OnChanged(function(State) -- Auto Collect Drops
         getgenv().AutoCollecting =  State
         while getgenv().AutoCollecting == true do
@@ -869,7 +869,6 @@ do
             [3] = "AutoSell",
             [4] = rarity
         }
-        print("Включение авто-продажи для: " .. rarity) -- Отладочное сообщение
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
     end
     
@@ -880,7 +879,6 @@ do
             [3] = "AutoSell",
             [4] = rarity .. "_Shiny"
         }
-        print("Включение авто-продажи shiny для: " .. rarity .. "_Shiny") -- Отладочное сообщение
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
     end
 
@@ -924,17 +922,13 @@ AutoSell:OnChanged(function(state)
                     if isSelected then
                         -- Если авто-продажа была выключена вручную, включаем её обратно
                         if currenton and not currenton.Visible and currentoff and currentoff.Visible then
-                                print("Включаем авто-продажу для " .. rarity.Name)
                                 enableautosell(tostring(rarity.Name))
-                                print("Авто-продажа для " .. rarity.Name .. " включена.")
                             end
 
                         -- Проверяем состояние для авто-продажи shiny
                         if getgenv().AutoSellShiny then
                             if currentshinyon and not currentshinyon.Visible and currentshinyoff and currentshinyoff.Visible then
-                                    print("Включаем авто-продажу shiny для " .. rarity.Name)
                                     enableautosellshiny(tostring(rarity.Name))
-                                    print("Авто-продажа shiny для " .. rarity.Name .. " включена.")
                                 end
                             end
                         end
