@@ -1180,24 +1180,6 @@ end)
     end)
 
 
-    local DeleteNotifications = Tabs.Misc:CreateButton({
-        Title = "Enable/Disable Notifications",
-        Description = "",
-        Callback = function()
-            local notifications = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Notifications
-            notifications.Visible  = not notifications.Visible
-            
-        end
-    })
-
-
-    local RemoveEggAnimation = Tabs.Eggs:CreateButton({
-        Title = "Remove Egg Animation", 
-        Description = "",
-        Callback = function()
-            game:GetService("Players").LocalPlayer.PlayerScripts.Shalom.General.Scripts.Eggs.Egg_Template:Destroy()
-        end
-    })
 
     local Passivelist = {}
     if require then
