@@ -332,6 +332,7 @@ do
                 return rootPart -- Если найден, возвращаем его
             end
         end
+    end
 
     AutoCollect:OnChanged(function(State) -- Auto Collect Drops
         getgenv().AutoCollecting =  State
@@ -410,7 +411,6 @@ do
         end
     })
 
-
     local function containsValue(value, table)
         for _, v in ipairs(table) do
             if v == value then
@@ -420,32 +420,15 @@ do
         return false
     end
 
-
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
-    
-    
-        -- Если не найден, проверяем в Workspace.Server.Players
-        local playersFolder = game.Workspace:FindFirstChild("Server") and game.Workspace.Server:FindFirstChild("Players")
-        if playersFolder then
-            -- Ищем модель игрока по имени
-            local playerModel = playersFolder:FindFirstChild(player.Name)
-            if playerModel then
-                local humanoidRootPart = playerModel:FindFirstChild("HumanoidRootPart")
-                if humanoidRootPart then
-                    return playerModel -- Если найден, возвращаем его
-                end
-            end
-        end
-    
-        -- Если не найден, возвращаем nil
-        return nil
-    end
+
     
     
     local teleportRadius = 10
     local teleportRadiusForPet = 20
     
+
     local function findNearestEnemy(selectedEnemies)
         local closestEnemy = nil
         local closestDistance = math.huge
@@ -1274,7 +1257,11 @@ end)
     
     
     local petslist = getExistingUnitIds()
-    
+    local PassiveParagraph = Tabs.Rerolls:CreateParagraph("Current Passive", {
+        Title = "Current Passive: ",
+        Content = nil
+    })
+
     local PetsDropdown = Tabs.Rerolls:CreateDropdown("Pets Dropdown", {Title = "Select Pet For Auto Reroll Passive", Description = "", Values = petslist, Multi = false, Default = ""})
     local PassivesDropdown = Tabs.Rerolls:CreateDropdown("Passives Dropdown", {Title = "Select Passive For Auto Reroll Passive", Description = "Allows Multi", Values = Passivelist, Multi = true, Default = {}})
     
@@ -1329,9 +1316,9 @@ end)
     local function checkpassiveofpet(pet)
         local petfolder = game:GetService("Players").LocalPlayer.Pets
         local currentpet = petfolder:FindFirstChild(pet)
-        local selectedPassives = PassivesDropdown:GetSelectedValues()
         if currentpet then
             local currentpassive = tostring(currentpet:GetAttribute("Passive"))
+            PassiveParagraph:SetValue(currentpassive)
             return currentpassive
 
         end
