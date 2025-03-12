@@ -3,7 +3,6 @@ local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.
 local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
 local MarketplaceService = game:GetService("MarketplaceService")
 local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
-local ApelHubFolder = "Apel Hub"
 
 
 local Window = Library:CreateWindow({
@@ -433,7 +432,9 @@ do
         local closestEnemy = nil
         local closestDistance = math.huge
         local rootPart = findHumanoidRootPart()
-        for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
+        local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
+        local currentmap = tostring(maps[1])
+        for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local distance = (rootPart.Position - enemy.Position).Magnitude
     
@@ -451,7 +452,9 @@ do
         local closestEnemy = nil
         local closestDistance = math.huge
         local rootPart = findHumanoidRootPart()
-        for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
+        local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
+        local currentmap = tostring(maps[1])
+        for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local distance = (rootPart.Position - enemy.Position).Magnitude
     
@@ -465,6 +468,45 @@ do
         return closestEnemy
     end
     
+
+    local function findStrongestEnemy()
+
+        local strongestenemy = nil
+        local strong = 0
+        local rootPart = findHumanoidRootPart()
+        local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
+        local currentmap = tostring(maps[1])
+        for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+                if hp > strong then
+                    strong = hp
+                    strongestenemy = enemy
+                end
+            end
+        end
+    
+        return strongestenemy
+    end
+
+    local function findWeakestEnemy()
+        local weakestenemy = nil
+        local weak = math.huge
+        local rootPart = findHumanoidRootPart()
+        local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
+        local currentmap = tostring(maps[1])
+        for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+                if hp < weak then
+                    weak = hp
+                    weakestenemy = enemy
+                end
+            end
+        end
+    
+        return weakestenemy
+    end
 
 
     local function getEquipedPets()
@@ -549,6 +591,8 @@ do
         end
     end
 
+
+
     local function teleportPetsToNearestEnemyWithContains()
         local selectedEnemies = {}
         for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
@@ -585,6 +629,32 @@ do
         end
     end
 
+    local function teleportMeToStrongestEnemy()
+
+    
+        local nearestEnemy = findStrongestEnemy()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToWeakestEnemy()
+        local nearestEnemy = findWeakestEnemy()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
     local function teleportPetsToNearestEnemyWithoutContains()
 
     
@@ -603,6 +673,40 @@ do
             end
         end
     end
+
+    local function teleportPetsToStrongestEnemy()
+        local strongestEnemy = findStrongestEnemy()
+
+        if strongestEnemy then
+            local targetRootPart = strongestEnemy
+            local pets = getPets()
+            for i, v in pets do
+                    local petrootpart = v.HumanoidRootPart
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+            end
+        end
+    end
+
+    local function teleportPetsToWeakestEnemy()
+        local weakestenemy = findWeakestEnemy()
+
+        if weakestenemy then
+            local targetRootPart = weakestenemy
+            local pets = getPets()
+            for i, v in pets do
+                    local petrootpart = v.HumanoidRootPart
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+            end
+        end
+    end
+
+
 
 
 
@@ -668,6 +772,81 @@ do
         end
     end
 
+    local function sendPetsOnStrongestEnemy()
+        local strongestEnemy = findStrongestEnemy()
+        local EquipedPets = getEquipedPets()
+    
+        if strongestEnemy then  -- Проверяем, что nearestEnemy существует
+            local info = strongestEnemy:FindFirstChild("Info")  -- Находим объект Info
+    
+            if info then  -- Проверяем, существует ли Info
+                for i, v in EquipedPets do
+                    local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+    
+                    if info:FindFirstChild("Pets") then  -- Проверяем, существует ли Pets
+                        if not info.Pets:FindFirstChild(rnpetcheck) then
+                            teleportPetsToStrongestEnemy()
+                            local args = {
+                                [1] = "General",
+                                [2] = "Pets",
+                                [3] = "Attack",
+                                [4] = v,
+                                [5] = strongestEnemy
+                            }
+    
+                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+
+                        end
+                    else
+                        print("Pets не найдены в Info.")
+                    end
+                end
+            else
+                print("Info не найден у ближайшего врага.")
+            end
+        else
+            print("Ближайший враг не найден.")
+        end
+    end
+
+    local function sendPetsOnWeakestEnemy()
+        local weakestenemy = findWeakestEnemy()
+        local EquipedPets = getEquipedPets()
+    
+        if weakestenemy then  -- Проверяем, что nearestEnemy существует
+            local info = weakestenemy:FindFirstChild("Info")  -- Находим объект Info
+    
+            if info then  -- Проверяем, существует ли Info
+                for i, v in EquipedPets do
+                    local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+    
+                    if info:FindFirstChild("Pets") then  -- Проверяем, существует ли Pets
+                        if not info.Pets:FindFirstChild(rnpetcheck) then
+                            teleportPetsToWeakestEnemy()
+                            local args = {
+                                [1] = "General",
+                                [2] = "Pets",
+                                [3] = "Attack",
+                                [4] = v,
+                                [5] = weakestenemy
+                            }
+    
+                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+
+                        end
+                    else
+                        print("Pets не найдены в Info.")
+                    end
+                end
+            else
+                print("Info не найден у ближайшего врага.")
+            end
+        else
+            print("Ближайший враг не найден.")
+        end
+    end
+
+
     getgenv().Busy = nil
     AutoFarmSelectedMobs:OnChanged(function(state)
         getgenv().AutoFarm = state
@@ -700,10 +879,23 @@ do
         end
     end)
     
-    local AutoFarmNearest = Tabs.Farm:CreateToggle("Auto Farm Nearest", {Title = "Auto Farm Nearest", Default = false, Description = ""})
-    AutoFarmNearest:OnChanged(function(state)
-        getgenv().AutoFarmNearest = state
-        while getgenv().AutoFarmNearest do
+    local TypeOfFarmForAllMobs = Tabs.Farm:CreateDropdown("Type of farm for mobs", {
+        Title = "Select Type of Farm",
+        Values = {"Strongest", "Weakest", "Nearest"},
+        Multi = false,
+        Default = "Nearest",
+    })
+
+    function TypeOfFarmForAllMobs:GetSelectedValue()
+        local selected = self.Value
+        return selected
+    end
+
+    local AutoFarmMobs = Tabs.Farm:CreateToggle("Auto Farm Enemies", {Title = "Auto Farm Enemies", Default = false, Description = "Farm with Selected Type of Farm"})
+    
+    AutoFarmMobs:OnChanged(function(state)
+        getgenv().AutoFarmMobs = state
+        while getgenv().AutoFarmMobs do
             task.wait()
             for i, v in ipairs(workspace.Client.Maps:GetChildren()) do
                 if v.Name == "Lobby" then
@@ -712,22 +904,34 @@ do
                     getgenv().Busy = false
                 end
             end
-            for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
+            local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
+            local currentmap = tostring(maps[1])
+            for _, enemy in ipairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
                 if enemy:IsA("Part") then
-                    -- Проверяем здоровье и состояние врага
-                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false then
-                        sendPetsOnNearestEnemy()
-                        if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
-                            teleportMeToNearestEnemyWithoutContains()
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmMobs == true and getgenv().Busy == false then
+                        local typeofFarm = TypeOfFarmForAllMobs:GetSelectedValue()
+                        if typeofFarm == "Strongest" then
+                            pcall(sendPetsOnStrongestEnemy)
+                            if getgenv().AutoFarmWithTeleport == true then
+                                pcall(teleportMeToStrongestEnemy)
+                            end
+                        elseif typeofFarm == "Weakest" then
+                            pcall(sendPetsOnWeakestEnemy)
+                            if getgenv().AutoFarmWithTeleport == true then
+                                pcall(teleportMeToWeakestEnemy)
+                            end
+                        elseif typeofFarm == "Nearest" then
+                            pcall(sendPetsOnNearestEnemy)
+                            if getgenv().AutoFarmWithTeleport == true then
+                                pcall(teleportMeToNearestEnemyWithoutContains)
+                            end
                         end
-                        wait(0.1)
-
                     end
                 end
             end
         end
-        
     end)
+
 
     local eggfolder = workspace.Server.Eggs
     local egglist = {}
@@ -1044,10 +1248,74 @@ end)
         return closestEnemy
     end
 
+    local function findStrongestEnemyInTrial()
+        local strongestenemy = nil
+        local strong = 0
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(TrialEnemiesFolder:GetDescendants()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp > strong then
+                    strong = hp
+                    strongestenemy = enemy
+                end
+            end
+        end
+    
+        return strongestenemy
+    end
+
+    local function findWeakestEnemyInTrial()
+        local weakestenemy = nil
+        local weak = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(TrialEnemiesFolder:GetDescendants()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp < weak then
+                    weak = hp
+                    weakestenemy = enemy
+                end
+            end
+        end
+
+        return weakestenemy
+    end
+
     local function teleportMeToNearestEnemyInTrial()
 
     
         local nearestEnemy = findNearestEnemyInTrial()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToStrongestEnemyInTrial()
+
+    
+        local nearestEnemy = findStrongestEnemyInTrial()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToWeakestEnemyInTrial()
+
+    
+        local nearestEnemy = findWeakestEnemyInTrial()
         local rootPart = findHumanoidRootPart()
         if nearestEnemy then
             local targetRootPart = nearestEnemy
@@ -1077,6 +1345,44 @@ end)
         end
     end
 
+    local function teleportPetsToStrongestEnemyInTrial()
+
+    
+        local strongestenemy = findStrongestEnemyInTrial()
+
+        if strongestenemy then
+            local targetRootPart = strongestenemy
+            local pets = getPets()
+            for i, v in pets do
+                    local petrootpart = v.HumanoidRootPart
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+            
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+            end
+        end
+    end
+
+    local function teleportPetsToWeakestEnemyInTrial()
+
+    
+        local weakestenemy = findWeakestEnemyInTrial()
+
+        if weakestenemy then
+            local targetRootPart = weakestenemy
+            local pets = getPets()
+            for i, v in pets do
+                    local petrootpart = v.HumanoidRootPart
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+            
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+            end
+        end
+    end
+
     local function sendPetsOnNearestEnemyInTrial()
         local nearestEnemy = findNearestEnemyInTrial()
         local EquipedPets = getEquipedPets()
@@ -1090,6 +1396,46 @@ end)
                 [3] = "Attack",
                 [4] = v,
                 [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnStrongestEnemyInTrial()
+        local strongestenemy = findStrongestEnemyInTrial()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not strongestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInTrial()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = strongestenemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnWeakestEnemyInTrial()
+        local weakestenemy = findWeakestEnemyInTrial()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not weakestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInTrial()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = weakestenemy
             }
             
             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
@@ -1181,11 +1527,22 @@ end)
 
     end)
 
+    local TypeOfFarmInTrial = Tabs.Trials:CreateDropdown("Type of Auto Attack In Trial", {
+        Title = "Select Type of Auto Attack",
+        Values = {"Strongest", "Weakest", "Nearest"},
+        Multi = false,
+        Default = "Nearest",
+    })
     local AutoAttackInTrial = Tabs.Trials:CreateToggle("Auto Attack in Trial", {
         Title = "Auto Attack Enemies In Trial",
-        Description = "",
+        Description = "Auto Attack Enemies In Trial with Selected Type of Farm",
         Default = false
     })
+
+    function TypeOfFarmInTrial:GetSelectedValue()
+        local selected = self.Value
+        return selected
+    end
 
     AutoAttackInTrial:OnChanged(function(state)
         getgenv().AutoAttackInTrial = state
@@ -1195,13 +1552,20 @@ end)
                 if enemy:IsA("Part") then
                     -- Проверяем здоровье и состояние врага
                     if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoAttackInTrial == true and getgenv().StopFarmingTrial == false then
-                        teleportMeToNearestEnemyInTrial()
-                        sendPetsOnNearestEnemyInTrial()
-                        wait()
+                        local typeofFarm = TypeOfFarmInTrial:GetSelectedValue()
+                        if typeofFarm == "Strongest" then
+                            pcall(teleportMeToStrongestEnemyInTrial)
+                            pcall(sendPetsOnStrongestEnemyInTrial)
+                        elseif typeofFarm == "Weakest" then
+                            pcall(teleportMeToWeakestEnemyInTrial)
+                            pcall(sendPetsOnWeakestEnemyInTrial)
+                        elseif typeofFarm == "Nearest" then
+                            pcall(teleportMeToNearestEnemyInTrial)
+                            pcall(sendPetsOnNearestEnemyInTrial)
+                        end
                     end
                 end
             end
-
         end
     end)
 
