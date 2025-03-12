@@ -432,9 +432,7 @@ do
         local closestEnemy = nil
         local closestDistance = math.huge
         local rootPart = findHumanoidRootPart()
-        local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
-        local currentmap = tostring(maps[1])
-        for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+        for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local distance = (rootPart.Position - enemy.Position).Magnitude
     
@@ -452,9 +450,7 @@ do
         local closestEnemy = nil
         local closestDistance = math.huge
         local rootPart = findHumanoidRootPart()
-        local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
-        local currentmap = tostring(maps[1])
-        for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+        for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local distance = (rootPart.Position - enemy.Position).Magnitude
     
@@ -467,6 +463,7 @@ do
     
         return closestEnemy
     end
+    
     
 
     --[[local function findStrongestEnemy()
