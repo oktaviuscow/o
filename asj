@@ -469,7 +469,7 @@ do
     end
     
 
-    local function findStrongestEnemy()
+    --[[local function findStrongestEnemy()
 
         local strongestenemy = nil
         local strong = 0
@@ -506,7 +506,7 @@ do
         end
     
         return weakestenemy
-    end
+    end]]
 
 
     local function getEquipedPets()
@@ -629,7 +629,7 @@ do
         end
     end
 
-    local function teleportMeToStrongestEnemy()
+    --[[local function teleportMeToStrongestEnemy()
 
     
         local nearestEnemy = findStrongestEnemy()
@@ -653,7 +653,7 @@ do
                 rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
             end
         end
-    end
+    end]]
 
     local function teleportPetsToNearestEnemyWithoutContains()
 
@@ -674,7 +674,7 @@ do
         end
     end
 
-    local function teleportPetsToStrongestEnemy()
+    --[[local function teleportPetsToStrongestEnemy()
         local strongestEnemy = findStrongestEnemy()
 
         if strongestEnemy then
@@ -704,7 +704,7 @@ do
                     end
             end
         end
-    end
+    end]]
 
 
 
@@ -772,7 +772,7 @@ do
         end
     end
 
-    local function sendPetsOnStrongestEnemy()
+    --[[local function sendPetsOnStrongestEnemy()
         local strongestEnemy = findStrongestEnemy()
         local EquipedPets = getEquipedPets()
     
@@ -844,7 +844,7 @@ do
         else
             print("Ближайший враг не найден.")
         end
-    end
+    end]]
 
 
     getgenv().Busy = nil
@@ -879,23 +879,22 @@ do
         end
     end)
     
-    local TypeOfFarmForAllMobs = Tabs.Farm:CreateDropdown("Type of farm for mobs", {
+    --[[local TypeOfFarmForAllMobs = Tabs.Farm:CreateDropdown("Type of farm for mobs", {
         Title = "Select Type of Farm",
         Values = {"Strongest", "Weakest", "Nearest"},
         Multi = false,
         Default = "Nearest",
-    })
+
 
     function TypeOfFarmForAllMobs:GetSelectedValue()
         local selected = self.Value
         return selected
-    end
+    end]]
 
-    local AutoFarmMobs = Tabs.Farm:CreateToggle("Auto Farm Enemies", {Title = "Auto Farm Enemies", Default = false, Description = "Farm with Selected Type of Farm"})
-    
-    AutoFarmMobs:OnChanged(function(state)
-        getgenv().AutoFarmMobs = state
-        while getgenv().AutoFarmMobs do
+    local AutoFarmNearest = Tabs.Farm:CreateToggle("Auto Farm Nearest", {Title = "Auto Farm Nearest", Default = false, Description = ""})
+    AutoFarmNearest:OnChanged(function(state)
+        getgenv().AutoFarmNearest = state
+        while getgenv().AutoFarmNearest do
             task.wait()
             for i, v in ipairs(workspace.Client.Maps:GetChildren()) do
                 if v.Name == "Lobby" then
@@ -908,28 +907,19 @@ do
             local currentmap = tostring(maps[1])
             for _, enemy in ipairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
                 if enemy:IsA("Part") then
-                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmMobs == true and getgenv().Busy == false then
-                        local typeofFarm = TypeOfFarmForAllMobs:GetSelectedValue()
-                        if typeofFarm == "Strongest" then
-                            pcall(sendPetsOnStrongestEnemy)
-                            if getgenv().AutoFarmWithTeleport == true then
-                                pcall(teleportMeToStrongestEnemy)
-                            end
-                        elseif typeofFarm == "Weakest" then
-                            pcall(sendPetsOnWeakestEnemy)
-                            if getgenv().AutoFarmWithTeleport == true then
-                                pcall(teleportMeToWeakestEnemy)
-                            end
-                        elseif typeofFarm == "Nearest" then
-                            pcall(sendPetsOnNearestEnemy)
-                            if getgenv().AutoFarmWithTeleport == true then
-                                pcall(teleportMeToNearestEnemyWithoutContains)
-                            end
+                    -- Проверяем здоровье и состояние врага
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false then
+                        sendPetsOnNearestEnemy()
+                        if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
+                            teleportMeToNearestEnemyWithoutContains()
                         end
+                        wait(0.1)
+
                     end
                 end
             end
         end
+        
     end)
 
 
