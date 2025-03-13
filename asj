@@ -112,7 +112,7 @@ local function getExistingUnitIds2(petsFolder)
 end
 
 -- Функция для обновления petsFolder
-local function updatePetsFolder()
+--[[local function updatePetsFolder()
     local success, sigma2 = pcall(function()
         return require(sigma.PlayerScripts.Shalom)
     end)
@@ -130,8 +130,7 @@ local function updatePetsFolder()
     end
 
     -- Получаем существующие unitid
-    local existingUnitIds2 = getExistingUnitIds2(petsFolder)
-
+    local existingUnitIds2 = getExistingUnitIds2()
     -- Получаем таблицу питомцев напрямую
     local petsData = sigma2.Data.Pets
     if type(petsData) == "table" then
@@ -172,7 +171,7 @@ coroutine.wrap(function()
         task.wait() -- Ждем 5 секунд перед следующим обновлением
     end
 end)()
-
+]]
 
     local ShalomPath = player.PlayerScripts.Shalom
     local function getExistingAvatars(AvatarsFolder)
@@ -1396,7 +1395,7 @@ end)
         for i, v in EquipedPets do
             local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
             if not strongestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
-            teleportPetsToNearestEnemyInTrial()
+            teleportPetsToStrongestEnemyInTrial()
             local args = {
                 [1] = "General",
                 [2] = "Pets",
@@ -1416,7 +1415,7 @@ end)
         for i, v in EquipedPets do
             local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
             if not weakestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
-            teleportPetsToNearestEnemyInTrial()
+            teleportPetsToWeakestEnemyInTrial()
             local args = {
                 [1] = "General",
                 [2] = "Pets",
@@ -1557,7 +1556,7 @@ end)
     end)
 
 
-
+    --[[
     local Passivelist = {}
     if require then
     local function UpdatePassivesList()
@@ -1718,7 +1717,7 @@ end)
         end
 
     end)
-
+    ]]
     local function getlistofavatars()
         local Players = game:GetService("Players")
         local player = Players.LocalPlayer
