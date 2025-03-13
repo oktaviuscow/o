@@ -434,17 +434,9 @@ do
         local closestEnemy = nil
         local closestDistance = math.huge
         local rootPart = findHumanoidRootPart()
-        local mapsFolder = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps")
-        local currentmap = nil
-        if mapsFolder then
-            local maps = mapsFolder:GetChildren()
-            
-            if #maps > 0 then
-                currentmap = tostring(maps[1]) -- Получаем первую карту
-            end
-        end
-        if currentmap ~= nil then
-            for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+
+
+            for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
                 if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                     local distance = (rootPart.Position - enemy.Position).Magnitude
         
@@ -454,7 +446,7 @@ do
                     end
                 end
             end
-        end
+
     
         return closestEnemy
     end
@@ -463,17 +455,7 @@ do
         local closestEnemy = nil
         local closestDistance = math.huge
         local rootPart = findHumanoidRootPart()
-        local mapsFolder = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps")
-        local currentmap = nil
-        if mapsFolder then
-            local maps = mapsFolder:GetChildren()
-            
-            if #maps > 0 then
-                currentmap = tostring(maps[1]) -- Получаем первую карту
-            end
-        end
-        if currentmap ~= nil then
-            for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+            for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
                 if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                     local distance = (rootPart.Position - enemy.Position).Magnitude
         
@@ -483,7 +465,7 @@ do
                     end
                 end
             end
-        end
+
     
         return closestEnemy
     end
@@ -886,17 +868,8 @@ do
                 end
             end
             -- Проверяем состояние врагов в каждом цикле
-            local mapsFolder = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps")
-            local currentmap = nil
-            if mapsFolder then
-                local maps = mapsFolder:GetChildren()
-                
-                if #maps > 0 then
-                    currentmap = tostring(maps[1]) -- Получаем первую карту
-                end
-            end
-            if currentmap ~= nil then
-                for _, enemy in ipairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+
+                for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
                     if enemy:IsA("Part") and containsValue(enemy.Name, Values) then
                         -- Проверяем здоровье и состояние врага
                         if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true and getgenv().Busy == false then
@@ -907,7 +880,7 @@ do
                         end
                     end
                 end
-            end
+
         end
     end)
     
@@ -935,17 +908,7 @@ do
                     getgenv().Busy = false
                 end
             end
-            local mapsFolder = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps")
-            local currentmap = nil
-            if mapsFolder then
-                local maps = mapsFolder:GetChildren()
-                
-                if #maps > 0 then
-                    currentmap = tostring(maps[1]) -- Получаем первую карту
-                end
-            end
-            if currentmap ~= nil then
-                for _, enemy in ipairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+                for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
                     if enemy:IsA("Part") then
                         -- Проверяем здоровье и состояние врага
                         if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false then
@@ -958,7 +921,6 @@ do
                         end
                     end
                 end
-            end
         end
         
     end)
