@@ -9,7 +9,7 @@ local Window = Library:CreateWindow({
     Title = "Apel Hub",
     SubTitle = tostring(gamename),
     TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
+    Size = UDim2.fromOffset(600, 400),
     Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
     Resize = true, -- Resize this ^ Size according to a 1920x1080 screen, good for mobile users but may look weird on some devices
     MinSize = Vector2.new(250, 250),
@@ -319,7 +319,6 @@ do
         end
     end)
 
-    
 
     local AutoCollect = Tabs.Misc:CreateToggle("Auto Collect", {Title = "Auto Collect Drops", Default = false, Description = ""})
 
@@ -435,13 +434,24 @@ do
         local closestEnemy = nil
         local closestDistance = math.huge
         local rootPart = findHumanoidRootPart()
-        for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
-            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
-                local distance = (rootPart.Position - enemy.Position).Magnitude
-    
-                if containsValue(enemy.Name, selectedEnemies) and distance < closestDistance then
-                    closestDistance = distance
-                    closestEnemy = enemy
+        local mapsFolder = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps")
+        local currentmap = nil
+        if mapsFolder then
+            local maps = mapsFolder:GetChildren()
+            
+            if #maps > 0 then
+                currentmap = tostring(maps[1]) -- Получаем первую карту
+            end
+        end
+        if currentmap ~= nil then
+            for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+                if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                    local distance = (rootPart.Position - enemy.Position).Magnitude
+        
+                    if containsValue(enemy.Name, selectedEnemies) and distance < closestDistance then
+                        closestDistance = distance
+                        closestEnemy = enemy
+                    end
                 end
             end
         end
@@ -453,13 +463,24 @@ do
         local closestEnemy = nil
         local closestDistance = math.huge
         local rootPart = findHumanoidRootPart()
-        for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
-            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
-                local distance = (rootPart.Position - enemy.Position).Magnitude
-    
-                if distance < closestDistance then
-                    closestDistance = distance
-                    closestEnemy = enemy
+        local mapsFolder = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps")
+        local currentmap = nil
+        if mapsFolder then
+            local maps = mapsFolder:GetChildren()
+            
+            if #maps > 0 then
+                currentmap = tostring(maps[1]) -- Получаем первую карту
+            end
+        end
+        if currentmap ~= nil then
+            for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+                if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                    local distance = (rootPart.Position - enemy.Position).Magnitude
+        
+                    if distance < closestDistance then
+                        closestDistance = distance
+                        closestEnemy = enemy
+                    end
                 end
             end
         end
@@ -865,14 +886,25 @@ do
                 end
             end
             -- Проверяем состояние врагов в каждом цикле
-            for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
-                if enemy:IsA("Part") and containsValue(enemy.Name, Values) then
-                    -- Проверяем здоровье и состояние врага
-                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true and getgenv().Busy == false then
-                        if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
-                            teleportMeToNearestEnemyWithContains()
+            local mapsFolder = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps")
+            local currentmap = nil
+            if mapsFolder then
+                local maps = mapsFolder:GetChildren()
+                
+                if #maps > 0 then
+                    currentmap = tostring(maps[1]) -- Получаем первую карту
+                end
+            end
+            if currentmap ~= nil then
+                for _, enemy in ipairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+                    if enemy:IsA("Part") and containsValue(enemy.Name, Values) then
+                        -- Проверяем здоровье и состояние врага
+                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true and getgenv().Busy == false then
+                            if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
+                                teleportMeToNearestEnemyWithContains()
+                            end
+                            sendPetsOnEnemy()
                         end
-                        sendPetsOnEnemy()
                     end
                 end
             end
@@ -903,16 +935,27 @@ do
                     getgenv().Busy = false
                 end
             end
-            for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
-                if enemy:IsA("Part") then
-                    -- Проверяем здоровье и состояние врага
-                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false then
-                        sendPetsOnNearestEnemy()
-                        if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
-                            teleportMeToNearestEnemyWithoutContains()
-                        end
-                        wait(0.1)
+            local mapsFolder = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps")
+            local currentmap = nil
+            if mapsFolder then
+                local maps = mapsFolder:GetChildren()
+                
+                if #maps > 0 then
+                    currentmap = tostring(maps[1]) -- Получаем первую карту
+                end
+            end
+            if currentmap ~= nil then
+                for _, enemy in ipairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+                    if enemy:IsA("Part") then
+                        -- Проверяем здоровье и состояние врага
+                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false then
+                            sendPetsOnNearestEnemy()
+                            if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
+                                teleportMeToNearestEnemyWithoutContains()
+                            end
+                            wait(0.1)
 
+                        end
                     end
                 end
             end
@@ -1216,13 +1259,13 @@ end)
         Description = ""
     })
 
-    local TrialEnemiesFolder = workspace.Server.Trial.Enemies
+    local TrialEnemiesFolder = workspace.Server.Trial.Enemies.Easy
 
     local function findNearestEnemyInTrial()
         local closestEnemy = nil
         local closestDistance = math.huge
         local rootPart = findHumanoidRootPart()
-        for _, enemy in pairs(TrialEnemiesFolder:GetDescendants()) do
+        for _, enemy in pairs(TrialEnemiesFolder:GetChildren()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local distance = (rootPart.Position - enemy.Position).Magnitude
     
@@ -1240,7 +1283,7 @@ end)
         local strongestenemy = nil
         local strong = 0
         local rootPart = findHumanoidRootPart()
-        for _, enemy in pairs(TrialEnemiesFolder:GetDescendants()) do
+        for _, enemy in pairs(TrialEnemiesFolder:GetChildren()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local hp = tonumber(enemy:GetAttribute("MaxHealth"))
 
@@ -1258,7 +1301,7 @@ end)
         local weakestenemy = nil
         local weak = math.huge
         local rootPart = findHumanoidRootPart()
-        for _, enemy in pairs(TrialEnemiesFolder:GetDescendants()) do
+        for _, enemy in pairs(TrialEnemiesFolder:GetChildren()) do
             if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
                 local hp = tonumber(enemy:GetAttribute("MaxHealth"))
 
@@ -1536,7 +1579,7 @@ end)
         getgenv().AutoAttackInTrial = state
         while getgenv().AutoAttackInTrial do
             task.wait()
-            for _, enemy in ipairs(TrialEnemiesFolder:GetDescendants()) do
+            for _, enemy in ipairs(TrialEnemiesFolder:GetChildren()) do
                 if enemy:IsA("Part") then
                     -- Проверяем здоровье и состояние врага
                     if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoAttackInTrial == true and getgenv().StopFarmingTrial == false then
