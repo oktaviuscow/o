@@ -112,7 +112,7 @@ local function getExistingUnitIds2(petsFolder)
 end
 
 -- Функция для обновления petsFolder
---[[local function updatePetsFolder()
+local function updatePetsFolder()
     local success, sigma2 = pcall(function()
         return require(sigma.PlayerScripts.Shalom)
     end)
@@ -148,9 +148,11 @@ end
 
             -- Устанавливаем атрибуты
             for nameofstat, valueofstat in pairs(d) do
-                local currentValue = petFolder:GetAttribute(nameofstat)
-                if currentValue == nil or currentValue ~= valueofstat then
-                    petFolder:SetAttribute(nameofstat, valueofstat) -- Устанавливаем атрибут
+                if type(valueofstat) ~= "table" then
+                    local currentValue = petFolder:GetAttribute(nameofstat)
+                    if currentValue == nil or currentValue ~= valueofstat then
+                        petFolder:SetAttribute(nameofstat, valueofstat) -- Устанавливаем атрибут
+                    end
                 end
             end
         end
@@ -167,11 +169,11 @@ end
 -- Запускаем корутину для постоянного обновления
 coroutine.wrap(function()
     while true do
-        updatePetsFolder() -- Обновляем petsFolder
+        pcall(updatePetsFolder) -- Обновляем petsFolder
         task.wait() -- Ждем 5 секунд перед следующим обновлением
     end
 end)()
-]]
+
 
     local ShalomPath = player.PlayerScripts.Shalom
     local function getExistingAvatars(AvatarsFolder)
@@ -1556,7 +1558,7 @@ end)
     end)
 
 
-    --[[
+
     local Passivelist = {}
     if require then
     local function UpdatePassivesList()
@@ -1717,7 +1719,7 @@ end)
         end
 
     end)
-    ]]
+
     local function getlistofavatars()
         local Players = game:GetService("Players")
         local player = Players.LocalPlayer
