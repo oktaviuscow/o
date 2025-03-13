@@ -22,6 +22,7 @@ local Window = Library:CreateWindow({
 local Tabs = {
     Credits = Window:CreateTab({Title = "Credits", Icon = "book"}),
     Farm = Window:CreateTab({ Title = "Farming", Icon = "align-center" }),
+    Gamemodes = Window:CreateTab({Title = "Gamemodes", Icon = ""}),
     Trials = Window:CreateTab({Title = "Trial", Icon = "apple"}),
     Eggs = Window:CreateTab({Title = "Eggs", Icon = "egg"}),
     AutoBuy = Window:CreateTab({Title = "Auto Buy", Icon = "shopping-cart"}),
@@ -100,15 +101,14 @@ end
 
 local sigma = Players.LocalPlayer
 
--- Функция для получения существующих unitid из petsFolder
-local function getExistingUnitIds2(petsFolder)
-    local existingUnitIds2 = {}
+local function getExistingUnitIds(petsFolder)
+    local existingUnitIds = {}
     for _, child in pairs(petsFolder:GetChildren()) do
         if child:IsA("Folder") then
-            table.insert(existingUnitIds2, child.Name) -- Добавляем имя папки (unitid) в список
+            table.insert(existingUnitIds, child.Name) -- Добавляем имя папки (unitid) в список
         end
     end
-    return existingUnitIds2
+    return existingUnitIds
 end
 
 -- Функция для обновления petsFolder
@@ -130,7 +130,8 @@ local function updatePetsFolder()
     end
 
     -- Получаем существующие unitid
-    local existingUnitIds2 = getExistingUnitIds2()
+    local existingUnitIds = getExistingUnitIds(petsFolder)
+
     -- Получаем таблицу питомцев напрямую
     local petsData = sigma2.Data.Pets
     if type(petsData) == "table" then
@@ -144,15 +145,15 @@ local function updatePetsFolder()
                 petFolder.Parent = petsFolder -- Добавляем папку в Pets
             end
 
-            table.insert(existingUnitIds2, unitid)
+            table.insert(existingUnitIds, unitid)
 
             -- Устанавливаем атрибуты
             for nameofstat, valueofstat in pairs(d) do
-                if type(valueofstat) ~= "table" then
-                    local currentValue = petFolder:GetAttribute(nameofstat)
-                    if currentValue == nil or currentValue ~= valueofstat then
-                        petFolder:SetAttribute(nameofstat, valueofstat) -- Устанавливаем атрибут
-                    end
+                local currentValue = petFolder:GetAttribute(nameofstat)
+                if typeof(valueofstat) ~= "table" then
+                if currentValue == nil or currentValue ~= valueofstat then
+                    petFolder:SetAttribute(nameofstat, valueofstat) -- Устанавливаем атрибут
+                end
                 end
             end
         end
@@ -160,7 +161,7 @@ local function updatePetsFolder()
 
     -- Удаляем папки питомцев, которые не соответствуют существующим unitid
     for _, child in pairs(petsFolder:GetChildren()) do
-        if child:IsA("Folder") and not table.find(existingUnitIds2, child.Name) then
+        if child:IsA("Folder") and not table.find(existingUnitIds, child.Name) then
             child:Destroy() -- Удаляем папку
         end
     end
@@ -169,7 +170,7 @@ end
 -- Запускаем корутину для постоянного обновления
 coroutine.wrap(function()
     while true do
-        pcall(updatePetsFolder) -- Обновляем petsFolder
+        updatePetsFolder() -- Обновляем petsFolder
         task.wait() -- Ждем 5 секунд перед следующим обновлением
     end
 end)()
@@ -1898,6 +1899,96 @@ end)
             if not getgenv().AutoDisableAnimation then return end
             task.wait()
             disableanimation()
+        end
+    end)
+
+    local AutoFarmNearestInCardHub = Tabs.Gamemodes:CreateToggle("Auto Farm Nearest in Card Hub", {Title= "Auto Farm Nearest in Card Hub", Description = "", Default = false})
+    local CardHubEnemiesFolder = game:GetService("Workspace"):FindFirstChild("Server"):FindFirstChild("Card_HUB"):FindFirstChild("Enemies")
+
+    local function findNearestEnemyInCardHub()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(CardHubEnemiesFolder:GetDescendants()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local distance = (rootPart.Position - enemy.Position).Magnitude
+    
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestEnemy = enemy
+                end
+            end
+        end
+    
+        return closestEnemy
+    end
+
+    local function teleportMeToNearestEnemyInCardHub()
+
+    
+        local nearestEnemy = findNearestEnemyInCardHub()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportPetsToNearestEnemyInCardHub()
+
+    
+        local nearestEnemy = findNearestEnemyInCardHub()
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getPets()
+            for i, v in pets do
+                    local petrootpart = v.HumanoidRootPart
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+            
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+            end
+        end
+    end
+
+    local function sendPetsOnNearestEnemyInCardHub()
+        local nearestEnemy = findNearestEnemyInCardHub()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInCardHub()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    AutoFarmNearestInCardHub:OnChanged(function(state)
+        getgenv().AutoFarmNearestInCardHub = state
+        while getgenv().AutoFarmNearestInCardHub do
+            task.wait()
+            for _, enemy in ipairs(CardHubEnemiesFolder:GetDescendants()) do
+                if enemy:IsA("Part") then
+                    -- Проверяем здоровье и состояние врага
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearestInCardHub == true then
+                        pcall(teleportMeToNearestEnemyInCardHub)
+                        pcall(sendPetsOnNearestEnemyInCardHub)
+                    end
+                end
+            end
         end
     end)
     local function delayedTeleport()
