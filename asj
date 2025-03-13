@@ -902,9 +902,7 @@ do
                     getgenv().Busy = false
                 end
             end
-            local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
-            local currentmap = tostring(maps[1])
-            for _, enemy in ipairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
+            for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
                 if enemy:IsA("Part") then
                     -- Проверяем здоровье и состояние врага
                     if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false then
