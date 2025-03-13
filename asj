@@ -101,14 +101,15 @@ end
 
 local sigma = Players.LocalPlayer
 
-local function getExistingUnitIds(petsFolder)
-    local existingUnitIds = {}
+-- Функция для получения существующих unitid из petsFolder
+local function getExistingUnitIds2(petsFolder)
+    local existingUnitIds2 = {}
     for _, child in pairs(petsFolder:GetChildren()) do
         if child:IsA("Folder") then
-            table.insert(existingUnitIds, child.Name) -- Добавляем имя папки (unitid) в список
+            table.insert(existingUnitIds2, child.Name) -- Добавляем имя папки (unitid) в список
         end
     end
-    return existingUnitIds
+    return existingUnitIds2
 end
 
 -- Функция для обновления petsFolder
@@ -130,7 +131,7 @@ local function updatePetsFolder()
     end
 
     -- Получаем существующие unitid
-    local existingUnitIds = getExistingUnitIds(petsFolder)
+    local existingUnitIds2 = getExistingUnitIds2(petsFolder)
 
     -- Получаем таблицу питомцев напрямую
     local petsData = sigma2.Data.Pets
@@ -145,23 +146,23 @@ local function updatePetsFolder()
                 petFolder.Parent = petsFolder -- Добавляем папку в Pets
             end
 
-            table.insert(existingUnitIds, unitid)
+            table.insert(existingUnitIds2, unitid)
 
             -- Устанавливаем атрибуты
             for nameofstat, valueofstat in pairs(d) do
+            if typeof(valueofstat) ~= "table" then
                 local currentValue = petFolder:GetAttribute(nameofstat)
-                if typeof(valueofstat) ~= "table" then
                 if currentValue == nil or currentValue ~= valueofstat then
                     petFolder:SetAttribute(nameofstat, valueofstat) -- Устанавливаем атрибут
                 end
-                end
+            end
             end
         end
     end
 
     -- Удаляем папки питомцев, которые не соответствуют существующим unitid
     for _, child in pairs(petsFolder:GetChildren()) do
-        if child:IsA("Folder") and not table.find(existingUnitIds, child.Name) then
+        if child:IsA("Folder") and not table.find(existingUnitIds2, child.Name) then
             child:Destroy() -- Удаляем папку
         end
     end
@@ -1396,7 +1397,7 @@ end)
         for i, v in EquipedPets do
             local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
             if not strongestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
-            teleportPetsToStrongestEnemyInTrial()
+            teleportPetsToNearestEnemyInTrial()
             local args = {
                 [1] = "General",
                 [2] = "Pets",
@@ -1416,7 +1417,7 @@ end)
         for i, v in EquipedPets do
             local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
             if not weakestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
-            teleportPetsToWeakestEnemyInTrial()
+            teleportPetsToNearestEnemyInTrial()
             local args = {
                 [1] = "General",
                 [2] = "Pets",
@@ -2003,7 +2004,7 @@ InterfaceManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 InterfaceManager:SetFolder("Apel Hub")
-SaveManager:SetFolder("Apel Hub/".."[RELEASE] Anime Spirits Journey")
+SaveManager:SetFolder("Apel Hub/"..tostring(gamename))
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
 SaveManager:LoadAutoloadConfig()
