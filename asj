@@ -150,23 +150,26 @@ local function updatePetsFolder()
                 petFolder.Parent = petsFolder -- Добавляем папку в Pets
             end
 
-            table.insert(existingUnitIds2, unitid)
-
             -- Устанавливаем атрибуты
             for nameofstat, valueofstat in pairs(d) do
-            if typeof(valueofstat) ~= "table" then
-                local currentValue = petFolder:GetAttribute(nameofstat)
-                if currentValue == nil or currentValue ~= valueofstat then
-                    petFolder:SetAttribute(nameofstat, valueofstat) -- Устанавливаем атрибут
+                if typeof(valueofstat) ~= "table" then
+                    local currentValue = petFolder:GetAttribute(nameofstat)
+                    if currentValue == nil or currentValue ~= valueofstat then
+                        petFolder:SetAttribute(nameofstat, valueofstat) -- Устанавливаем атрибут
+                    end
                 end
-            end
             end
         end
     end
 
     -- Удаляем папки питомцев, которые не соответствуют существующим unitid
+    local currentUnitIds = {} -- Создаем новую таблицу для текущих unitid
+    for unitid in pairs(petsData) do
+        table.insert(currentUnitIds, tostring(unitid)) -- Добавляем текущие unitid
+    end
+
     for _, child in pairs(petsFolder:GetChildren()) do
-        if child:IsA("Folder") and not table.find(existingUnitIds2, child.Name) then
+        if child:IsA("Folder") and not table.find(currentUnitIds, child.Name) then
             child:Destroy() -- Удаляем папку
         end
     end
@@ -181,17 +184,17 @@ coroutine.wrap(function()
 end)()
 
 -- Функция для получения существующих unitid из petsFolder
-local function getExistingCardsIds(cardsfolder)
+local function getExistingCardsIds(cardsFolder)
     local existingCardsIds = {}
-    for _, child in pairs(cardsfolder:GetChildren()) do
+    for _, child in pairs(cardsFolder:GetChildren()) do
         if child:IsA("Folder") then
-            table.insert(existingCardsIds, child.Name) -- Добавляем имя папки (unitid) в список
+            table.insert(existingCardsIds, child.Name) -- Добавляем имя папки (cardid) в список
         end
     end
     return existingCardsIds
 end
 
--- Функция для обновления petsFolder
+-- Функция для обновления cardsFolder
 local function updateCardsFolder()
     local success, sigma2 = pcall(function()
         return require(sigma.PlayerScripts.Shalom)
@@ -201,7 +204,7 @@ local function updateCardsFolder()
         return
     end
 
-    -- Создаем папку Pets в LocalPlayer, если она еще не существует
+    -- Создаем папку Cards в LocalPlayer, если она еще не существует
     local cardsFolder = sigma:FindFirstChild("Cards")
     if not cardsFolder then
         cardsFolder = Instance.new("Folder")
@@ -209,10 +212,10 @@ local function updateCardsFolder()
         cardsFolder.Parent = sigma
     end
 
-    -- Получаем существующие unitid
-    local existingCardsIds = getExistingCardsIds(cardsFolder)
+    -- Получаем существующие cardid
+    local existingCardsIds = {}
 
-    -- Получаем таблицу питомцев напрямую
+    -- Получаем таблицу карт напрямую
     local cardsData = sigma2.Data.Inventory.Cards
     if type(cardsData) == "table" then
         for cardid, d in pairs(cardsData) do
@@ -221,11 +224,9 @@ local function updateCardsFolder()
             if not cardFolder then
                 -- Если папка не существует, создаем её
                 cardFolder = Instance.new("Folder")
-                cardFolder.Name = tostring(cardid) -- Устанавливаем имя папки как unitid
-                cardFolder.Parent = cardsFolder -- Добавляем папку в Pets
+                cardFolder.Name = tostring(cardid) -- Устанавливаем имя папки как cardid
+                cardFolder.Parent = cardsFolder -- Добавляем папку в Cards
             end
-
-            table.insert(existingCardsIds, cardid)
 
             -- Устанавливаем атрибуты
             for name, valueofstat in pairs(d) do
@@ -234,10 +235,15 @@ local function updateCardsFolder()
                     cardFolder:SetAttribute(name, valueofstat) -- Устанавливаем атрибут
                 end
             end
+
+            -- Добавляем cardid в существующие
+            if not table.find(existingCardsIds, tostring(cardid)) then
+                table.insert(existingCardsIds, tostring(cardid))
+            end
         end
     end
     
-    -- Удаляем папки питомцев, которые не соответствуют существующим unitid
+    -- Удаляем папки карт, которые не соответствуют существующим cardid
     for _, child in pairs(cardsFolder:GetChildren()) do
         if child:IsA("Folder") and not table.find(existingCardsIds, child.Name) then
             child:Destroy() -- Удаляем папку
@@ -248,8 +254,8 @@ end
 -- Запускаем корутину для постоянного обновления
 coroutine.wrap(function()
     while true do
-        updateCardsFolder() -- Обновляем petsFolder
-        task.wait() 
+        updateCardsFolder() -- Обновляем cardsFolder
+        task.wait() -- Ждем 5 секунд перед следующим обновлением
     end
 end)()
 
@@ -2350,7 +2356,7 @@ end)
                 for i , v in pairs(myCards:GetChildren()) do
                     local currentcard = tostring(v:GetAttribute("Name"))
                     if containsValue(currentcard, selectedCards) then
-                        print("deleting"..tostring(v))
+                        print("deleting: "..tostring(v).." | ".. tostring(currentcard))
                         sellCard(tostring(v))
                     end
                 end
