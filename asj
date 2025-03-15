@@ -1487,7 +1487,7 @@ end)
     getgenv().StopFarmingTrial = true
     AutoJoinTrial:OnChanged(function(state)
         getgenv().AutoTrial = state
-        writefile(TrialFarmPath, state)
+        writefile(TrialFarmPath, tostring(state))
             local function checkTime()
                 while getgenv().AutoTrial == true do
                     local currentTime = os.date("*t")  -- Получаем текущее время
