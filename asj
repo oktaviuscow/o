@@ -402,8 +402,8 @@ do
     end)
 
 
-    local AutoCollect = Tabs.Misc:CreateToggle("Auto Collect", {Title = "Auto Collect Drops", Default = false, Description = ""})
-
+    local AutoCollect = Tabs.Misc:CreateToggle("Auto Collect", {Title = "Auto Collect Drops", Default = false, Description = "Teleporting Drops to  you"})
+    local AutoCollectBypassed = Tabs.Misc:CreateToggle("Auto Collect Bypassed", {Title = "Auto Collect Bypassed", Default = false, Description = "Collecting Drops without teleport (Maybe fix memory leak and freezing)"})
     local dropfolder = game:GetService("Workspace").Client.Drops
 
     local function findHumanoidRootPart()
@@ -416,6 +416,17 @@ do
             end
         end
     end
+    local function collectid(id)
+        local args = {
+            [1] = "General",
+            [2] = "Drops",
+            [3] = "Collect",
+            [4] = id
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        
+    end
 
     AutoCollect:OnChanged(function(State) -- Auto Collect Drops
         getgenv().AutoCollecting =  State
@@ -426,6 +437,17 @@ do
                 task.wait()
                 for i, v in ipairs(dropfolder:GetChildren()) do
                     v.CFrame = rootPart.CFrame
+                end
+        end
+    end)
+
+    AutoCollectBypassed:OnChanged(function(State) -- Auto Collect Drops Bypassed
+        getgenv().AutoCollectingBypassed =  State
+        while getgenv().AutoCollectingBypassed == true do
+            if not getgenv().AutoCollectingBypassed == true then return end
+                task.wait()
+                for i, v in ipairs(dropfolder:GetChildren()) do
+                    collectid(tostring(v.Name))
                 end
         end
     end)
