@@ -403,7 +403,7 @@ do
 
 
     local AutoCollect = Tabs.Misc:CreateToggle("Auto Collect", {Title = "Auto Collect Drops", Default = false, Description = "Teleporting Drops to  you"})
-    local AutoCollectBypassed = Tabs.Misc:CreateToggle("Auto Collect Bypassed", {Title = "Auto Collect Bypassed", Default = false, Description = "Collecting Drops without teleport (Maybe fix memory leak and freezing)"})
+    local AutoCollectBypassed = Tabs.Misc:CreateToggle("Auto Collect Bypassed", {Title = "Auto Collect Bypassed (DONT WORK IN TRIAL)", Default = false, Description = "Collecting Drops without teleport (Maybe fix memory leak and freezing)"})
     local dropfolder = game:GetService("Workspace").Client.Drops
 
     local function findHumanoidRootPart()
@@ -447,7 +447,9 @@ do
             if not getgenv().AutoCollectingBypassed == true then return end
                 task.wait()
                 for i, v in ipairs(dropfolder:GetChildren()) do
+                    if getgenv().StopFarmingTrial == true then
                     collectid(tostring(v.Name))
+                    end
                 end
         end
     end)
