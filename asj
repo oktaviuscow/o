@@ -644,39 +644,6 @@ do
     
         return EquipedPets
     end
-    
-
-    local function getPets()
-        local pets = {}
-        local player = game:GetService("Players").LocalPlayer  -- Получаем локального игрока
-    
-        for _, value in ipairs(workspace.Server.Pets:GetChildren()) do
-            local inputString = value.Name
-            local nickname = string.match(inputString, "^(.-)---")
-    
-            if nickname then
-                if nickname == tostring(player) then
-                    -- Проверяем, существует ли объект Info
-                    if value:FindFirstChild("Info") then
-                        local info = value.Info  -- Сохраняем ссылку на Info
-    
-                        -- Проверяем, существует ли объект Player внутри Info
-                        if info:FindFirstChild("Player") then
-                            if info.Player.Value == player then
-                                table.insert(pets, value)
-                            end
-                        else
-                            print("Player не найден в Info у питомца:", value.Name)
-                        end
-                    else
-                        print("Info не найден у питомца:", value.Name)
-                    end
-                end
-            end
-        end
-    
-        return pets
-    end
 
 
     local function teleportMeToNearestEnemyWithContains()
@@ -708,14 +675,15 @@ do
 
         if nearestEnemy then
             local targetRootPart = nearestEnemy
-            local pets = getPets()
+            local pets = getEquipedPets()
             for i, v in pets do
-                    local petrootpart = v.HumanoidRootPart
+                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
                     local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
-            
+                    if petrootpart then
                     if distanceToPet > teleportRadiusForPet then
                         petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
                     end
+                end
             end
         end
     end
@@ -734,32 +702,6 @@ do
         end
     end
 
-    --[[local function teleportMeToStrongestEnemy()
-
-    
-        local nearestEnemy = findStrongestEnemy()
-        local rootPart = findHumanoidRootPart()
-        if nearestEnemy then
-            local targetRootPart = nearestEnemy
-            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
-            if distanceToEnemy > teleportRadius then
-                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
-            end
-        end
-    end
-
-    local function teleportMeToWeakestEnemy()
-        local nearestEnemy = findWeakestEnemy()
-        local rootPart = findHumanoidRootPart()
-        if nearestEnemy then
-            local targetRootPart = nearestEnemy
-            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
-            if distanceToEnemy > teleportRadius then
-                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
-            end
-        end
-    end]]
-
     local function teleportPetsToNearestEnemyWithoutContains()
 
     
@@ -767,54 +709,19 @@ do
 
         if nearestEnemy then
             local targetRootPart = nearestEnemy
-            local pets = getPets()
+            local pets = getEquipedPets()
             for i, v in pets do
-                    local petrootpart = v.HumanoidRootPart
+                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
+
                     local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
-            
-                    if distanceToPet > teleportRadiusForPet then
-                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    if petrootpart then
+                        if distanceToPet > teleportRadiusForPet then
+                            petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                        end
                     end
             end
         end
     end
-
-    --[[local function teleportPetsToStrongestEnemy()
-        local strongestEnemy = findStrongestEnemy()
-
-        if strongestEnemy then
-            local targetRootPart = strongestEnemy
-            local pets = getPets()
-            for i, v in pets do
-                    local petrootpart = v.HumanoidRootPart
-                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
-                    if distanceToPet > teleportRadiusForPet then
-                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
-                    end
-            end
-        end
-    end
-
-    local function teleportPetsToWeakestEnemy()
-        local weakestenemy = findWeakestEnemy()
-
-        if weakestenemy then
-            local targetRootPart = weakestenemy
-            local pets = getPets()
-            for i, v in pets do
-                    local petrootpart = v.HumanoidRootPart
-                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
-                    if distanceToPet > teleportRadiusForPet then
-                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
-                    end
-            end
-        end
-    end]]
-
-
-
-
-
 
     local function sendPetsOnEnemy()
         local selectedEnemies = {}
@@ -876,80 +783,6 @@ do
             print("Ближайший враг не найден.")
         end
     end
-
-    --[[local function sendPetsOnStrongestEnemy()
-        local strongestEnemy = findStrongestEnemy()
-        local EquipedPets = getEquipedPets()
-    
-        if strongestEnemy then  -- Проверяем, что nearestEnemy существует
-            local info = strongestEnemy:FindFirstChild("Info")  -- Находим объект Info
-    
-            if info then  -- Проверяем, существует ли Info
-                for i, v in EquipedPets do
-                    local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
-    
-                    if info:FindFirstChild("Pets") then  -- Проверяем, существует ли Pets
-                        if not info.Pets:FindFirstChild(rnpetcheck) then
-                            teleportPetsToStrongestEnemy()
-                            local args = {
-                                [1] = "General",
-                                [2] = "Pets",
-                                [3] = "Attack",
-                                [4] = v,
-                                [5] = strongestEnemy
-                            }
-    
-                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
-
-                        end
-                    else
-                        print("Pets не найдены в Info.")
-                    end
-                end
-            else
-                print("Info не найден у ближайшего врага.")
-            end
-        else
-            print("Ближайший враг не найден.")
-        end
-    end
-
-    local function sendPetsOnWeakestEnemy()
-        local weakestenemy = findWeakestEnemy()
-        local EquipedPets = getEquipedPets()
-    
-        if weakestenemy then  -- Проверяем, что nearestEnemy существует
-            local info = weakestenemy:FindFirstChild("Info")  -- Находим объект Info
-    
-            if info then  -- Проверяем, существует ли Info
-                for i, v in EquipedPets do
-                    local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
-    
-                    if info:FindFirstChild("Pets") then  -- Проверяем, существует ли Pets
-                        if not info.Pets:FindFirstChild(rnpetcheck) then
-                            teleportPetsToWeakestEnemy()
-                            local args = {
-                                [1] = "General",
-                                [2] = "Pets",
-                                [3] = "Attack",
-                                [4] = v,
-                                [5] = weakestenemy
-                            }
-    
-                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
-
-                        end
-                    else
-                        print("Pets не найдены в Info.")
-                    end
-                end
-            else
-                print("Info не найден у ближайшего врага.")
-            end
-        else
-            print("Ближайший враг не найден.")
-        end
-    end]]
 
 
     getgenv().Busy = nil
@@ -1438,14 +1271,16 @@ end)
 
         if nearestEnemy then
             local targetRootPart = nearestEnemy
-            local pets = getPets()
+            local pets = getEquipedPets()
             for i, v in pets do
-                    local petrootpart = v.HumanoidRootPart
+                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
+
                     local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
-            
+                    if petrootpart then
                     if distanceToPet > teleportRadiusForPet then
                         petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
                     end
+                end
             end
         end
     end
@@ -2109,14 +1944,16 @@ end)
 
         if nearestEnemy then
             local targetRootPart = nearestEnemy
-            local pets = getPets()
+            local pets = getEquipedPets()
             for i, v in pets do
-                    local petrootpart = v.HumanoidRootPart
+                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
+
                     local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
-            
+                    if petrootpart then
                     if distanceToPet > teleportRadiusForPet then
                         petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
                     end
+                end
             end
         end
     end
