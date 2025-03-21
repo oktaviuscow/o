@@ -2530,11 +2530,11 @@ end)
 
 
  
-    --[[local function delayedTeleport()
+    local function delayedTeleport()
         task.wait(10)  -- Задержка в 10 секунд
         teleportToSavedPosition()  -- Вызов функции телепортации
     end
-    coroutine.wrap(delayedTeleport)()]]
+    coroutine.wrap(delayedTeleport)()
 
 end
 
