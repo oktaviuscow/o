@@ -27,8 +27,9 @@ local Tabs = {
     Eggs = Window:CreateTab({Title = "Eggs", Icon = "egg"}),
     AutoBuy = Window:CreateTab({Title = "Auto Buy", Icon = "shopping-cart"}),
     Rerolls = Window:CreateTab({Title = "Auto Rolls", Icon = "refresh-ccw"}),
+    Teams = Window:CreateTab({Title = "Teams", Icon = "users"}),
     Misc = Window:CreateTab({Title = " Misc", Icon = "diamond"}),
-    Settings = Window:CreateTab({ Title = "Settings", Icon = "settings" })
+    Settings = Window:CreateTab({ Title = "Settings", Icon = "settings" }),
 
 }
 
@@ -103,6 +104,41 @@ else
     print("Файл '" .. PositionfileName.."and"..WorldfileName .. "' был создан и записан.")
 end
 
+local TeamsFolder = folderName.."\\Anime Spirits Journey".."\\Teams"
+
+    if not isfolder(TeamsFolder) then
+        makefolder(TeamsFolder)  -- Создаем папку, если она не существует
+        print("Папка '" .. TeamsFolder .. "' была создана.")
+    else
+        print("Папка '" .. TeamsFolder .. "' уже существует.")
+    end
+local Team1 = "Team 1.txt"
+local Team2 = "Team 2.txt"
+local Team3 = "Team 3.txt"
+local Team4 = "Team 4.txt"
+local Team5 = "Team 5.txt"
+local Team1Path = TeamsFolder .. "\\" .. Team1
+local Team2Path = TeamsFolder .. "\\" .. Team2
+local Team3Path = TeamsFolder .. "\\" .. Team3
+local Team4Path = TeamsFolder .. "\\" .. Team4
+local Team5Path = TeamsFolder .. "\\" .. Team5
+if not isfile(Team1Path) or not isfile(Team2Path) or not isfile(Team3Path) or not isfile(Team4Path) or not isfile(Team5Path) then
+    if not isfile(Team1Path) then
+    writefile(Team1Path, "")
+    end
+    if not isfile(Team2Path) then
+    writefile(Team2Path, "")
+    end
+    if not isfile(Team3Path) then
+    writefile(Team3Path, "")
+    end
+    if not isfile(Team4Path) then
+    writefile(Team4Path, "")
+    end
+    if not isfile(Team5Path) then
+    writefile(Team5Path, "")
+    end
+end
 local sigma = Players.LocalPlayer
 
 -- Функция для получения существующих unitid из petsFolder
@@ -259,6 +295,63 @@ coroutine.wrap(function()
     end
 end)()
 
+-- Функция для обновления cardsFolder
+--[[local function updateEquippedFolder()
+    local success, sigma2 = pcall(function()
+        return require(sigma.PlayerScripts.Shalom)
+    end)
+
+    if not success then
+        return
+    end
+
+    -- Создаем папку Cards в LocalPlayer, если она еще не существует
+    local equippedfodler = sigma:FindFirstChild("Equipped")
+    if not equippedfodler then
+        equippedfodler = Instance.new("Folder")
+        equippedfodler.Name = "Equipped"
+        equippedfodler.Parent = sigma
+    end
+
+    -- Получаем существующие cardid
+    local EquippedPets = {}
+
+    -- Получаем таблицу карт напрямую
+    local EquippedPetsData = sigma2.Data["Pets_Equipped"]
+    if type(EquippedPetsData) == "table" then
+        for petid, d in pairs(EquippedPetsData) do
+            -- Проверяем, существует ли папка с таким именем
+            local equippedpetFolder = equippedfodler:FindFirstChild(tostring(petid))
+            if not equippedpetFolder then
+                -- Если папка не существует, создаем её
+                equippedpetFolder = Instance.new("Folder")
+                equippedpetFolder.Name = tostring(petid) -- Устанавливаем имя папки как petidcardid
+                equippedpetFolder.Parent = equippedfodler -- Добавляем папку в Cards
+            end
+
+            -- Добавляем cardid в существующие
+            if not table.find(EquippedPets, tostring(petid)) then
+                table.insert(EquippedPets, tostring(petid))
+            end
+        end
+    end
+    
+    -- Удаляем папки карт, которые не соответствуют существующим cardid
+    for _, child in pairs(equippedfodler:GetChildren()) do
+        if child:IsA("Folder") and not table.find(EquippedPets, child.Name) then
+            child:Destroy() -- Удаляем папку
+        end
+    end
+end
+
+-- Запускаем корутину для постоянного обновления
+coroutine.wrap(function()
+    while true do
+        updateEquippedFolder() -- Обновляем cardsFolder
+        task.wait() -- Ждем 5 секунд перед следующим обновлением
+    end
+end)()]]
+
     local ShalomPath = player.PlayerScripts.Shalom
     local function getExistingAvatars(AvatarsFolder)
         local existingAvatars = {}
@@ -387,6 +480,34 @@ end)()
         end
     end)()
 
+    local function checkgamemode()
+        local player = game:GetService("Players").LocalPlayer
+        local atr = player:GetAttribute("Mode")
+        if atr == "Trial_Easy" then
+            if  getgenv().StopFarmingCards == false then
+                getgenv().StopFarmingCards = true
+            end
+            getgenv().StopFarmingTrial = false
+            getgenv().currentmode = atr
+        elseif  atr == "Cards" then
+            getgenv().StopFarmingCards = false
+            if getgenv().StopFarmingTrial == false then
+                getgenv().StopFarmingTrial = true
+            end
+            getgenv().currentmode = atr
+        elseif not atr then
+            getgenv().StopFarmingCards = true
+            getgenv().StopFarmingTrial = true
+            getgenv().currentmode = "None"
+        end
+    end
+    
+    coroutine.wrap(function()
+        while true do
+            checkgamemode() -- Обновляем petsFolder
+            task.wait() -- Ждем 5 секунд перед следующим обновлением
+        end
+    end)()
 
 do
 
@@ -579,45 +700,6 @@ do
     
     
 
-    --[[local function findStrongestEnemy()
-
-        local strongestenemy = nil
-        local strong = 0
-        local rootPart = findHumanoidRootPart()
-        local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
-        local currentmap = tostring(maps[1])
-        for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
-            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
-                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
-                if hp > strong then
-                    strong = hp
-                    strongestenemy = enemy
-                end
-            end
-        end
-    
-        return strongestenemy
-    end
-
-    local function findWeakestEnemy()
-        local weakestenemy = nil
-        local weak = math.huge
-        local rootPart = findHumanoidRootPart()
-        local maps = game:GetService("Workspace"):FindFirstChild("Client"):FindFirstChild("Maps"):GetChildren()
-        local currentmap = tostring(maps[1])
-        for _, enemy in pairs(ServerEnemiesFolder:FindFirstChild(currentmap):GetChildren()) do
-            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
-                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
-                if hp < weak then
-                    weak = hp
-                    weakestenemy = enemy
-                end
-            end
-        end
-    
-        return weakestenemy
-    end]]
-
 
     local function getEquipedPets()
         local EquipedPets = {}
@@ -641,7 +723,6 @@ do
                 end
             end
         end
-    
         return EquipedPets
     end
 
@@ -819,18 +900,6 @@ do
         end
     end)
     
-    --[[local TypeOfFarmForAllMobs = Tabs.Farm:CreateDropdown("Type of farm for mobs", {
-        Title = "Select Type of Farm",
-        Values = {"Strongest", "Weakest", "Nearest"},
-        Multi = false,
-        Default = "Nearest",
-
-
-    function TypeOfFarmForAllMobs:GetSelectedValue()
-        local selected = self.Value
-        return selected
-    end]]
-
     local AutoFarmNearest = Tabs.Farm:CreateToggle("Auto Farm Nearest", {Title = "Auto Farm Nearest", Default = false, Description = ""})
     AutoFarmNearest:OnChanged(function(state)
         getgenv().AutoFarmNearest = state
@@ -1345,7 +1414,6 @@ end)
         end
     end
 
-    getgenv().StopFarmingTrial = true
     AutoJoinTrial:OnChanged(function(state)
         getgenv().AutoTrial = state
         writefile(TrialFarmPath, tostring(state))
@@ -1831,6 +1899,29 @@ end)
         getgenv().CardWaveLimit = tonumber(Value)
     end)
     
+    local AutoStartCards = Tabs.Gamemodes:CreateToggle("Auto Start Card Gamemode",{
+        Title = "Auto Start Card Gamemode",
+        Default = false,
+        Description = ""
+    })
+
+    AutoStartCards:OnChanged(function(state)
+        getgenv().AutoStartCards = state
+        while getgenv().AutoStartCards do
+            task.wait(5)
+            if getgenv().currentmode ~= "Cards" and getgenv().StopFarmingTrial == true and getgenv().StopFarmingCards == true then
+                local args = {
+                    [1] = "Enemies",
+                    [2] = "Cards",
+                    [3] = "Open"
+                }
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+            end
+        end
+        
+    end)
+
     local AutoJoinCards = Tabs.Gamemodes:CreateToggle("Auto Join And Leave Card Gamemode",{
         Title = "Auto Join And Leave Card Gamemode",
         Default = false,
@@ -2029,7 +2120,7 @@ end)
                         local mapsf = workspace.Client.Maps
                         getgenv().StopFarmingCards = false
                         for i ,v in ipairs(mapsf:GetChildren()) do
-                            if v.Name ~= "Lobby" then
+                            if v.Name ~= "Lobby" and tostring(player:GetAttribute("Mode")) ~= "Trial_Easy" then
                                 wait(1)
                                 local args = {
                                     [1] = "General",
@@ -2053,6 +2144,7 @@ end)
                             end
                         end
                         wait(2)
+                        if tostring(player:GetAttribute("Mode")) ~= "Trial_Easy" then
                         local args = {
                             [1] = "Enemies",
                             [2] = "Cards",
@@ -2069,7 +2161,7 @@ end)
                         }
                         
                         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
-                        
+                        end
                     end
         
                     -- Ждем 1 секунду перед следующей проверкой
@@ -2080,11 +2172,11 @@ end)
             coroutine.wrap(checkOpen)()
             
             local function checkcurrentwaveinCardHub()
-                while getgenv().AutoTrial do
+                while getgenv().AutoJoinCards do
                     task.wait(10)
                     local waveNumber = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Card.Wave.Value)
                     local cardwavelimitrn = tonumber(getgenv().CardWaveLimit)
-                    if waveNumber and cardwavelimitrn and waveNumber >= cardwavelimitrn and not getgenv().StopFarmingCards then
+                    if waveNumber and cardwavelimitrn and waveNumber >= cardwavelimitrn and getgenv().currentmode == "Cards" then
                         print("Достигнут лимит волн, телепортируем...")
                         getgenv().StopFarmingCards = true
                         wait(1)
@@ -2222,11 +2314,227 @@ end)
         end
 
     end)
-    local function delayedTeleport()
+
+    local TeamsDropdown = Tabs.Teams:CreateDropdown("Teams Dropdown",{
+        Title = "Select Team for saving",
+        Description = "",
+        Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+        Multi = false,
+        Default = "Team 1"
+    })
+    
+    local SaveTeamButton = Tabs.Teams:CreateButton({
+        Title = "Save Team",
+        Description = "Saving selected team",
+        Callback = function()
+            local selectedTeam = TeamsDropdown.Value
+            local equippedpets = getEquipedPets()
+            if selectedTeam then
+                if selectedTeam == "Team 1" then
+                    writefile(Team1Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team1Path, v..'\n')
+                    end
+                elseif selectedTeam == "Team 2" then
+                    writefile(Team2Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team2Path, v..'\n')
+                    end
+                elseif selectedTeam == "Team 3" then
+                    writefile(Team3Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team3Path, v..'\n')
+                    end
+                elseif selectedTeam == "Team 4" then
+                    writefile(Team4Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team4Path, v..'\n')
+                    end
+                elseif selectedTeam == "Team 5" then
+                    writefile(Team5Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team5Path, v..'\n')
+                    end
+                end
+            end
+        end
+    })
+    local function equippet(id)
+        local args = {
+            [1] = "General",
+            [2] = "Pets",
+            [3] = "Equip_Pet",
+            [4] = id
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+
+    local function getTeamIds(path)
+        local fileContent = readfile(path)
+
+        -- Создаем таблицу для хранения идентификаторов
+        local idsTable = {}
+
+        -- Разбиваем содержимое файла на строки
+        for line in fileContent:gmatch("[^\r\n]+") do
+            table.insert(idsTable, line) -- Добавляем каждую строку в таблицу
+        end
+        return idsTable
+    end
+
+    local function loadteam(path)
+        wait()
+        local args = {
+            [1] = "General",
+            [2] = "Pets",
+            [3] = "Unequip_All"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        wait()
+        local idsTable = getTeamIds(path)
+        for _, id in ipairs(idsTable) do
+            equippet(id)
+        end
+    end
+    local function returnselectedteamPath(path)
+        local selectedTeam = path.Value
+        local selectedpath = nil
+        if selectedTeam == "Team 1" then
+            selectedpath = Team1Path
+        elseif selectedTeam == "Team 2" then
+            selectedpath = Team2Path
+        elseif selectedTeam == "Team 3" then
+            selectedpath = Team3Path
+        elseif selectedTeam == "Team 4" then
+            selectedpath = Team4Path
+        elseif selectedTeam == "Team 5" then
+            selectedpath = Team5Path
+        end
+        return selectedpath
+    end
+    local EquipSelectedTeam = Tabs.Teams:CreateButton({
+        Title = "Equip Selected Team",
+        Description = "Equipping selected team",
+        Callback = function()
+            local selectedTeam = returnselectedteamPath(TeamsDropdown)
+            loadteam(selectedTeam)
+            end
+    })
+
+    local function isAnyIdMissing(equipped, selected)
+        for _, id in ipairs(selected) do
+            if not table.find(equipped, id) then
+                return true -- Если хотя бы один id отсутствует, возвращаем true
+            end
+        end
+        return false -- Все id найдены
+    end
+
+    local NormalTeamDropdown = Tabs.Teams:CreateDropdown("Normal Teams Dropdown",{
+        Title = "Select Team for Equip in Normal World",
+        Description = "",
+        Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+        Multi = false,
+        Default = ""
+    })
+
+    local NormalTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Normal Team",{
+        Title = "Equip Selected Team for Normal World",
+        Description = "Auto Equipping selected Team for Normal World",
+        Default = false
+    })
+
+    NormalTeamEquip:OnChanged(function(state)
+        getgenv().AutoEquipNormalTeam = state
+        while getgenv().AutoEquipNormalTeam do
+            task.wait()
+            if getgenv().currentmode == "None" then
+                task.wait(1)
+                local equippedIds = getEquipedPets()
+                local selectedTeam = returnselectedteamPath(NormalTeamDropdown)
+                local selectedTeamIds = getTeamIds(selectedTeam)
+
+                -- Проверяем, есть ли отсутствующие id
+                if isAnyIdMissing(equippedIds, selectedTeamIds) then
+                    loadteam(selectedTeam) -- Вызываем функцию, если есть отсутствующие id
+                end
+            end
+        end
+    end)
+
+    local TrialTeamsDropdown = Tabs.Teams:CreateDropdown("Trial Teams Dropdown",{
+        Title = "Select Trial Team for Equip",
+        Description = "",
+        Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+        Multi = false,
+        Default = ""
+    })
+
+    local TrialTeamsEquip = Tabs.Teams:CreateToggle("Auto Equip Trial Team",{
+        Title = "Equip Selected Trial Team",
+        Description = "Auto Equipping selected trial team",
+        Default = false
+    })
+
+    TrialTeamsEquip:OnChanged(function(state)
+        getgenv().AutoEquipTrialTeam = state
+        while getgenv().AutoEquipTrialTeam do
+            task.wait()
+            if getgenv().currentmode == "Trial_Easy" then
+                task.wait(1)
+                local equippedIds = getEquipedPets()
+                local selectedTeam = returnselectedteamPath(TrialTeamsDropdown)
+                local selectedTeamIds = getTeamIds(selectedTeam)
+
+                
+                -- Проверяем, есть ли отсутствующие id
+                if isAnyIdMissing(equippedIds, selectedTeamIds) then
+                    loadteam(selectedTeam) -- Вызываем функцию, если есть отсутствующие id
+                end
+            end
+        end
+    end)
+
+    local CardTeamDropdown = Tabs.Teams:CreateDropdown("Cards Teams Dropdown",{
+        Title = "Select Cards Team for Equip",
+        Description = "",
+        Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+        Multi = false,
+        Default = ""
+    })
+
+    local CardTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Card Team",{
+        Title = "Equip Selected Card Team",
+        Description = "Auto Equipping selected Card team",
+        Default = false
+    })
+
+    CardTeamEquip:OnChanged(function(state)
+        getgenv().AutoEquipCardTeam = state
+        while getgenv().AutoEquipCardTeam do
+            task.wait()
+            if getgenv().currentmode == "Cards" then
+                task.wait(1)
+                local equippedIds = getEquipedPets()
+                local selectedTeam = returnselectedteamPath(CardTeamDropdown)
+                local selectedTeamIds = getTeamIds(selectedTeam)
+                -- Проверяем, есть ли отсутствующие id
+                if isAnyIdMissing(equippedIds, selectedTeamIds) then
+                    loadteam(selectedTeam) -- Вызываем функцию, если есть отсутствующие id
+                end
+            end
+        end
+    end)
+
+
+ 
+    --[[local function delayedTeleport()
         task.wait(10)  -- Задержка в 10 секунд
         teleportToSavedPosition()  -- Вызов функции телепортации
     end
-    coroutine.wrap(delayedTeleport)()
+    coroutine.wrap(delayedTeleport)()]]
 
 end
 
