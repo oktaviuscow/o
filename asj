@@ -28,7 +28,6 @@ local Tabs = {
     AutoBuy = Window:CreateTab({Title = "Auto Buy", Icon = "shopping-cart"}),
     Rerolls = Window:CreateTab({Title = "Auto Rolls", Icon = "refresh-ccw"}),
     Teams = Window:CreateTab({Title = "Teams", Icon = "users"}),
-    Test = Window:CreateTab({Title = "Test", Icon = ""}),
     Misc = Window:CreateTab({Title = " Misc", Icon = "diamond"}),
     Settings = Window:CreateTab({ Title = "Settings", Icon = "settings" }),
 
@@ -1896,7 +1895,7 @@ end)
             getgenv().CardWaveLimit = tonumber(Value)
         end
     })
-    CardWaveLimit:OnChanged(function(Value)
+    TrialWaveLimit:OnChanged(function(Value)
         getgenv().CardWaveLimit = tonumber(Value)
     end)
     
@@ -2370,16 +2369,6 @@ end)
         
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
     end
-    
-    local function UnequipAllPets()
-        local args = {
-            [1] = "General",
-            [2] = "Pets",
-            [3] = "Unequip_All"
-        }
-        
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
-    end
 
     local function getTeamIds(path)
         local fileContent = readfile(path)
@@ -2396,7 +2385,13 @@ end)
 
     local function loadteam(path)
         wait()
-        UnequipAllPets()
+        local args = {
+            [1] = "General",
+            [2] = "Pets",
+            [3] = "Unequip_All"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
         wait()
         local idsTable = getTeamIds(path)
         for _, id in ipairs(idsTable) do
@@ -2532,29 +2527,9 @@ end)
             end
         end
     end)
-    
-    local ReEquipPetIfUlt = Tabs.Test:CreateToggle("Re equip if ult", {
-        Title = "re equip if ult",
-        Description = "",
-        Default = false
-    })
-    
-    ReEquipPetIfUlt:OnChanged(function(state)
-        getgenv().ReEquipPetIfUlt = state
-        while getgenv().ReEquipPetIfUlt do
-            task.wait()
-            local EquippedPets = getEquipedPets()
-            for i, v in pairs(workspace.Server.Pets:GetChildren()) do
-                if table.find(EquippedPets, v.Name) then
-                    local ultenemy = v:GetAttribute("Ult_Enemy")
-                    if ultenemy ~= "" and ultenemy ~= nil then
-                        task.wait()
-                        v:SetAttribute("Ult_Enemy", "")
-                    end
-                end
-            end
-        end
-    end)
+
+
+ 
     --[[local function delayedTeleport()
         task.wait(10)  -- Задержка в 10 секунд
         teleportToSavedPosition()  -- Вызов функции телепортации
@@ -2568,8 +2543,8 @@ SaveManager:SetLibrary(Library)
 InterfaceManager:SetLibrary(Library)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("Apel Hub Test")
-SaveManager:SetFolder("Apel Hub Test/".."Anime Spirits Journey")
+InterfaceManager:SetFolder("Apel Hub")
+SaveManager:SetFolder("Apel Hub/".."Anime Spirits Journey")
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
 SaveManager:LoadAutoloadConfig()
