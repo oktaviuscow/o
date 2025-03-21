@@ -1895,7 +1895,7 @@ end)
             getgenv().CardWaveLimit = tonumber(Value)
         end
     })
-    TrialWaveLimit:OnChanged(function(Value)
+    CardWaveLimit:OnChanged(function(Value)
         getgenv().CardWaveLimit = tonumber(Value)
     end)
     
