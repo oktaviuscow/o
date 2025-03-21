@@ -2214,7 +2214,7 @@ end)
             for _, enemy in ipairs(CardEnemiesFolder:GetChildren()) do
                 if enemy:IsA("Part") then
                     -- Проверяем здоровье и состояние врага
-                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoAttackInTrial == true and getgenv().StopFarmingCards == false then
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoAttackInCardHub == true and getgenv().StopFarmingCards == false then
                         local typeofFarm = TypeOfFarmInCardHub:GetSelectedValue()
                         if typeofFarm == "Strongest" then
                             pcall(teleportMeToStrongestEnemyInCardHub)
