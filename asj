@@ -24,6 +24,7 @@ local Tabs = {
     Farm = Window:CreateTab({ Title = "Farming", Icon = "align-center" }),
     Gamemodes = Window:CreateTab({Title = "Card Gamemode", Icon = "credit-card"}),
     Trials = Window:CreateTab({Title = "Trial", Icon = "apple"}),
+    Portals = Window:CreateTab({Title = "Portals", Icon = "globe"}),
     Eggs = Window:CreateTab({Title = "Eggs", Icon = "egg"}),
     AutoBuy = Window:CreateTab({Title = "Auto Buy", Icon = "shopping-cart"}),
     Rerolls = Window:CreateTab({Title = "Auto Rolls", Icon = "refresh-ccw"}),
@@ -495,6 +496,14 @@ end)()]]
                 getgenv().StopFarmingTrial = true
             end
             getgenv().currentmode = atr
+        elseif atr == "Portal" then
+            if  getgenv().StopFarmingCards == false then
+                getgenv().StopFarmingCards = true
+            end
+            if getgenv().StopFarmingTrial == false then
+                getgenv().StopFarmingTrial = true
+            end
+            getgenv().currentmode = atr
         elseif not atr then
             getgenv().StopFarmingCards = true
             getgenv().StopFarmingTrial = true
@@ -888,7 +897,7 @@ do
                 for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
                     if enemy:IsA("Part") and containsValue(enemy.Name, Values) then
                         -- Проверяем здоровье и состояние врага
-                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true and getgenv().Busy == false then
+                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true and getgenv().Busy == false and getgenv().currentmode == "None" then
                             if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
                                 teleportMeToNearestEnemyWithContains()
                             end
@@ -915,7 +924,7 @@ do
                 for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
                     if enemy:IsA("Part") then
                         -- Проверяем здоровье и состояние врага
-                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false then
+                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false and getgenv().currentmode == "None" then
                             sendPetsOnNearestEnemy()
                             if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
                                 teleportMeToNearestEnemyWithoutContains()
@@ -1424,6 +1433,7 @@ end)
                     local seconds = currentTime.sec
                     -- Проверяем, если минуты равны 0 или 30
                     if (minutes == 0) and (seconds > 10) then
+                        if getgenv().currentmode == "None" then
                         getgenv().StopFarmingTrial = false
                         wait(1)
                         local mapsf = workspace.Client.Maps
@@ -1467,7 +1477,7 @@ end)
                         }
                         
                         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
-
+                        end
                     end
         
                     -- Ждем 1 секунду перед следующей проверкой
@@ -1483,7 +1493,7 @@ end)
                     local waveText = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Trial.Frame.Frame.Content.Frame.Wave.Wave.Text
                     local waveNumber = tonumber(string.match(waveText, "%d+"))
                     local trialWaveLimit = tonumber(getgenv().TrialWaveLimit)
-                    if waveNumber and trialWaveLimit and waveNumber >= trialWaveLimit and not getgenv().StopFarmingTrial then
+                    if waveNumber and trialWaveLimit and waveNumber >= trialWaveLimit and not getgenv().StopFarmingTrial and getgenv().currentmode == "Trial_Easy" then
                         print("Достигнут лимит волн, телепортируем...")
                         getgenv().StopFarmingTrial = true
                         wait(1)
@@ -2117,6 +2127,7 @@ end)
                         wait(1)
                         local openvalue = game:GetService("ReplicatedStorage").Gamemodes.Card.Open.Value
                         if openvalue == true then
+                        if getgenv().currentmode == "None" then
                         local mapsf = workspace.Client.Maps
                         getgenv().StopFarmingCards = false
                         for i ,v in ipairs(mapsf:GetChildren()) do
@@ -2163,6 +2174,7 @@ end)
                         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
                         end
                     end
+                end
         
                     -- Ждем 1 секунду перед следующей проверкой
                     wait(1)
@@ -2369,6 +2381,16 @@ end)
         
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
     end
+    
+    local function UnequipAllPets()
+        local args = {
+            [1] = "General",
+            [2] = "Pets",
+            [3] = "Unequip_All"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
 
     local function getTeamIds(path)
         local fileContent = readfile(path)
@@ -2385,13 +2407,7 @@ end)
 
     local function loadteam(path)
         wait()
-        local args = {
-            [1] = "General",
-            [2] = "Pets",
-            [3] = "Unequip_All"
-        }
-        
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        UnequipAllPets()
         wait()
         local idsTable = getTeamIds(path)
         for _, id in ipairs(idsTable) do
@@ -2528,8 +2544,354 @@ end)
         end
     end)
 
+    local PortalTeamDropdown = Tabs.Teams:CreateDropdown("Portal Teams Dropdown",{
+        Title = "Select Portal Team for Equip",
+        Description = "",
+        Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+        Multi = false,
+        Default = ""
+    })
 
- 
+    local PortalTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Portal Team",{
+        Title = "Equip Selected Portal Team",
+        Description = "Auto Equipping selected Portal team",
+        Default = false
+    })
+
+    PortalTeamEquip:OnChanged(function(state)
+        getgenv().AutoEquipPortalTeam = state
+        while getgenv().AutoEquipPortalTeam do
+            task.wait()
+            if getgenv().currentmode == "Portal" then
+                task.wait(1)
+                local equippedIds = getEquipedPets()
+                local selectedTeam = returnselectedteamPath(PortalTeamDropdown)
+                local selectedTeamIds = getTeamIds(selectedTeam)
+                -- Проверяем, есть ли отсутствующие id
+                if isAnyIdMissing(equippedIds, selectedTeamIds) then
+                    loadteam(selectedTeam) -- Вызываем функцию, если есть отсутствующие id
+                end
+            end
+        end
+    end)
+    
+    local PortalRanksDropdown = Tabs.Portals:CreateDropdown("Portal Ranks Dropdown", {
+        Title = "Choose Ranks of Portals For Farming",
+        Description = "",
+        Values = {"S", "A", "B", "C", "D", "E"},
+        Multi = true,
+        Default = {}
+    })
+
+    function PortalRanksDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    local function joinportal()
+        local args = {
+            [1] = "Enemies",
+            [2] = "Portal",
+            [3] = "Join"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))        
+    end
+
+    local TypeOfFarmInPortal = Tabs.Portals:CreateDropdown("Type of Auto Attack In Portal", {
+        Title = "Select Type of Auto Attack",
+        Values = {"Strongest", "Weakest", "Nearest"},
+        Multi = false,
+        Default = "Nearest",
+    })
+
+    local PortalJoin = Tabs.Portals:CreateToggle("Auto Join Portals",{
+        Title = "Auto Join Portals",
+        Description = "",
+        Default = false
+    })
+
+    PortalJoin:OnChanged(function(state)
+        getgenv().PortalJoin = state
+        local function CheckPortalAndJoin()
+            while getgenv().PortalJoin == true do
+                task.wait(5)
+                local openValueForPortal = game:GetService("ReplicatedStorage").Gamemodes.Portal.Open.Value
+                if openValueForPortal == true then
+                local selectedPortalRanks = PortalRanksDropdown:GetSelectedValues()
+                local currentRank = tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Rank.Value)
+                    if containsValue(currentRank, selectedPortalRanks) then
+                        if getgenv().currentmode == "None" then
+                            wait(2)
+                            local args = {
+                                [1] = "General",
+                                [2] = "Maps",
+                                [3] = "Teleport",
+                                [4] = "Leveling City"
+                            }
+                            
+                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                            wait(2)                            
+                            joinportal()
+                        end
+                    end
+                end
+            end
+        end
+
+        coroutine.wrap(CheckPortalAndJoin)()
+    end)
+
+    local PortalLeave = Tabs.Portals:CreateToggle("Auto Leave Portals",{
+        Title = "Auto Leave Portals",
+        Description = "",
+        Default = false
+    })
+
+    PortalLeave:OnChanged(function(state)
+        getgenv().LeavePortal = state
+        local previousMode = getgenv().currentmode
+
+        local function trackCurrentMode()
+            while getgenv().LeavePortal do
+                local currentMode = getgenv().currentmode
+                
+
+                if currentMode ~= previousMode then
+                    print("Текущий режим изменился на:", currentMode) 
+                    if previousMode == "Portal"  then
+                        task.wait(2)
+                        teleportToSavedPosition()
+                    end
+                    previousMode = currentMode
+                end
+                
+                task.wait(1)
+            end
+        end
+
+        coroutine.wrap(trackCurrentMode)()
+    end)
+    local PortalEnemiesFolder = workspace.Server.Portal.Enemies
+    local function findNearestEnemyInPortal()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(PortalEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local distance = (rootPart.Position - enemy.Position).Magnitude
+    
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestEnemy = enemy
+                end
+            end
+        end
+    
+        return closestEnemy
+    end
+
+    local function findStrongestEnemyInPortal()
+        local strongestenemy = nil
+        local strong = 0
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(PortalEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp > strong then
+                    strong = hp
+                    strongestenemy = enemy
+                end
+            end
+        end
+    
+        return strongestenemy
+    end
+
+    local function findWeakestEnemyInPortal()
+        local weakestenemy = nil
+        local weak = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(PortalEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp < weak then
+                    weak = hp
+                    weakestenemy = enemy
+                end
+            end
+        end
+
+        return weakestenemy
+    end
+
+    local function teleportMeToNearestEnemyInPortal()
+
+    
+        local nearestEnemy = findNearestEnemyInPortal()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToStrongestEnemyInPortal()
+
+    
+        local nearestEnemy = findStrongestEnemyInPortal()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToWeakestEnemyInPortal()
+
+    
+        local nearestEnemy = findWeakestEnemyInPortal()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportPetsToNearestEnemyInPortal()
+
+    
+        local nearestEnemy = findNearestEnemyInPortal()
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getEquipedPets()
+            for i, v in pets do
+                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
+
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                    if petrootpart then
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+                end
+            end
+        end
+    end
+
+    local function sendPetsOnNearestEnemyInPortal()
+        local nearestEnemy = findNearestEnemyInPortal()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInPortal()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnStrongestEnemyInPortal()
+        local strongestenemy = findStrongestEnemyInPortal()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not strongestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInPortal()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = strongestenemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnWeakestEnemyInPortal()
+        local weakestenemy = findWeakestEnemyInPortal()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not weakestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInPortal()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = weakestenemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local AutoAttackInPortal = Tabs.Portals:CreateToggle("Auto Attack in Portal", {
+        Title = "Auto Attack Enemies In Portal",
+        Description = "Auto Attack Enemies In Portal with Selected Type of Farm",
+        Default = false
+    })
+
+    function TypeOfFarmInPortal:GetSelectedValue()
+        local selected = self.Value
+        return selected
+    end
+
+    AutoAttackInPortal:OnChanged(function(state)
+        getgenv().AutoAttackInPortal = state
+        while getgenv().AutoAttackInPortal do
+            task.wait()
+            for _, enemy in ipairs(PortalEnemiesFolder:GetChildren()) do
+                if enemy:IsA("Part") then
+                    -- Проверяем здоровье и состояние врага
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoAttackInPortal == true and getgenv().currentmode == "Portal" then
+                        local typeofFarm = TypeOfFarmInPortal:GetSelectedValue()
+                        if typeofFarm == "Strongest" then
+                            pcall(teleportMeToStrongestEnemyInPortal)
+                            pcall(sendPetsOnStrongestEnemyInPortal)
+                        elseif typeofFarm == "Weakest" then
+                            pcall(teleportMeToWeakestEnemyInPortal)
+                            pcall(sendPetsOnWeakestEnemyInPortal)
+                        elseif typeofFarm == "Nearest" then
+                            pcall(teleportMeToNearestEnemyInPortal)
+                            pcall(sendPetsOnNearestEnemyInPortal)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    
+
     local function delayedTeleport()
         task.wait(10)  -- Задержка в 10 секунд
         teleportToSavedPosition()  -- Вызов функции телепортации
