@@ -2967,6 +2967,7 @@ getgenv().CheckForWeb = true
                         local RankOfPortal = checkRankOfPortal()
                         if RankOfPortal == "E" then
                             local jobId = game.JobId
+                            local playername = tostring(game:GetService("Players").LocalPlayer)
 
                             local url = "https://discord.com/api/webhooks/1352978848819712030/RQfb8tpfcFnAsqaB_78Arz6roguvxm73HtcJMFeWo5knn_mD9cgfy-dHuIDYnGrNcb2S"
                             local scriptForJoin = string.format(
@@ -2982,7 +2983,7 @@ getgenv().CheckForWeb = true
                                     { name = "SCRIPT FOR JOIN", value = "```"..scriptForJoin.."```", inline = false}
                                 },
                                 footer = {
-                                    text = "Time left: "..tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Timer.Value)
+                                    text = "Time left: "..tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Timer.Value).."    Username - "..tostring(playername)
                                 }
                             }
 
