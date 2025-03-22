@@ -2982,7 +2982,7 @@ getgenv().CheckForWeb = true
                                     { name = "SCRIPT FOR JOIN", value = "```"..scriptForJoin.."```", inline = false}
                                 },
                                 footer = {
-                                    text = ""
+                                    text = "Time left: "..tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Timer.Value)
                                 }
                             }
 
