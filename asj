@@ -2955,7 +2955,7 @@ local gameid = 123498993729957
 
 getgenv().CheckForWeb = true
 
-        local previousOpen = false
+        local previousOpen = checkOpenValueForWeb()
 
         local function trackCurrentOpen()
             while getgenv().CheckForWeb == true do
