@@ -2900,6 +2900,106 @@ end)
 
 end
 
+do
+
+local function checkOpenValueForWeb()
+    local openvalue = game:GetService("ReplicatedStorage").Gamemodes.Portal.Open.Value
+
+    return openvalue
+end
+
+local function checkRankOfPortal()
+    local RankOfPortal = game:GetService("ReplicatedStorage").Gamemodes.Portal.Rank.Value
+    return RankOfPortal
+end
+
+local request = http_request or request or HttpPost or syn.request
+
+local function SendMessage(url, message, embed)
+    local http = game:GetService("HttpService")
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
+    
+    local data = {
+        ["content"] = message, -- Устанавливаем обычное сообщение
+        ["embeds"] = {} -- Инициализируем пустой массив для вложений
+    }
+    
+    -- Проверяем, если embed передан
+    if embed then
+        table.insert(data["embeds"], {
+            ["title"] = embed.title,
+            ["description"] = embed.description,
+            ["color"] = embed.color,
+            ["fields"] = embed.fields,
+            ["footer"] = {
+                ["text"] = embed.footer.text
+            }
+        })
+    end
+
+    local body = http:JSONEncode(data)
+    local response = request({
+        Url = url,
+        Method = "POST",
+        Headers = headers,
+        Body = body
+    })
+end
+
+-- Пример использования
+local TeleportService = game:GetService("TeleportService")
+local gameid = 123498993729957
+
+
+getgenv().CheckForWeb = true
+
+        local previousOpen = false
+
+        local function trackCurrentOpen()
+            while getgenv().CheckForWeb == true do
+                local sgg = game:GetService("ReplicatedStorage"):GetAttribute("VIP_ID")
+                if sgg == "" then
+                local currentOpen = checkOpenValueForWeb()
+                if currentOpen ~= previousOpen then
+                    if previousOpen == false  then
+                        local RankOfPortal = checkRankOfPortal()
+                        if RankOfPortal == "E" then
+                            local jobId = game.JobId
+
+                            local url = "https://discord.com/api/webhooks/1352978848819712030/RQfb8tpfcFnAsqaB_78Arz6roguvxm73HtcJMFeWo5knn_mD9cgfy-dHuIDYnGrNcb2S"
+                            local scriptForJoin = string.format(
+                                'game:GetService("TeleportService"):TeleportToPlaceInstance(%d, "%s", game:GetService("Players").LocalPlayer)',
+                                gameid,
+                                jobId
+                            )
+                            local embed = {
+                                title = "Portal spawned: ".."Rank - "..tostring(checkRankOfPortal()),
+                                description = "",
+                                color = 16711680, -- Красный цвет в десятичном формате
+                                fields = {
+                                    { name = "SCRIPT FOR JOIN", value = "```"..scriptForJoin.."```", inline = false}
+                                },
+                                footer = {
+                                    text = ""
+                                }
+                            }
+
+                            SendMessage(url, "@everyone", embed)
+                        end
+                    end
+                    previousOpen = currentOpen
+                end
+            end
+                
+                task.wait(1)
+            end
+        end
+
+        coroutine.wrap(trackCurrentOpen)()
+end
+
 
 SaveManager:SetLibrary(Library)
 InterfaceManager:SetLibrary(Library)
