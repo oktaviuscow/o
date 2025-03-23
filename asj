@@ -2965,7 +2965,7 @@ getgenv().CheckForWeb = true
                 if currentOpen ~= previousOpen then
                     if previousOpen == false  then
                         local RankOfPortal = checkRankOfPortal()
-                        if RankOfPortal == "C" then
+                        if RankOfPortal == "B" or RankOfPortal == "E" or RankOfPortal == "D" then
                             local jobId = game.JobId
                             local playername = tostring(game:GetService("Players").LocalPlayer)
 
