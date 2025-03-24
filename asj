@@ -1990,11 +1990,13 @@ end)
             local notifications = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Notifications
             local maingui = game:GetService("Players").LocalPlayer.PlayerGui.UI
             local egggui = game:GetService("Players").LocalPlayer.PlayerGui.Egg
-            if passivegui.Enabled == true or avatargui.Enabled == true or notifications.Visible == true or egggui.Enabled == true then
+            local talentgui = game:GetService("Players").LocalPlayer.PlayerGui.Talent
+            if passivegui.Enabled == true or avatargui.Enabled == true or notifications.Visible == true or egggui.Enabled == true or talentgui.Enabled == true then
                 egggui.Enabled = false
                 passivegui.Enabled = false
                 avatargui.Enabled = false
                 notifications.Visible = false
+                talentgui.Enabled = false
                 maingui.Enabled = true
             end
     end
