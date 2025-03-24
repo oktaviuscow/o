@@ -1592,13 +1592,58 @@ end)
     else
         Passivelist = {}
     end
+
+
+
+    local TalentList = {}
+    if require then
+    local function UpdateTalentsList()
+        local Talents = {}
+        local Players = game:GetService("Players")
+        local sigma = Players.LocalPlayer
+        local success, sigma2 = pcall(function()
+            return require(sigma.PlayerScripts.Shalom)
+        end)
+    
+        if not success then
+            return
+        end
+    
+        local TalentsData = sigma2.Shared.Talents
+    
+        if type(TalentsData) == "table" then
+            for talentname, d in pairs(TalentsData) do
+                table.insert(Talents, talentname)
+            end
+        end
+    
+        -- Сортируем Passives по алфавиту, ставя "Fairy" в самый верх
+        table.sort(Talents, function(a, b)
+            if a == "Avatar of Fortune" then
+                return true -- "Fairy" всегда выше
+            elseif b == "Avatar of Fortune" then
+                return false -- "Fairy" всегда выше
+            else
+                return a < b -- Сравниваем по алфавиту
+            end
+        end)
+    
+        return Talents
+    end
+
+    
+    TalentList = UpdateTalentsList()
+    else
+        TalentList = {}
+    end
+
     local function getExistingUnitIds()
         local petsFolder = game:GetService("Players").LocalPlayer:FindFirstChild("Pets")
         if petsFolder then
             local existingUnitIds = {}
             for _, child in pairs(petsFolder:GetChildren()) do
                 if child:IsA("Folder") then
-                    local stringfortable = tostring(child:GetAttribute("Name")) .. " | Passive: " .. tostring(child:GetAttribute("Passive")) .. " | Level: " .. tostring(child:GetAttribute("Level")) .. " | ID: " .. tostring(child.Name)
+                    local stringfortable = tostring(child:GetAttribute("Name")) .. " | Passive: " .. tostring(child:GetAttribute("Passive")) .. " | Talent: ".. tostring(child:GetAttribute("Talent")) .." | Level: " .. tostring(child:GetAttribute("Level")) .. " | ID: " .. tostring(child.Name)
                     table.insert(existingUnitIds, stringfortable) -- Добавляем имя папки (unitid) в список
                 end
             end
@@ -1610,12 +1655,13 @@ end)
     
     local petslist = getExistingUnitIds()
     local PassiveParagraph = Tabs.Rerolls:CreateParagraph("Current Passive", {
-        Title = "Current Passive: ",
+        Title = "Current Passive and Talent: ",
         Content = nil
     })
 
     local PetsDropdown = Tabs.Rerolls:CreateDropdown("Pets Dropdown", {Title = "Select Pet For Auto Reroll Passive", Description = "", Values = petslist, Multi = false, Default = ""})
     local PassivesDropdown = Tabs.Rerolls:CreateDropdown("Passives Dropdown", {Title = "Select Passive For Auto Reroll Passive", Description = "Allows Multi", Values = Passivelist, Multi = true, Default = {}})
+    local TalentsDropdown = Tabs.Rerolls:CreateDropdown("Talents Dropdown", {Title = "Select Talents For Auto Reroll Talent", Description = "Allows Multi", Values = TalentList, Multi = true, Default = {}})
     
     local function getselectedid()
         local selectedPet = PetsDropdown.Value
@@ -1665,13 +1711,29 @@ end)
         return selected
     end
 
-    local function checkpassiveofpet(pet)
+    function TalentsDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+
+    local function checkpet(pet, value)
         local petfolder = game:GetService("Players").LocalPlayer.Pets
         local currentpet = petfolder:FindFirstChild(pet)
         if currentpet then
             local currentpassive = tostring(currentpet:GetAttribute("Passive"))
-            PassiveParagraph:SetValue(currentpassive)
-            return currentpassive
+            local currenttalent = tostring(currentpet:GetAttribute("Talent"))
+            PassiveParagraph:SetValue(currentpassive.. "\n"..currenttalent)
+            if value == "Talent" then
+                return currenttalent
+            elseif value == "Passive" then
+                return currentpassive
+            end
 
         end
     end
@@ -1689,7 +1751,21 @@ end)
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
     end
 
+    local function rerollTalent(pet)
+        local args = {
+            [1] = "General",
+            [2] = "Talents",
+            [3] = "Open",
+            [4] = pet,
+            [5] = "Emerald"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        
+    end
+
     local AutoRerollPassive = Tabs.Rerolls:CreateToggle("Auto Reroll passive",{Title = "Auto Roll For Selected Passive", Description = "YOU MUST BE IN PASSIVE REROLL CIRCLE", Default = false})
+    local AutoRerollTalent = Tabs.Rerolls:CreateToggle("Auto Reroll talent",{Title = "Auto Roll For Selected Talent", Description = "YOU MUST BE IN TALENT REROLL CIRCLE", Default = false})
 
     AutoRerollPassive:OnChanged(function(state)
         getgenv().AutoRollPassive = state
@@ -1697,20 +1773,58 @@ end)
             task.wait()
             local selectedPetId = getselectedid()
             local selectedPassives = PassivesDropdown:GetSelectedValues()
-            if selectedPetId then
-                local currentpassive = checkpassiveofpet(selectedPetId)
-                if containsValue(currentpassive, selectedPassives) then
-                    AutoRerollPassive:SetValue(false)
-                    PetsDropdown:SetValue("")
-                    updatePetsDropdownAndSelect()
-                    getgenv().AutoRollPassive = false
-                else
-                    rerollPassive(selectedPetId)
+    
+            if #selectedPassives == 0 then
+                AutoRerollPassive:SetValue(false)
+                PetsDropdown:SetValue("")
+                updatePetsDropdownAndSelect()
+                getgenv().AutoRollPassive = false
+            else
+                if selectedPetId then
+                    local currentpassive = checkpet(selectedPetId, "Passive")
+                    if containsValue(currentpassive, selectedPassives) then
+                        AutoRerollPassive:SetValue(false)
+                        PetsDropdown:SetValue("")
+                        updatePetsDropdownAndSelect()
+                        getgenv().AutoRollPassive = false
+                    else
+                        rerollPassive(selectedPetId)
+                    end
+                end
+            end
+        end
+    end)
+
+    AutoRerollTalent:OnChanged(function(state)
+        getgenv().AutoRollTalent = state
+        while getgenv().AutoRollTalent do
+            task.wait()
+            local selectedPetId = getselectedid()
+            local selectedTalents = TalentsDropdown:GetSelectedValues()
+
+            if #selectedTalents == 0 then
+                AutoRerollTalent:SetValue(false)
+                PetsDropdown:SetValue("")
+                updatePetsDropdownAndSelect()
+                getgenv().AutoRollTalent = false
+            else
+                if selectedPetId then
+                    local currentTalent = checkpet(selectedPetId, "Talent")
+                    if containsValue(currentTalent, selectedTalents) then
+                        AutoRerollTalent:SetValue(false)
+                        PetsDropdown:SetValue("")
+                        updatePetsDropdownAndSelect()
+                        getgenv().AutoRollTalent = false
+                    else
+                        rerollTalent(selectedPetId)
+                    end
                 end
             end
         end
 
     end)
+
+
 
     local function getlistofavatars()
         local Players = game:GetService("Players")
