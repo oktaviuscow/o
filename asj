@@ -2787,7 +2787,7 @@ end)
                     previousMode = currentMode
                 end
                 
-                task.wait(1)
+                task.wait(5)
             end
         end
 
