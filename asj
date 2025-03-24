@@ -1728,7 +1728,7 @@ end)
         if currentpet then
             local currentpassive = tostring(currentpet:GetAttribute("Passive"))
             local currenttalent = tostring(currentpet:GetAttribute("Talent"))
-            PassiveParagraph:SetValue(currentpassive.. "\n"..currenttalent)
+            PassiveParagraph:SetValue("Passive: "..currentpassive.. "\n".."Talent: "..currenttalent)
             if value == "Talent" then
                 return currenttalent
             elseif value == "Passive" then
