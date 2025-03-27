@@ -1428,11 +1428,9 @@ end)
         writefile(TrialFarmPath, tostring(state))
             local function checkTime()
                 while getgenv().AutoTrial == true do
-                    local currentTime = os.date("*t")  -- Получаем текущее время
-                    local minutes = currentTime.min
-                    local seconds = currentTime.sec
-                    -- Проверяем, если минуты равны 0 или 30
-                    if (minutes == 0) and (seconds > 10) then
+                    local currentValueOfOpen = game:GetService("ReplicatedStorage").Gamemodes.Trial.Easy.Open.Value
+
+                    if currentValueOfOpen == true then
                         if getgenv().currentmode == "None" then
                         getgenv().StopFarmingTrial = false
                         wait(1)
@@ -1480,7 +1478,6 @@ end)
                         end
                     end
         
-                    -- Ждем 1 секунду перед следующей проверкой
                     wait(1)
                 end
             end
