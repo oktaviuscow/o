@@ -2687,6 +2687,31 @@ end)
             end
         end
     end)
+
+
+    local AutoReEquipTeamDropdown = Tabs.Teams:CreateDropdown("Auto Re Equip Teams Dropdown",{
+        Title = "Select Team for Auto Re Equip",
+        Description = "IT WILL RE EQUIP SELECTED TEAM EVERY 20 MINS",
+        Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+        Multi = false,
+        Default = ""
+    })
+
+    local AutoReEquipTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Re Equip Team",{
+        Title = "Equip Selected Team for Auto Re Equip",
+        Description = "IT WILL RE EQUIP SELECTED TEAM EVERY 20 MINS",
+        Default = false
+    })
+
+    AutoReEquipTeamEquip:OnChanged(function(state)
+        getgenv().AutoEquipReEquip = state
+        while getgenv().AutoEquipReEquip do
+            task.wait(10)
+                local selectedTeam = returnselectedteamPath(AutoReEquipTeamDropdown)
+                loadteam(selectedTeam)
+            task.wait(1200)
+        end
+    end)
     
     local PortalRanksDropdown = Tabs.Portals:CreateDropdown("Portal Ranks Dropdown", {
         Title = "Choose Ranks of Portals For Farming",
