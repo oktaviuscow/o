@@ -567,7 +567,9 @@ do
     
                 task.wait()
                 for i, v in ipairs(dropfolder:GetChildren()) do
-                    v.CFrame = rootPart.CFrame
+                    pcall(function()
+                        v.CFrame = rootPart.CFrame
+                    end)
                 end
         end
     end)
@@ -694,11 +696,13 @@ do
         local rootPart = findHumanoidRootPart()
             for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
                 if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
-                    local distance = (rootPart.Position - enemy.Position).Magnitude
-        
-                    if distance < closestDistance then
-                        closestDistance = distance
-                        closestEnemy = enemy
+                    if rootPart then
+                        local distance = (rootPart.Position - enemy.Position).Magnitude
+            
+                        if distance < closestDistance then
+                            closestDistance = distance
+                            closestEnemy = enemy
+                        end
                     end
                 end
             end
