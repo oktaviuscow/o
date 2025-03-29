@@ -793,22 +793,37 @@ do
     end
 
     local function teleportPetsToNearestEnemyWithoutContains()
-
-    
         local nearestEnemy = findNearestEnemyWithoutContains()
-
+    
         if nearestEnemy then
             local targetRootPart = nearestEnemy
             local pets = getEquipedPets()
-            for i, v in pets do
-                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
-
-                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+    
+            -- Проверяем, существует ли workspace.Client и workspace.Client.Pets
+            local petsFolder = workspace:FindFirstChild("Client") and workspace.Client:FindFirstChild("Pets")
+            if not petsFolder then
+                warn("Pets folder not found in workspace.Client")
+                return
+            end
+            
+            for i, petName in ipairs(pets) do
+                local pet = petsFolder:FindFirstChild(petName) -- Сначала ищем питомца
+                if pet then -- Проверяем, существует ли питомец
+                    local petrootpart = pet:FindFirstChild("HumanoidRootPart") -- Теперь ищем HumanoidRootPart
+    
+                    -- Проверяем, существует ли petrootpart
                     if petrootpart then
+                        local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                        
                         if distanceToPet > teleportRadiusForPet then
                             petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
                         end
+                    else
+                        warn("HumanoidRootPart not found for pet:", petName) -- Выводим предупреждение, если HumanoidRootPart не найден
                     end
+                else
+                    warn("Pet not found:", petName) -- Выводим предупреждение, если питомец не найден
+                end
             end
         end
     end
