@@ -2657,34 +2657,27 @@ end)
         end
     end)
 
-    local PortalTeamDropdown = Tabs.Teams:CreateDropdown("Portal Teams Dropdown",{
-        Title = "Select Portal Team for Equip",
-        Description = "",
+    local AutoReEquipTeamDropdown = Tabs.Teams:CreateDropdown("Auto Re Equip Teams Dropdown",{
+        Title = "Select Team for Auto Re Equip",
+        Description = "IT WILL RE EQUIP SELECTED TEAM EVERY 20 MINS",
         Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
         Multi = false,
         Default = ""
     })
 
-    local PortalTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Portal Team",{
-        Title = "Equip Selected Portal Team",
-        Description = "Auto Equipping selected Portal team",
+    local AutoReEquipTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Re Equip Team",{
+        Title = "Equip Selected Team for Auto Re Equip",
+        Description = "IT WILL RE EQUIP SELECTED TEAM EVERY 20 MINS",
         Default = false
     })
 
-    PortalTeamEquip:OnChanged(function(state)
-        getgenv().AutoEquipPortalTeam = state
-        while getgenv().AutoEquipPortalTeam do
-            task.wait()
-            if getgenv().currentmode == "Portal" then
-                task.wait(1)
-                local equippedIds = getEquipedPets()
-                local selectedTeam = returnselectedteamPath(PortalTeamDropdown)
-                local selectedTeamIds = getTeamIds(selectedTeam)
-                -- Проверяем, есть ли отсутствующие id
-                if isAnyIdMissing(equippedIds, selectedTeamIds) then
-                    loadteam(selectedTeam) -- Вызываем функцию, если есть отсутствующие id
-                end
-            end
+    AutoReEquipTeamEquip:OnChanged(function(state)
+        getgenv().AutoEquipReEquip = state
+        while getgenv().AutoEquipReEquip do
+            task.wait(10)
+                local selectedTeam = returnselectedteamPath(AutoReEquipTeamDropdown)
+                loadteam(selectedTeam)
+            task.wait(1200)
         end
     end)
     
@@ -3003,30 +2996,7 @@ end)
             end
         end
     end)
-
-     local AutoReEquipTeamDropdown = Tabs.Teams:CreateDropdown("Auto Re Equip Teams Dropdown",{
-         Title = "Select Team for Auto Re Equip",
-         Description = "IT WILL RE EQUIP SELECTED TEAM EVERY 20 MINS",
-         Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
-         Multi = false,
-         Default = ""
-     })
- 
-     local AutoReEquipTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Re Equip Team",{
-         Title = "Equip Selected Team for Auto Re Equip",
-         Description = "IT WILL RE EQUIP SELECTED TEAM EVERY 20 MINS",
-         Default = false
-     })
- 
-     AutoReEquipTeamEquip:OnChanged(function(state)
-         getgenv().AutoEquipReEquip = state
-         while getgenv().AutoEquipReEquip do
-             task.wait(10)
-                 local selectedTeam = returnselectedteamPath(AutoReEquipTeamDropdown)
-                 loadteam(selectedTeam)
-             task.wait(1200)
-         end
-     end)
+    
 
     --[[local function delayedTeleport()
         task.wait(10)  -- Задержка в 10 секунд
