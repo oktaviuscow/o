@@ -1512,7 +1512,27 @@ end)
                     if waveNumber and trialWaveLimit and waveNumber >= trialWaveLimit and not getgenv().StopFarmingTrial and getgenv().currentmode == "Trial_Easy" then
                         print("Достигнут лимит волн, телепортируем...")
                         getgenv().StopFarmingTrial = true
-                        wait(1)
+                        wait(3)
+                        local args = {
+                            [1] = "General",
+                            [2] = "Maps",
+                            [3] = "Teleport",
+                            [4] = "Lobby"
+                        }
+                
+                        -- Отправляем запрос на телепортацию
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        wait(2)
+                        local args = {
+                            [1] = "General",
+                            [2] = "Maps",
+                            [3] = "Teleport",
+                            [4] = "Lobby"
+                        }
+                
+                        -- Отправляем запрос на телепортацию
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        wait(3)
                         teleportToSavedPosition()
                     end
                 end
