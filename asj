@@ -716,16 +716,13 @@ do
 
     local function getEquipedPets()
         local EquipedPets = {}
-        local player = game:GetService("Players").LocalPlayer  -- Получаем локального игрока
+        local player = game:GetService("Players").LocalPlayer
     
         for _, value in ipairs(workspace.Server.Pets:GetChildren()) do
             local nickname = player.UserId
             if nickname then
                 if nickname == (game.Players.LocalPlayer.UserId) then
-                    -- Проверяем, существует ли объект Info
-                        local info = tonumber(value:GetAttribute("Player"))  -- Сохраняем ссылку на Info
-    
-                        -- Проверяем, существует ли объект Player внутри Info
+                        local info = tonumber(value:GetAttribute("Player"))
                         if info then
                             if info == tonumber(nickname) then
                                 table.insert(EquipedPets, value.Name)
@@ -752,7 +749,7 @@ do
             local targetRootPart = nearestEnemy
             local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
             if distanceToEnemy > teleportRadius then
-                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
             end
         end
     end
@@ -775,7 +772,7 @@ do
                     local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
                     if petrootpart then
                     if distanceToPet > teleportRadiusForPet then
-                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
                     end
                 end
             end
@@ -791,7 +788,7 @@ do
             local targetRootPart = nearestEnemy
             local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
             if distanceToEnemy > teleportRadius then
-                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
             end
         end
     end
@@ -803,7 +800,6 @@ do
             local targetRootPart = nearestEnemy
             local pets = getEquipedPets()
     
-            -- Проверяем, существует ли workspace.Client и workspace.Client.Pets
             local petsFolder = workspace:FindFirstChild("Client") and workspace.Client:FindFirstChild("Pets")
             if not petsFolder then
                 warn("Pets folder not found in workspace.Client")
@@ -811,22 +807,21 @@ do
             end
             
             for i, petName in ipairs(pets) do
-                local pet = petsFolder:FindFirstChild(petName) -- Сначала ищем питомца
-                if pet then -- Проверяем, существует ли питомец
-                    local petrootpart = pet:FindFirstChild("HumanoidRootPart") -- Теперь ищем HumanoidRootPart
+                local pet = petsFolder:FindFirstChild(petName)
+                if pet then
+                    local petrootpart = pet:FindFirstChild("HumanoidRootPart")
     
-                    -- Проверяем, существует ли petrootpart
                     if petrootpart then
                         local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
                         
                         if distanceToPet > teleportRadiusForPet then
-                            petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                            petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
                         end
                     else
-                        warn("HumanoidRootPart not found for pet:", petName) -- Выводим предупреждение, если HumanoidRootPart не найден
+                        warn("HumanoidRootPart not found for pet:", petName)
                     end
                 else
-                    warn("Pet not found:", petName) -- Выводим предупреждение, если питомец не найден
+                    warn("Pet not found:", petName)
                 end
             end
         end
@@ -860,14 +855,14 @@ do
         local nearestEnemy = findNearestEnemyWithoutContains()
         local EquipedPets = getEquipedPets()
     
-        if nearestEnemy then  -- Проверяем, что nearestEnemy существует
-            local info = nearestEnemy:FindFirstChild("Info")  -- Находим объект Info
+        if nearestEnemy then 
+            local info = nearestEnemy:FindFirstChild("Info")  
     
-            if info then  -- Проверяем, существует ли Info
+            if info then  
                 for i, v in EquipedPets do
                     local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
     
-                    if info:FindFirstChild("Pets") then  -- Проверяем, существует ли Pets
+                    if info:FindFirstChild("Pets") then 
                         if not info.Pets:FindFirstChild(rnpetcheck) then
                             teleportPetsToNearestEnemyWithoutContains()
                             local args = {
@@ -911,11 +906,10 @@ do
                     getgenv().Busy = false
                 end
             end
-            -- Проверяем состояние врагов в каждом цикле
 
                 for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
                     if enemy:IsA("Part") and containsValue(enemy.Name, Values) then
-                        -- Проверяем здоровье и состояние врага
+
                         if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true and getgenv().Busy == false and getgenv().currentmode == "None" then
                             if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
                                 teleportMeToNearestEnemyWithContains()
@@ -942,7 +936,6 @@ do
             end
                 for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
                     if enemy:IsA("Part") then
-                        -- Проверяем здоровье и состояние врага
                         if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false and getgenv().currentmode == "None" then
                             sendPetsOnNearestEnemy()
                             if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
@@ -2814,26 +2807,31 @@ end)
             while getgenv().PortalJoin == true do
                 task.wait(5)
                 local openValueForPortal = game:GetService("ReplicatedStorage").Gamemodes.Portal.Open.Value
-                local timerofPortal = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Card.Timer.Value)
-                if openValueForPortal == true and timerofPortal < 60 then
+                local timerofPortal = math.huge
+                if openValueForPortal == true then
                 local selectedPortalRanks = PortalRanksDropdown:GetSelectedValues()
                 local currentRank = tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Rank.Value)
-                    if containsValue(currentRank, selectedPortalRanks) then
-                        if getgenv().currentmode == "None" then
-                            wait(2)
-                            local args = {
-                                [1] = "General",
-                                [2] = "Maps",
-                                [3] = "Teleport",
-                                [4] = "Leveling City"
-                            }
-                            
-                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
-                            wait(2)                            
-                            joinportal()
+                wait(5)
+                timerofPortal = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Card.Timer.Value)
+                    if timerofPortal < 60 then
+                        if containsValue(currentRank, selectedPortalRanks) then
+                            if getgenv().currentmode == "None" then
+                                wait(2)
+                                local args = {
+                                    [1] = "General",
+                                    [2] = "Maps",
+                                    [3] = "Teleport",
+                                    [4] = "Leveling City"
+                                }
+                                
+                                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                                wait(2)                            
+                                joinportal()
+                            end
                         end
                     end
                 end
+                timerofPortal = math.huge
             end
         end
 
@@ -3086,8 +3084,8 @@ end)
     
 
     --[[local function delayedTeleport()
-        task.wait(10)  -- Задержка в 10 секунд
-        teleportToSavedPosition()  -- Вызов функции телепортации
+        task.wait(10)
+        teleportToSavedPosition()
     end
     coroutine.wrap(delayedTeleport)()]]
 
