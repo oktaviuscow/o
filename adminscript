@@ -3140,6 +3140,7 @@ spawnteamtab()
             end
             if numberofult == 7 then
                 print("CANCELING ULT")
+                UnequipAllPets()
                 task.wait()
                 equipbest()
             end
