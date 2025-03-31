@@ -1,0 +1,3305 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+local MarketplaceService = game:GetService("MarketplaceService")
+local gamename = MarketplaceService:GetProductInfo(game.PlaceId).Name
+
+
+local Window = Library:CreateWindow({
+    Title = "Apel Hub",
+    SubTitle = tostring(gamename),
+    TabWidth = 160,
+    Size = UDim2.fromOffset(600, 400),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Resize = true, -- Resize this ^ Size according to a 1920x1080 screen, good for mobile users but may look weird on some devices
+    MinSize = Vector2.new(250, 250),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+
+local Tabs = {
+    Credits = Window:CreateTab({Title = "Credits", Icon = "book"}),
+    Farm = Window:CreateTab({ Title = "Farming", Icon = "align-center" }),
+    Gamemodes = Window:CreateTab({Title = "Card Gamemode", Icon = "credit-card"}),
+    Trials = Window:CreateTab({Title = "Trial", Icon = "apple"}),
+    Portals = Window:CreateTab({Title = "Portals", Icon = "globe"}),
+    Eggs = Window:CreateTab({Title = "Eggs", Icon = "egg"}),
+    AutoBuy = Window:CreateTab({Title = "Auto Buy", Icon = "shopping-cart"}),
+    Rerolls = Window:CreateTab({Title = "Auto Rolls", Icon = "refresh-ccw"}),
+    Teams = Window:CreateTab({Title = "Teams", Icon = "users"}),
+    Misc = Window:CreateTab({Title = " Misc", Icon = "diamond"}),
+    Settings = Window:CreateTab({ Title = "Settings", Icon = "settings" }),
+    ADMINUSE = Window:CreateTab({Title = "ADMIN", Icon = ""}),
+
+}
+
+Tabs.Credits:CreateParagraph("Aligned Paragraph", {
+    Title = "Discord",
+    Content = "https://discord.gg/4gDAbj2VXG\n Dev - Apelsinka",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Center
+})
+
+Tabs.Credits:CreateButton({
+    Title = "Copy Discord link",
+    Description = "Click it",
+    TitleAlignment = "Middle",
+    ContentAlignment = Enum.TextXAlignment.Center,
+    Callback = function()
+        local link = "https://discord.gg/4gDAbj2VXG"
+        setclipboard(link)
+    end
+})
+
+
+local Options = Library.Options
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character
+    local bb=game:service'VirtualUser'
+    game:service'Players'.LocalPlayer.Idled:connect(function()
+    bb:CaptureController()bb:ClickButton2(Vector2.new())end)
+
+
+local folderName = "Apel Hub"
+local PositionfileName = "Saved Position.txt"
+local WorldfileName = "Saved World.txt"    
+local PositionfolderPath = folderName .. "\\" .. PositionfileName
+local WorldfolderPath = folderName .. "\\" .. WorldfileName
+local RarityfileName = "Saved Rarities.txt"
+local RarityfolderPath = folderName .. "\\" .. RarityfileName
+local EnabledOrDisabledName = "Saved EnabledOrDisabled.txt"
+local EnabledOrDisabledfolderPath = folderName .. "\\" .. EnabledOrDisabledName
+local TrialFarmFileName = "trialjoin.txt"
+local TrialFarmPath = folderName .. "\\" .. TrialFarmFileName
+-- Проверяем, существует ли папка
+if not isfolder(folderName) then
+    makefolder(folderName)  -- Создаем папку, если она не существует
+    print("Папка '" .. folderName .. "' была создана.")
+else
+    print("Папка '" .. folderName .. "' уже существует.")
+end
+
+-- Проверяем, существует ли файл
+if not isfile(PositionfolderPath) or not isfile(WorldfolderPath) or not isfile(RarityfolderPath) or not isfile(EnabledOrDisabledfolderPath) then
+    local positionforsave = "139.8529052734375, 377.14923095703125, 3295.7548828125"
+    local worldforsave = "Piece Village"
+    if not isfile(PositionfolderPath) then
+    writefile(PositionfolderPath, tostring(positionforsave))
+    end
+    if not isfile(WorldfolderPath) then
+    writefile(WorldfolderPath, worldforsave)
+    end
+    if not isfile(RarityfolderPath) then
+    writefile(RarityfolderPath, "")
+    end
+    if not isfile(EnabledOrDisabledfolderPath) then
+        writefile(EnabledOrDisabledfolderPath, "false")
+    end
+    if not isfile(TrialFarmPath) then
+        writefile(TrialFarmPath, "false")
+    end
+    print("Файл '" .. PositionfileName.."and"..WorldfileName .. "' был создан и записан.")
+else
+    print("Файл '" .. PositionfileName.."and"..WorldfileName .. "' был создан и записан.")
+end
+
+local TeamsFolder = folderName.."\\Anime Spirits Journey".."\\Teams"
+
+    if not isfolder(TeamsFolder) then
+        makefolder(TeamsFolder)  -- Создаем папку, если она не существует
+        print("Папка '" .. TeamsFolder .. "' была создана.")
+    else
+        print("Папка '" .. TeamsFolder .. "' уже существует.")
+    end
+local Team1 = "Team 1.txt"
+local Team2 = "Team 2.txt"
+local Team3 = "Team 3.txt"
+local Team4 = "Team 4.txt"
+local Team5 = "Team 5.txt"
+local Team1Path = TeamsFolder .. "\\" .. Team1
+local Team2Path = TeamsFolder .. "\\" .. Team2
+local Team3Path = TeamsFolder .. "\\" .. Team3
+local Team4Path = TeamsFolder .. "\\" .. Team4
+local Team5Path = TeamsFolder .. "\\" .. Team5
+if not isfile(Team1Path) or not isfile(Team2Path) or not isfile(Team3Path) or not isfile(Team4Path) or not isfile(Team5Path) then
+    if not isfile(Team1Path) then
+    writefile(Team1Path, "")
+    end
+    if not isfile(Team2Path) then
+    writefile(Team2Path, "")
+    end
+    if not isfile(Team3Path) then
+    writefile(Team3Path, "")
+    end
+    if not isfile(Team4Path) then
+    writefile(Team4Path, "")
+    end
+    if not isfile(Team5Path) then
+    writefile(Team5Path, "")
+    end
+end
+local sigma = Players.LocalPlayer
+
+-- Функция для получения существующих unitid из petsFolder
+local function getExistingUnitIds2(petsFolder)
+    local existingUnitIds2 = {}
+    for _, child in pairs(petsFolder:GetChildren()) do
+        if child:IsA("Folder") then
+            table.insert(existingUnitIds2, child.Name) -- Добавляем имя папки (unitid) в список
+        end
+    end
+    return existingUnitIds2
+end
+
+-- Функция для обновления petsFolder
+local function updatePetsFolder()
+    local success, sigma2 = pcall(function()
+        return require(sigma.PlayerScripts.Shalom)
+    end)
+
+    if not success then
+        return
+    end
+
+    -- Создаем папку Pets в LocalPlayer, если она еще не существует
+    local petsFolder = sigma:FindFirstChild("Pets")
+    if not petsFolder then
+        petsFolder = Instance.new("Folder")
+        petsFolder.Name = "Pets"
+        petsFolder.Parent = sigma
+    end
+
+    -- Получаем существующие unitid
+    local existingUnitIds2 = getExistingUnitIds2(petsFolder)
+
+    -- Получаем таблицу питомцев напрямую
+    local petsData = sigma2.Data.Pets
+    if type(petsData) == "table" then
+        for unitid, d in pairs(petsData) do
+            -- Проверяем, существует ли папка с таким именем
+            local petFolder = petsFolder:FindFirstChild(tostring(unitid))
+            if not petFolder then
+                -- Если папка не существует, создаем её
+                petFolder = Instance.new("Folder")
+                petFolder.Name = tostring(unitid) -- Устанавливаем имя папки как unitid
+                petFolder.Parent = petsFolder -- Добавляем папку в Pets
+            end
+
+            -- Устанавливаем атрибуты
+            for nameofstat, valueofstat in pairs(d) do
+                if typeof(valueofstat) ~= "table" then
+                    local currentValue = petFolder:GetAttribute(nameofstat)
+                    if currentValue == nil or currentValue ~= valueofstat then
+                        petFolder:SetAttribute(nameofstat, valueofstat) -- Устанавливаем атрибут
+                    end
+                end
+            end
+        end
+    end
+
+    -- Удаляем папки питомцев, которые не соответствуют существующим unitid
+    local currentUnitIds = {} -- Создаем новую таблицу для текущих unitid
+    for unitid in pairs(petsData) do
+        table.insert(currentUnitIds, tostring(unitid)) -- Добавляем текущие unitid
+    end
+
+    for _, child in pairs(petsFolder:GetChildren()) do
+        if child:IsA("Folder") and not table.find(currentUnitIds, child.Name) then
+            child:Destroy() -- Удаляем папку
+        end
+    end
+end
+
+-- Запускаем корутину для постоянного обновления
+coroutine.wrap(function()
+    while true do
+        updatePetsFolder() -- Обновляем petsFolder
+        task.wait() -- Ждем 5 секунд перед следующим обновлением
+    end
+end)()
+
+-- Функция для получения существующих unitid из petsFolder
+local function getExistingCardsIds(cardsFolder)
+    local existingCardsIds = {}
+    for _, child in pairs(cardsFolder:GetChildren()) do
+        if child:IsA("Folder") then
+            table.insert(existingCardsIds, child.Name) -- Добавляем имя папки (cardid) в список
+        end
+    end
+    return existingCardsIds
+end
+
+-- Функция для обновления cardsFolder
+local function updateCardsFolder()
+    local success, sigma2 = pcall(function()
+        return require(sigma.PlayerScripts.Shalom)
+    end)
+
+    if not success then
+        return
+    end
+
+    -- Создаем папку Cards в LocalPlayer, если она еще не существует
+    local cardsFolder = sigma:FindFirstChild("Cards")
+    if not cardsFolder then
+        cardsFolder = Instance.new("Folder")
+        cardsFolder.Name = "Cards"
+        cardsFolder.Parent = sigma
+    end
+
+    -- Получаем существующие cardid
+    local existingCardsIds = {}
+
+    -- Получаем таблицу карт напрямую
+    local cardsData = sigma2.Data.Inventory.Cards
+    if type(cardsData) == "table" then
+        for cardid, d in pairs(cardsData) do
+            -- Проверяем, существует ли папка с таким именем
+            local cardFolder = cardsFolder:FindFirstChild(tostring(cardid))
+            if not cardFolder then
+                -- Если папка не существует, создаем её
+                cardFolder = Instance.new("Folder")
+                cardFolder.Name = tostring(cardid) -- Устанавливаем имя папки как cardid
+                cardFolder.Parent = cardsFolder -- Добавляем папку в Cards
+            end
+
+            -- Устанавливаем атрибуты
+            for name, valueofstat in pairs(d) do
+                local currentValue = cardFolder:GetAttribute(name)
+                if currentValue == nil or currentValue ~= valueofstat then
+                    cardFolder:SetAttribute(name, valueofstat) -- Устанавливаем атрибут
+                end
+            end
+
+            -- Добавляем cardid в существующие
+            if not table.find(existingCardsIds, tostring(cardid)) then
+                table.insert(existingCardsIds, tostring(cardid))
+            end
+        end
+    end
+    
+    -- Удаляем папки карт, которые не соответствуют существующим cardid
+    for _, child in pairs(cardsFolder:GetChildren()) do
+        if child:IsA("Folder") and not table.find(existingCardsIds, child.Name) then
+            child:Destroy() -- Удаляем папку
+        end
+    end
+end
+
+-- Запускаем корутину для постоянного обновления
+coroutine.wrap(function()
+    while true do
+        updateCardsFolder() -- Обновляем cardsFolder
+        task.wait() -- Ждем 5 секунд перед следующим обновлением
+    end
+end)()
+
+-- Функция для обновления cardsFolder
+--[[local function updateEquippedFolder()
+    local success, sigma2 = pcall(function()
+        return require(sigma.PlayerScripts.Shalom)
+    end)
+
+    if not success then
+        return
+    end
+
+    -- Создаем папку Cards в LocalPlayer, если она еще не существует
+    local equippedfodler = sigma:FindFirstChild("Equipped")
+    if not equippedfodler then
+        equippedfodler = Instance.new("Folder")
+        equippedfodler.Name = "Equipped"
+        equippedfodler.Parent = sigma
+    end
+
+    -- Получаем существующие cardid
+    local EquippedPets = {}
+
+    -- Получаем таблицу карт напрямую
+    local EquippedPetsData = sigma2.Data["Pets_Equipped"]
+    if type(EquippedPetsData) == "table" then
+        for petid, d in pairs(EquippedPetsData) do
+            -- Проверяем, существует ли папка с таким именем
+            local equippedpetFolder = equippedfodler:FindFirstChild(tostring(petid))
+            if not equippedpetFolder then
+                -- Если папка не существует, создаем её
+                equippedpetFolder = Instance.new("Folder")
+                equippedpetFolder.Name = tostring(petid) -- Устанавливаем имя папки как petidcardid
+                equippedpetFolder.Parent = equippedfodler -- Добавляем папку в Cards
+            end
+
+            -- Добавляем cardid в существующие
+            if not table.find(EquippedPets, tostring(petid)) then
+                table.insert(EquippedPets, tostring(petid))
+            end
+        end
+    end
+    
+    -- Удаляем папки карт, которые не соответствуют существующим cardid
+    for _, child in pairs(equippedfodler:GetChildren()) do
+        if child:IsA("Folder") and not table.find(EquippedPets, child.Name) then
+            child:Destroy() -- Удаляем папку
+        end
+    end
+end
+
+-- Запускаем корутину для постоянного обновления
+coroutine.wrap(function()
+    while true do
+        updateEquippedFolder() -- Обновляем cardsFolder
+        task.wait() -- Ждем 5 секунд перед следующим обновлением
+    end
+end)()]]
+
+    local ShalomPath = player.PlayerScripts.Shalom
+    local function getExistingAvatars(AvatarsFolder)
+        local existingAvatars = {}
+        for _, child in pairs(AvatarsFolder:GetChildren()) do
+            if child:IsA("Folder") then
+                table.insert(existingAvatars, child.Name) -- Добавляем имя папки (AvatarName) в список
+            end
+        end
+        return existingAvatars
+    end
+
+    local function updateAvatarsFolder()
+        local success, Shalom = pcall(function()
+            return require(ShalomPath)
+        end)
+    
+        if not success then
+            return
+        end
+
+        local Avatars = Shalom.Data.Inventory.Avatars
+        
+        local AvatarsFolder = player:FindFirstChild("Avatars")
+        if not AvatarsFolder then
+            AvatarsFolder = Instance.new("Folder")
+            AvatarsFolder.Name = "Avatars"
+            AvatarsFolder.Parent = player
+        end
+        local ExistingAvatars = getExistingAvatars(AvatarsFolder)
+
+        if type(Avatars) == "table" then
+            for AvatarName, d in pairs(Avatars) do
+                -- Проверяем, существует ли папка с таким именем
+                local AvatarFolder = AvatarsFolder:FindFirstChild(tostring(AvatarName))
+                if not AvatarFolder then
+                    -- Если папка не существует, создаем её
+                    AvatarFolder = Instance.new("Folder")
+                    AvatarFolder.Name = tostring(AvatarName) -- Устанавливаем имя папки как unitid
+                    AvatarFolder.Parent = AvatarsFolder -- Добавляем папку в Pets
+                end
+    
+                table.insert(ExistingAvatars, AvatarName)
+    
+            end
+        end
+
+        for _, child in pairs(AvatarsFolder:GetChildren()) do
+            if child:IsA("Folder") and not table.find(ExistingAvatars, child.Name) then
+                child:Destroy() -- Удаляем папку
+            end
+        end
+
+    end
+
+    coroutine.wrap(function()
+        while true do
+            updateAvatarsFolder() -- Обновляем petsFolder
+            task.wait() -- Ждем 5 секунд перед следующим обновлением
+        end
+    end)()
+
+    local ShalomPath = player.PlayerScripts.Shalom
+    local function getExistingStock(StockFolder)
+        local existingStock = {}
+        for _, child in pairs(StockFolder:GetChildren()) do
+            if child:IsA("Folder") then
+                table.insert(existingStock, child.Name) -- Добавляем имя папки (AvatarName) в список
+            end
+        end
+        return existingStock
+    end
+
+    local function updateStockFolder()
+        local success, Shalom = pcall(function()
+            return require(ShalomPath)
+        end)
+    
+        if not success then
+            return
+        end
+    
+        local Stock = Shalom.Data.Merchant.List
+    
+        local StockFolder = player:FindFirstChild("Stock")
+        if not StockFolder then
+            StockFolder = Instance.new("Folder")
+            StockFolder.Name = "Stock"
+            StockFolder.Parent = player
+        end
+        local ExistingStock = getExistingStock(StockFolder)
+    
+        if type(Stock) == "table" then
+            for StockName, NumberOfStock in pairs(Stock) do
+                -- Проверяем, существует ли папка с таким именем
+                local CheckStockFolder = StockFolder:FindFirstChild(tostring(StockName))
+                if not CheckStockFolder then
+                    -- Если папка не существует, создаем её
+                    CheckStockFolder = Instance.new("Folder")
+                    CheckStockFolder.Name = tostring(StockName) -- Устанавливаем имя папки как unitid
+                    CheckStockFolder.Parent = StockFolder -- Добавляем папку в Stock
+                end
+    
+                table.insert(ExistingStock, StockName)
+    
+                -- Заменяем пробелы на символы подчеркивания для атрибута
+                local safeAttributeName = StockName:gsub(" ", "_")
+    
+                local currentValue = CheckStockFolder:GetAttribute(safeAttributeName)
+                if currentValue == nil or currentValue ~= NumberOfStock then
+                    CheckStockFolder:SetAttribute("Amount", NumberOfStock) -- Устанавливаем атрибут
+                end
+            end
+        end
+    
+        for _, child in pairs(StockFolder:GetChildren()) do
+            if child:IsA("Folder") and not table.find(ExistingStock, child.Name) then
+                child:Destroy() -- Удаляем папку
+            end
+        end
+    end
+
+    coroutine.wrap(function()
+        while true do
+            updateStockFolder() -- Обновляем petsFolder
+            task.wait() -- Ждем 5 секунд перед следующим обновлением
+        end
+    end)()
+
+    local function checkgamemode()
+        local player = game:GetService("Players").LocalPlayer
+        local atr = player:GetAttribute("Mode")
+        if atr == "Trial_Easy" then
+            if  getgenv().StopFarmingCards == false then
+                getgenv().StopFarmingCards = true
+            end
+            getgenv().StopFarmingTrial = false
+            getgenv().currentmode = atr
+        elseif  atr == "Cards" then
+            getgenv().StopFarmingCards = false
+            if getgenv().StopFarmingTrial == false then
+                getgenv().StopFarmingTrial = true
+            end
+            getgenv().currentmode = atr
+        elseif atr == "Portal" then
+            if  getgenv().StopFarmingCards == false then
+                getgenv().StopFarmingCards = true
+            end
+            if getgenv().StopFarmingTrial == false then
+                getgenv().StopFarmingTrial = true
+            end
+            getgenv().currentmode = atr
+        elseif not atr then
+            getgenv().StopFarmingCards = true
+            getgenv().StopFarmingTrial = true
+            getgenv().currentmode = "None"
+        end
+    end
+    
+    coroutine.wrap(function()
+        while true do
+            checkgamemode() -- Обновляем petsFolder
+            task.wait() -- Ждем 5 секунд перед следующим обновлением
+        end
+    end)()
+
+do
+
+    local AutoClick = Tabs.Misc:CreateToggle("Auto Click", {Title = "Auto Click", Default = false, Description = ""})
+
+    AutoClick:OnChanged(function(State)-- Auto Click
+        getgenv().AutoClicking = State
+        while getgenv().AutoClicking == true do
+            if not getgenv().AutoClicking == true then return end
+                task.wait(0.01)
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer("Enemies", "World", "Click")
+        end
+    end)
+
+
+    local AutoCollect = Tabs.Misc:CreateToggle("Auto Collect", {Title = "Auto Collect Drops", Default = false, Description = "Teleporting Drops to  you"})
+    local AutoCollectBypassed = Tabs.Misc:CreateToggle("Auto Collect Bypassed", {Title = "Auto Collect Bypassed (DONT WORK IN TRIAL)", Default = false, Description = "Collecting Drops without teleport (Maybe fix memory leak and freezing)"})
+    local dropfolder = game:GetService("Workspace").Client.Drops
+
+    local function findHumanoidRootPart()
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                return rootPart
+            end
+        end
+    end
+
+    local function collectid(id)
+        local args = {
+            [1] = "General",
+            [2] = "Drops",
+            [3] = "Collect",
+            [4] = id
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        
+    end
+
+    AutoCollect:OnChanged(function(State) -- Auto Collect Drops
+        getgenv().AutoCollecting =  State
+        while getgenv().AutoCollecting == true do
+            if not getgenv().AutoCollecting == true then return end
+                local rootPart = findHumanoidRootPart()
+    
+                task.wait()
+                for i, v in ipairs(dropfolder:GetChildren()) do
+                    pcall(function()
+                        v.CFrame = rootPart.CFrame
+                    end)
+                end
+        end
+    end)
+
+    AutoCollectBypassed:OnChanged(function(State) -- Auto Collect Drops Bypassed
+        getgenv().AutoCollectingBypassed =  State
+        while getgenv().AutoCollectingBypassed == true do
+            if not getgenv().AutoCollectingBypassed == true then return end
+                task.wait()
+                for i, v in ipairs(dropfolder:GetChildren()) do
+                    if getgenv().StopFarmingTrial == true then
+                    collectid(tostring(v.Name))
+                    end
+                end
+        end
+    end)
+
+    local EnemiesFolder = workspace.Client.Enemies
+    local ServerEnemiesFolder = workspace.Server.Enemies
+    local Enemies = {}
+    local nameSet = {}
+
+    if EnemiesFolder then
+        for _, enemy in ipairs(EnemiesFolder:GetChildren()) do
+            local enemyname = enemy.Name
+            if enemyname and not nameSet[enemyname] then
+                table.insert(Enemies, enemyname)
+                nameSet[enemyname] = true
+            end
+        end
+    end
+    
+    local EnemyDropdown = Tabs.Farm:CreateDropdown("Enemy", {Title = "Enemy Selector", Description = "Select enemy for farm", Values = Enemies, Multi = true, Default = {}})
+
+    local CurrentEnemy = {}
+    EnemyDropdown:OnChanged(function(Value)
+        for Value, State in next, Value do
+            table.insert(CurrentEnemy, Value)
+        end
+    end)
+
+    function EnemyDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    local function RefreshEnemyDropdownWithNewEnemies()
+        local newEnemies = {}
+        local nameSet = {}
+        if EnemiesFolder then
+            for _, enemy in ipairs(EnemiesFolder:GetChildren()) do
+                local enemyname = enemy.Name
+                if enemyname and not nameSet[enemyname] then
+                    table.insert(newEnemies, enemyname)
+                    nameSet[enemyname] = true
+                end
+            end
+        end
+        EnemyDropdown:SetValues(newEnemies)
+    end
+    local AutoFarmSelectedMobs = Tabs.Farm:CreateToggle("Auto Farm Selected Mobs", {Title = "Auto Farm Selected Mobs", Default = false, Description = ""})
+
+    local AutoFarmWithTeleport = Tabs.Farm:CreateToggle("Auto Farm With Teleport", {Title = "Auto Farm With Teleport", Default = false, Description = ""})
+
+    AutoFarmWithTeleport:OnChanged(function(state)
+        getgenv().AutoFarmWithTeleport = state
+    end)
+
+    Tabs.Farm:CreateButton({
+        Title = "Refresh Enemies",
+        Description = "Update Enemies Dropdown with your current enemies on map",
+        Callback = function()
+            RefreshEnemyDropdownWithNewEnemies()
+        end
+    })
+
+    local function containsValue(value, table)
+        for _, v in ipairs(table) do
+            if v == value then
+                return true
+            end
+        end
+        return false
+    end
+
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+
+    
+    
+    local teleportRadius = 10
+    local teleportRadiusForPet = 20
+    
+
+    local function findNearestEnemy(selectedEnemies)
+        local closestEnemy = nil
+        local closestDistance = math.huge
+        local rootPart = findHumanoidRootPart()
+
+
+            for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
+                if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                    local distance = (rootPart.Position - enemy.Position).Magnitude
+        
+                    if containsValue(enemy.Name, selectedEnemies) and distance < closestDistance then
+                        closestDistance = distance
+                        closestEnemy = enemy
+                    end
+                end
+            end
+
+    
+        return closestEnemy
+    end
+
+    local function findNearestEnemyWithoutContains()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+        local rootPart = findHumanoidRootPart()
+            for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
+                if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                    if rootPart then
+                        local distance = (rootPart.Position - enemy.Position).Magnitude
+            
+                        if distance < closestDistance then
+                            closestDistance = distance
+                            closestEnemy = enemy
+                        end
+                    end
+                end
+            end
+
+    
+        return closestEnemy
+    end
+    
+    
+
+
+    local function getEquipedPets()
+        local EquipedPets = {}
+        local player = game:GetService("Players").LocalPlayer
+    
+        for _, value in ipairs(workspace.Server.Pets:GetChildren()) do
+            local nickname = player.UserId
+            if nickname then
+                if nickname == (game.Players.LocalPlayer.UserId) then
+                        local info = tonumber(value:GetAttribute("Player"))
+                        if info then
+                            if info == tonumber(nickname) then
+                                table.insert(EquipedPets, value.Name)
+                            end
+                        else
+                            print("Player не найден в Info.")
+                        end
+                end
+            end
+        end
+        return EquipedPets
+    end
+
+
+    local function teleportMeToNearestEnemyWithContains()
+        local selectedEnemies = {}
+        for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+            table.insert(selectedEnemies, value)
+        end
+        local rootPart = findHumanoidRootPart()
+        local nearestEnemy = findNearestEnemy(selectedEnemies)
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
+            end
+        end
+    end
+
+
+
+    local function teleportPetsToNearestEnemyWithContains()
+        local selectedEnemies = {}
+        for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+            table.insert(selectedEnemies, value)
+        end
+    
+        local nearestEnemy = findNearestEnemy(selectedEnemies)
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getEquipedPets()
+            for i, v in pets do
+                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                    if petrootpart then
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
+                    end
+                end
+            end
+        end
+    end
+
+    local function teleportMeToNearestEnemyWithoutContains()
+
+    
+        local nearestEnemy = findNearestEnemyWithoutContains()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
+            end
+        end
+    end
+
+    local function teleportPetsToNearestEnemyWithoutContains()
+        local nearestEnemy = findNearestEnemyWithoutContains()
+    
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getEquipedPets()
+    
+            local petsFolder = workspace:FindFirstChild("Client") and workspace.Client:FindFirstChild("Pets")
+            if not petsFolder then
+                warn("Pets folder not found in workspace.Client")
+                return
+            end
+            
+            for i, petName in ipairs(pets) do
+                local pet = petsFolder:FindFirstChild(petName)
+                if pet then
+                    local petrootpart = pet:FindFirstChild("HumanoidRootPart")
+    
+                    if petrootpart then
+                        local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                        
+                        if distanceToPet > teleportRadiusForPet then
+                            petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
+                        end
+                    else
+                        warn("HumanoidRootPart not found for pet:", petName)
+                    end
+                else
+                    warn("Pet not found:", petName)
+                end
+            end
+        end
+    end
+
+    local function sendPetsOnEnemy()
+        local selectedEnemies = {}
+        for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+            table.insert(selectedEnemies, value)
+        end
+        local nearestEnemy = findNearestEnemy(selectedEnemies)
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+                teleportPetsToNearestEnemyWithContains()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnNearestEnemy()
+        local nearestEnemy = findNearestEnemyWithoutContains()
+        local EquipedPets = getEquipedPets()
+    
+        if nearestEnemy then 
+            local info = nearestEnemy:FindFirstChild("Info")  
+    
+            if info then  
+                for i, v in EquipedPets do
+                    local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+    
+                    if info:FindFirstChild("Pets") then 
+                        if not info.Pets:FindFirstChild(rnpetcheck) then
+                            teleportPetsToNearestEnemyWithoutContains()
+                            local args = {
+                                [1] = "General",
+                                [2] = "Pets",
+                                [3] = "Attack",
+                                [4] = v,
+                                [5] = nearestEnemy
+                            }
+    
+                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+
+                        end
+                    else
+                        print("Pets не найдены в Info.")
+                    end
+                end
+            else
+                print("Info не найден у ближайшего врага.")
+            end
+        else
+            print("Ближайший враг не найден.")
+        end
+    end
+
+
+    getgenv().Busy = nil
+    AutoFarmSelectedMobs:OnChanged(function(state)
+        getgenv().AutoFarm = state
+    
+        while getgenv().AutoFarm do
+            task.wait()
+            local Values = {}
+            for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+                table.insert(Values, value)
+            end
+            for i, v in ipairs(workspace.Client.Maps:GetChildren()) do
+                if v.Name == "Lobby" then
+                    getgenv().Busy = true
+                else
+                    getgenv().Busy = false
+                end
+            end
+
+                for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
+                    if enemy:IsA("Part") and containsValue(enemy.Name, Values) then
+
+                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarm == true and getgenv().Busy == false and getgenv().currentmode == "None" then
+                            if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
+                                teleportMeToNearestEnemyWithContains()
+                            end
+                            sendPetsOnEnemy()
+                        end
+                    end
+                end
+
+        end
+    end)
+    
+    local AutoFarmNearest = Tabs.Farm:CreateToggle("Auto Farm Nearest", {Title = "Auto Farm Nearest", Default = false, Description = ""})
+    AutoFarmNearest:OnChanged(function(state)
+        getgenv().AutoFarmNearest = state
+        while getgenv().AutoFarmNearest do
+            task.wait()
+            for i, v in ipairs(workspace.Client.Maps:GetChildren()) do
+                if v.Name == "Lobby" then
+                    getgenv().Busy = true
+                else
+                    getgenv().Busy = false
+                end
+            end
+                for _, enemy in ipairs(ServerEnemiesFolder:GetDescendants()) do
+                    if enemy:IsA("Part") then
+                        if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoFarmNearest == true and getgenv().Busy == false and getgenv().currentmode == "None" then
+                            sendPetsOnNearestEnemy()
+                            if getgenv().AutoFarmWithTeleport == true and getgenv().Busy == false then
+                                teleportMeToNearestEnemyWithoutContains()
+                            end
+                            wait(0.1)
+
+                        end
+                    end
+                end
+        end
+        
+    end)
+
+
+    local eggfolder = workspace.Server.Eggs
+    local egglist = {}
+    local eggset = {}
+    if eggfolder then
+        for _, egg in ipairs(eggfolder:GetChildren()) do
+            local eggname = egg.Name
+            if eggname and not eggset[eggname] then
+                table.insert(egglist, eggname)
+                eggset[eggname] = true
+            end
+        end
+    end
+
+    local currenteggforfarm = nil
+    local EggsDropDown = Tabs.Eggs:CreateDropdown("Eggs", {Title = "Select Egg For Auto Open", Description = "", Values = egglist, Multi = false, Default = 1,})
+    EggsDropDown:OnChanged(function(Value)
+        currenteggforfarm = Value
+        print(currenteggforfarm)
+    end)
+
+    local AutoOpenEggs = Tabs.Eggs:CreateToggle("Auto Open Eggs", {Title = "Auto Open Selected Egg", Default = false, Description = ""})
+
+    AutoOpenEggs:OnChanged(function(state)
+        getgenv().AutoOpenEggs = state
+        while getgenv().AutoOpenEggs do
+            task.wait(0.01)
+
+            local args = {
+                [1] = "General",
+                [2] = "Eggs",
+                [3] = "Multi",
+                [4] = currenteggforfarm,
+                [5] = "Yen"
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+            
+        end
+    end)
+    local function loadRarities()
+        if isfile(RarityfolderPath) then
+            local savedRaritiesString = readfile(RarityfolderPath)
+            local savedRarities = {} -- Создаем таблицу для сохраненных рарностей
+            for rarity in string.gmatch(savedRaritiesString, "([^,]+)") do
+                table.insert(savedRarities, rarity:match("^%s*(.-)%s*$")) -- Убираем пробелы
+            end
+            return savedRarities -- Возвращаем таблицу сохраненных рарностей
+        else
+            print("Файл рарностей не найден.")
+            return {}
+        end
+    end
+    
+    -- Функция для обновления файла с рарностями
+    local function updateRaritiesFile(selectedValues)
+        local currentRarities = loadRarities() -- Загружаем текущие рарности из файла
+    
+        -- Создаем таблицу для обновленных рарностей
+        local updatedRarities = {}
+    
+        -- Добавляем новые рарности
+        for _, rarity in pairs(selectedValues) do
+            if not table.find(currentRarities, rarity) then
+                table.insert(updatedRarities, rarity) -- Добавляем новую рарность
+            end
+        end
+    
+        -- Добавляем существующие рарности
+        for _, rarity in pairs(currentRarities) do
+            if table.find(selectedValues, rarity) then
+                table.insert(updatedRarities, rarity) -- Сохраняем рарность, если она все еще выбрана
+            end
+        end
+    
+        -- Записываем обновленный список в файл
+        local raritiesString = table.concat(updatedRarities, ", ")
+        writefile(RarityfolderPath, raritiesString) -- Записываем строку в файл
+    end
+    
+    local function loadSavedStateForAutoSell()
+        local savedstate = readfile(EnabledOrDisabledfolderPath)
+        if savedstate:lower() == "true" then
+            return true
+        elseif savedstate:lower() == "false" then
+            return false
+        else
+            error("Содержимое файла не является логическим значением (true/false).")
+        end
+    end
+    -- Загружаем ранее сохраненные рарности при старте
+    local savedRarities = loadRarities()
+    local savedstateforautosell = loadSavedStateForAutoSell()
+
+    local AutoSellDropDown = Tabs.Eggs:CreateDropdown("Auto Sell Eggs Dropdown", {Title = "Select Rarity for Auto Sell", Description = "", Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythical"}, Multi = true, Default = savedRarities })
+    
+    local AutoSell = Tabs.Eggs:CreateToggle("Auto Sell Normal Pets", {Title = "Auto sell Selected Rarities", Default = savedstateforautosell, Description = ""})
+
+    function AutoSellDropDown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    
+    AutoSellDropDown:OnChanged(function()
+        local selectedrnrarities = {}
+        for _, value in ipairs(AutoSellDropDown:GetSelectedValues()) do
+            table.insert(selectedrnrarities, value)
+        end
+        updateRaritiesFile(selectedrnrarities) -- Обновляем файл с рарностями
+    end)
+
+    local function enableautosell(rarity)
+        local args = {
+            [1] = "General",
+            [2] = "Eggs",
+            [3] = "AutoSell",
+            [4] = rarity
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+    
+    local function enableautosellshiny(rarity)
+        local args = {
+            [1] = "General",
+            [2] = "Eggs",
+            [3] = "AutoSell",
+            [4] = rarity .. "_Shiny"
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+
+    getgenv().AutoSellShiny = false
+    local AutoSellShiny = Tabs.Eggs:CreateToggle("Auto Sell Shiny Pets", {Title = "Auto sell Shiny", Default = false, Description = "Works only with enabled Auto Sell"})
+
+    AutoSellShiny:OnChanged(function(state)
+        getgenv().AutoSellShiny = state
+    end)
+
+
+    local function containsValueRarity(value, list)
+    for _, v in ipairs(list) do
+        if v == value then
+            return true
+        end
+    end
+    return false
+end
+AutoSell:OnChanged(function(state)
+    getgenv().AutoSell = state
+    writefile(EnabledOrDisabledfolderPath, tostring(state)) -- Сохраняем текущее состояние в файл
+    while getgenv().AutoSell do
+        task.wait(0.15) -- Задержка для предотвращения перегрузки
+        local RaritiesFolder = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Gacha.Frame.Pages.Sell.List.List
+        if RaritiesFolder then
+            local Values = {} -- Создаем таблицу для хранения выбранных значений
+            for _, value in ipairs(AutoSellDropDown:GetSelectedValues()) do
+                table.insert(Values, value) -- Заполняем таблицу выбранными значениями
+            end
+
+            for _, rarity in ipairs(RaritiesFolder:GetChildren()) do
+                if rarity:IsA("Frame") then
+                    -- Проверяем, содержится ли rarity в значениях AutoSellDropDown
+                    local isSelected = containsValueRarity(rarity.Name, Values)
+                    local currenton = rarity:FindFirstChild("On")
+                    local currentoff = rarity:FindFirstChild("Off")
+                    local currentshinyon = rarity:FindFirstChild("ShinyOn")
+                    local currentshinyoff = rarity:FindFirstChild("ShinyOff")
+                    -- Проверяем состояние перед включением авто-продажи
+                    if isSelected then
+                        -- Если авто-продажа была выключена вручную, включаем её обратно
+                        if currenton and not currenton.Visible and currentoff and currentoff.Visible then
+                                enableautosell(tostring(rarity.Name))
+                            end
+
+                        -- Проверяем состояние для авто-продажи shiny
+                        if getgenv().AutoSellShiny then
+                            if currentshinyon and not currentshinyon.Visible and currentshinyoff and currentshinyoff.Visible then
+                                    enableautosellshiny(tostring(rarity.Name))
+                                end
+                            end
+                        end
+                    end
+                end
+        else
+            print("Rarities Folder не найден")
+        end
+    end
+end)
+
+    local savedWolrdString = readfile(WorldfolderPath)
+    getgenv().SavedWorld = tostring(savedWolrdString)
+        -- Чтение сохраненной позиции из файла
+    local savedPositionString = readfile(PositionfolderPath)
+    local positionValues = {}
+
+    -- Разделяем строку на отдельные координаты
+    for value in string.gmatch(savedPositionString, "[^,]+") do
+        table.insert(positionValues, tonumber(value))
+    end
+
+    -- Проверяем, что у нас есть три координаты
+    if #positionValues == 3 then
+        -- Создаем CFrame из координат
+        getgenv().SavedPosition = CFrame.new(positionValues[1], positionValues[2], positionValues[3])
+        print("Сохраненная позиция установлена:", getgenv().SavedPosition)
+    else
+        warn("Ошибка: неверное количество координат в файле.")
+    end
+
+    local currentPositionParagraph = Tabs.Trials:CreateParagraph("Current pos paragraph", {
+        Title = "Current Position",
+        Content = "World: "..savedWolrdString.."\nPosition: "..savedPositionString
+    })
+    
+    local function updatePositionAndMap()
+        -- Получаем текущее сохраненное состояние мира
+        for _, v in ipairs(workspace.Client.Maps:GetChildren()) do
+            getgenv().SavedWorld = v.Name
+            writefile(WorldfolderPath, v.Name)
+        end
+    
+        -- Получаем новую позицию
+        local HumanoidRootPart = findHumanoidRootPart()
+        getgenv().SavedPosition = CFrame.new(HumanoidRootPart.Position)
+        writefile(PositionfolderPath, tostring(getgenv().SavedPosition.x)..","..tostring(getgenv().SavedPosition.y)..","..tostring(getgenv().SavedPosition.z))
+        -- Обновляем содержимое параграфа
+        currentPositionParagraph:SetValue("World: " .. tostring(getgenv().SavedWorld) .. "\nPosition: " .. tostring(getgenv().SavedPosition))
+    end
+    
+    Tabs.Trials:CreateButton({
+        Title = "Save New Position",
+        Description = "Change your position for auto teleport",
+        Callback = function()
+            -- Вызываем функцию обновления позиции и карты
+            updatePositionAndMap()
+        end
+    })
+    
+    local function teleportToSavedPosition()
+        if getgenv().SavedPosition and getgenv().SavedWorld then
+            local args = {
+                [1] = "General",
+                [2] = "Maps",
+                [3] = "Teleport",
+                [4] = getgenv().SavedWorld
+            }
+    
+            -- Отправляем запрос на телепортацию
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+            wait(2)
+    
+            local HumanoidRootPart = findHumanoidRootPart()
+            -- Телепортируем персонажа на сохраненную позицию
+            HumanoidRootPart.CFrame = getgenv().SavedPosition
+        else
+            warn("Saved world or position is not set.")
+        end
+    end
+
+    Tabs.Trials:CreateButton({
+        Title = "Teleport To Saved Position",
+        Description = "",
+        Callback = function()
+            -- Вызываем функцию обновления позиции и карты
+            teleportToSavedPosition()
+        end
+    })
+    
+
+    getgenv().TrialWaveLimit = 0
+    local TrialWaveLimit = Tabs.Trials:CreateInput("TrialWaveLimit", {
+        Title = "Trial Wave Limit",
+        Default = 0, 
+        Description = "On this wave script will auto leave",
+        Numeric = true,
+        Finished = false,
+        Callback = function(Value)
+            getgenv().TrialWaveLimit = tonumber(Value)
+        end
+    })
+    TrialWaveLimit:OnChanged(function(Value)
+        getgenv().TrialWaveLimit = tonumber(Value)
+    end)
+    local function loadSavedStateForAutoJoin()
+        local savedstate = readfile(TrialFarmPath)
+        if savedstate:lower() == "true" then
+            return true
+        elseif savedstate:lower() == "false" then
+            return false
+        else
+            error("Содержимое файла не является логическим значением (true/false).")
+        end
+    end
+    local savedstateforautojoin  = loadSavedStateForAutoJoin
+    local AutoJoinTrial = Tabs.Trials:CreateToggle("Auto Join And Leave Trial",{
+        Title = "Auto Join And Leave Trial",
+        Default = savedstateforautojoin,
+        Description = ""
+    })
+
+    local TrialEnemiesFolder = workspace.Server.Trial.Enemies.Easy
+
+    local function findNearestEnemyInTrial()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(TrialEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local distance = (rootPart.Position - enemy.Position).Magnitude
+    
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestEnemy = enemy
+                end
+            end
+        end
+    
+        return closestEnemy
+    end
+
+    local function findStrongestEnemyInTrial()
+        local strongestenemy = nil
+        local strong = 0
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(TrialEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp > strong then
+                    strong = hp
+                    strongestenemy = enemy
+                end
+            end
+        end
+    
+        return strongestenemy
+    end
+
+    local function findWeakestEnemyInTrial()
+        local weakestenemy = nil
+        local weak = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(TrialEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp < weak then
+                    weak = hp
+                    weakestenemy = enemy
+                end
+            end
+        end
+
+        return weakestenemy
+    end
+
+    local function teleportMeToNearestEnemyInTrial()
+
+    
+        local nearestEnemy = findNearestEnemyInTrial()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToStrongestEnemyInTrial()
+
+    
+        local nearestEnemy = findStrongestEnemyInTrial()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToWeakestEnemyInTrial()
+
+    
+        local nearestEnemy = findWeakestEnemyInTrial()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportPetsToNearestEnemyInTrial()
+
+    
+        local nearestEnemy = findNearestEnemyInTrial()
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getEquipedPets()
+            for i, v in pets do
+                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
+
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                    if petrootpart then
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+                end
+            end
+        end
+    end
+
+    local function sendPetsOnNearestEnemyInTrial()
+        local nearestEnemy = findNearestEnemyInTrial()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInTrial()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnStrongestEnemyInTrial()
+        local strongestenemy = findStrongestEnemyInTrial()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not strongestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInTrial()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = strongestenemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnWeakestEnemyInTrial()
+        local weakestenemy = findWeakestEnemyInTrial()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not weakestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInTrial()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = weakestenemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    AutoJoinTrial:OnChanged(function(state)
+        getgenv().AutoTrial = state
+        writefile(TrialFarmPath, tostring(state))
+            local function checkTime()
+                while getgenv().AutoTrial == true do
+                    local currentValueOfOpen = game:GetService("ReplicatedStorage").Gamemodes.Trial.Easy.Open.Value
+
+                    if currentValueOfOpen == true then
+                        if getgenv().currentmode == "None" then
+                        getgenv().StopFarmingTrial = false
+                        wait(1)
+                        local mapsf = workspace.Client.Maps
+                        for i ,v in ipairs(mapsf:GetChildren()) do
+                            if v.Name ~= "Lobby" then
+                                wait(1)
+                                local args = {
+                                    [1] = "General",
+                                    [2] = "Maps",
+                                    [3] = "Teleport",
+                                    [4] = "Lobby"
+                                }
+                        
+                                -- Отправляем запрос на телепортацию
+                                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                                wait(2)
+                                local args = {
+                                    [1] = "General",
+                                    [2] = "Maps",
+                                    [3] = "Teleport",
+                                    [4] = "Lobby"
+                                }
+                        
+                                -- Отправляем запрос на телепортацию
+                                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                            end
+                        end
+                        wait(2)
+                        local args = {
+                            [1] = "Enemies",
+                            [2] = "Trial_Easy",
+                            [3] = "Join"
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        wait(1)
+                        local args = {
+                            [1] = "Enemies",
+                            [2] = "Trial_Easy",
+                            [3] = "Join"
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        end
+                    end
+        
+                    wait(1)
+                end
+            end
+
+            coroutine.wrap(checkTime)()
+            
+            local function checkcurrentwave()
+                while getgenv().AutoTrial do
+                    task.wait(10)
+                    local waveText = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Trial.Frame.Frame.Content.Frame.Wave.Wave.Text
+                    local waveNumber = tonumber(string.match(waveText, "%d+"))
+                    local trialWaveLimit = tonumber(getgenv().TrialWaveLimit)
+                    if waveNumber and trialWaveLimit and waveNumber >= trialWaveLimit and not getgenv().StopFarmingTrial and getgenv().currentmode == "Trial_Easy" then
+                        print("Достигнут лимит волн, телепортируем...")
+                        getgenv().StopFarmingTrial = true
+                        wait(3)
+                        local args = {
+                            [1] = "General",
+                            [2] = "Maps",
+                            [3] = "Teleport",
+                            [4] = "Lobby"
+                        }
+                
+                        -- Отправляем запрос на телепортацию
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        wait(2)
+                        local args = {
+                            [1] = "General",
+                            [2] = "Maps",
+                            [3] = "Teleport",
+                            [4] = "Lobby"
+                        }
+                
+                        -- Отправляем запрос на телепортацию
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        wait(3)
+                        teleportToSavedPosition()
+                    end
+                end
+            end
+            
+            -- Запускаем корутину
+            coroutine.wrap(checkcurrentwave)()
+
+    end)
+
+    local TypeOfFarmInTrial = Tabs.Trials:CreateDropdown("Type of Auto Attack In Trial", {
+        Title = "Select Type of Auto Attack",
+        Values = {"Strongest", "Weakest", "Nearest"},
+        Multi = false,
+        Default = "Nearest",
+    })
+    local AutoAttackInTrial = Tabs.Trials:CreateToggle("Auto Attack in Trial", {
+        Title = "Auto Attack Enemies In Trial",
+        Description = "Auto Attack Enemies In Trial with Selected Type of Farm",
+        Default = false
+    })
+
+    function TypeOfFarmInTrial:GetSelectedValue()
+        local selected = self.Value
+        return selected
+    end
+
+    AutoAttackInTrial:OnChanged(function(state)
+        getgenv().AutoAttackInTrial = state
+        while getgenv().AutoAttackInTrial do
+            task.wait()
+            for _, enemy in ipairs(TrialEnemiesFolder:GetChildren()) do
+                if enemy:IsA("Part") then
+                    -- Проверяем здоровье и состояние врага
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoAttackInTrial == true and getgenv().StopFarmingTrial == false then
+                        local typeofFarm = TypeOfFarmInTrial:GetSelectedValue()
+                        if typeofFarm == "Strongest" then
+                            pcall(teleportMeToStrongestEnemyInTrial)
+                            pcall(sendPetsOnStrongestEnemyInTrial)
+                        elseif typeofFarm == "Weakest" then
+                            pcall(teleportMeToWeakestEnemyInTrial)
+                            pcall(sendPetsOnWeakestEnemyInTrial)
+                        elseif typeofFarm == "Nearest" then
+                            pcall(teleportMeToNearestEnemyInTrial)
+                            pcall(sendPetsOnNearestEnemyInTrial)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+
+
+
+    local Passivelist = {}
+    if require then
+    local function UpdatePassivesList()
+        local Passives = {}
+        local Players = game:GetService("Players")
+        local sigma = Players.LocalPlayer
+        local success, sigma2 = pcall(function()
+            return require(sigma.PlayerScripts.Shalom)
+        end)
+    
+        if not success then
+            return
+        end
+    
+        local passivesData = sigma2.Shared.Passives
+    
+        if type(passivesData) == "table" then
+            for passivename, d in pairs(passivesData) do
+                table.insert(Passives, passivename)
+            end
+        end
+    
+        -- Сортируем Passives по алфавиту, ставя "Fairy" в самый верх
+        table.sort(Passives, function(a, b)
+            if a == "Fairy" then
+                return true -- "Fairy" всегда выше
+            elseif b == "Fairy" then
+                return false -- "Fairy" всегда выше
+            else
+                return a < b -- Сравниваем по алфавиту
+            end
+        end)
+    
+        return Passives
+    end
+
+    
+    Passivelist = UpdatePassivesList()
+    else
+        Passivelist = {}
+    end
+
+
+
+    local TalentList = {}
+    if require then
+    local function UpdateTalentsList()
+        local Talents = {}
+        local Players = game:GetService("Players")
+        local sigma = Players.LocalPlayer
+        local success, sigma2 = pcall(function()
+            return require(sigma.PlayerScripts.Shalom)
+        end)
+    
+        if not success then
+            return
+        end
+    
+        local TalentsData = sigma2.Shared.Talents
+    
+        if type(TalentsData) == "table" then
+            for talentname, d in pairs(TalentsData) do
+                table.insert(Talents, talentname)
+            end
+        end
+    
+        -- Сортируем Passives по алфавиту, ставя "Fairy" в самый верх
+        table.sort(Talents, function(a, b)
+            if a == "Avatar of Fortune" then
+                return true -- "Fairy" всегда выше
+            elseif b == "Avatar of Fortune" then
+                return false -- "Fairy" всегда выше
+            else
+                return a < b -- Сравниваем по алфавиту
+            end
+        end)
+    
+        return Talents
+    end
+
+    
+    TalentList = UpdateTalentsList()
+    else
+        TalentList = {}
+    end
+
+    local function getExistingUnitIds()
+        local petsFolder = game:GetService("Players").LocalPlayer:FindFirstChild("Pets")
+        if petsFolder then
+            local existingUnitIds = {}
+            for _, child in pairs(petsFolder:GetChildren()) do
+                if child:IsA("Folder") then
+                    local stringfortable = tostring(child:GetAttribute("Name")) .. " | Passive: " .. tostring(child:GetAttribute("Passive")) .. " | Talent: ".. tostring(child:GetAttribute("Talent")) .." | Level: " .. tostring(child:GetAttribute("Level")) .. " | ID: " .. tostring(child.Name)
+                    table.insert(existingUnitIds, stringfortable) -- Добавляем имя папки (unitid) в список
+                end
+            end
+            return existingUnitIds
+        end
+    end
+
+    
+    
+    local petslist = getExistingUnitIds()
+    local PassiveParagraph = Tabs.Rerolls:CreateParagraph("Current Passive", {
+        Title = "Current Passive and Talent: ",
+        Content = nil
+    })
+
+    local PetsDropdown = Tabs.Rerolls:CreateDropdown("Pets Dropdown", {Title = "Select Pet For Auto Reroll Passive", Description = "", Values = petslist, Multi = false, Default = ""})
+    local PassivesDropdown = Tabs.Rerolls:CreateDropdown("Passives Dropdown", {Title = "Select Passive For Auto Reroll Passive", Description = "Allows Multi", Values = Passivelist, Multi = true, Default = {}})
+    local TalentsDropdown = Tabs.Rerolls:CreateDropdown("Talents Dropdown", {Title = "Select Talents For Auto Reroll Talent", Description = "Allows Multi", Values = TalentList, Multi = true, Default = {}})
+    
+    local function getselectedid()
+        local selectedPet = PetsDropdown.Value
+        if selectedPet and type(selectedPet) ~= "table" then
+            -- Извлекаем ID из выбранного питомца
+            local idStart = selectedPet:find("ID: ") -- Находим начало ID
+            if idStart then
+                local id = selectedPet:sub(idStart + 4) -- Извлекаем ID
+                return id
+            end
+        end
+        return nil -- Если ничего не выбрано или ID не найден
+    end
+    
+    local function updatePetsDropdownAndSelect()
+        local selectedId = getselectedid()
+        local newpetlist = getExistingUnitIds()
+        PetsDropdown:SetValues(newpetlist) -- Устанавливаем новые значения в выпадающий список
+    
+        -- Получаем ID выбранного питомца
+        if selectedId then
+            -- Ищем питомца с соответствующим ID в новом списке
+            for _, pet in pairs(newpetlist) do
+                if pet:find("ID: " .. selectedId) then
+                    PetsDropdown:SetValue(pet) -- Устанавливаем выбранный питомец
+                    break -- Выходим из цикла, если нашли
+                end
+            end
+        end
+    end
+    
+    local RefreshPets = Tabs.Rerolls:CreateButton({
+        Title = "Refresh Pets",
+        Description = "",
+        Callback = function()
+            updatePetsDropdownAndSelect() -- Обновляем и выбираем питомца
+        end
+    })
+
+    function PassivesDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    function TalentsDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+
+    local function checkpet(pet, value)
+        local petfolder = game:GetService("Players").LocalPlayer.Pets
+        local currentpet = petfolder:FindFirstChild(pet)
+        if currentpet then
+            local currentpassive = tostring(currentpet:GetAttribute("Passive"))
+            local currenttalent = tostring(currentpet:GetAttribute("Talent"))
+            PassiveParagraph:SetValue("Passive: "..currentpassive.. "\n".."Talent: "..currenttalent)
+            if value == "Talent" then
+                return currenttalent
+            elseif value == "Passive" then
+                return currentpassive
+            end
+
+        end
+    end
+
+    local function rerollPassive(pet)
+        local args = {
+            [1] = "General",
+            [2] = "Passives",
+            [3] = "Open",
+            [4] = pet,
+            [5] = "Ruby",
+            [6] = {}
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+
+    local function rerollTalent(pet)
+        local args = {
+            [1] = "General",
+            [2] = "Talents",
+            [3] = "Open",
+            [4] = pet,
+            [5] = "Emerald"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        
+    end
+
+    local AutoRerollPassive = Tabs.Rerolls:CreateToggle("Auto Reroll passive",{Title = "Auto Roll For Selected Passive", Description = "YOU MUST BE IN PASSIVE REROLL CIRCLE", Default = false})
+    local AutoRerollTalent = Tabs.Rerolls:CreateToggle("Auto Reroll talent",{Title = "Auto Roll For Selected Talent", Description = "YOU MUST BE IN TALENT REROLL CIRCLE", Default = false})
+
+    AutoRerollPassive:OnChanged(function(state)
+        getgenv().AutoRollPassive = state
+        while getgenv().AutoRollPassive do
+            task.wait()
+            local selectedPetId = getselectedid()
+            local selectedPassives = PassivesDropdown:GetSelectedValues()
+    
+            if #selectedPassives == 0 then
+                AutoRerollPassive:SetValue(false)
+                PetsDropdown:SetValue("")
+                updatePetsDropdownAndSelect()
+                getgenv().AutoRollPassive = false
+            else
+                if selectedPetId then
+                    local currentpassive = checkpet(selectedPetId, "Passive")
+                    if containsValue(currentpassive, selectedPassives) then
+                        AutoRerollPassive:SetValue(false)
+                        PetsDropdown:SetValue("")
+                        updatePetsDropdownAndSelect()
+                        getgenv().AutoRollPassive = false
+                    else
+                        rerollPassive(selectedPetId)
+                    end
+                end
+            end
+        end
+    end)
+
+    AutoRerollTalent:OnChanged(function(state)
+        getgenv().AutoRollTalent = state
+        while getgenv().AutoRollTalent do
+            task.wait()
+            local selectedPetId = getselectedid()
+            local selectedTalents = TalentsDropdown:GetSelectedValues()
+
+            if #selectedTalents == 0 then
+                AutoRerollTalent:SetValue(false)
+                PetsDropdown:SetValue("")
+                updatePetsDropdownAndSelect()
+                getgenv().AutoRollTalent = false
+            else
+                if selectedPetId then
+                    local currentTalent = checkpet(selectedPetId, "Talent")
+                    if containsValue(currentTalent, selectedTalents) then
+                        AutoRerollTalent:SetValue(false)
+                        PetsDropdown:SetValue("")
+                        updatePetsDropdownAndSelect()
+                        getgenv().AutoRollTalent = false
+                    else
+                        rerollTalent(selectedPetId)
+                    end
+                end
+            end
+        end
+
+    end)
+
+
+
+    local function getlistofavatars()
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+        local Shalom = require(player.PlayerScripts.Shalom)
+        local Avatars = {}
+            local ListOfAvatars = Shalom.Shared.Avatars
+        
+            if type(ListOfAvatars) == "table" then
+                for i,v in pairs(ListOfAvatars) do
+                    if tostring(i) ~= "Hawk" then
+                        table.insert(Avatars, i)
+                    end
+                end
+            end
+
+            table.sort(Avatars)
+        return Avatars
+    end
+    local AvatarsList = getlistofavatars()
+
+    local AvatarsDropdown = Tabs.Rerolls:CreateDropdown("Avatars Dropdown", {Title = "Select Avatars For Auto Reroll", Description = "Allows Multi", Values = AvatarsList , Multi = true, Default = {}})
+    local AutoRerollAvatar = Tabs.Rerolls:CreateToggle("Auto Reroll Avatars",{Title = "Auto Roll For Selected Avatars", Description = "", Default = false})
+
+    function AvatarsDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    local function rerollAvatar()
+        local args = {
+            [1] = "General",
+            [2] = "Avatars",
+            [3] = "Open",
+            [4] = "Sapphire"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+    local function containsValueTable(selectedAvatars, currentAvatarslist)
+        -- Проверяем, являются ли входные данные таблицами
+        if type(selectedAvatars) ~= "table" then
+            warn("Ошибка: selectedAvatars не является таблицей. Получено: " .. type(selectedAvatars))
+            return false -- Если selectedAvatars не таблица, возвращаем false
+        end
+    
+        if type(currentAvatarslist) ~= "table" then
+            warn("Ошибка: currentAvatarslist не является таблицей. Получено: " .. type(currentAvatarslist))
+            return false -- Если currentAvatarslist не таблица, возвращаем false
+        end
+    
+        for _, selected in ipairs(selectedAvatars) do
+            for _, current in ipairs(currentAvatarslist) do
+                if selected == current then
+                    return true -- Если найдено совпадение, возвращаем true
+                end
+            end
+        end
+        return false -- Если совпадений не найдено, возвращаем false
+    end
+    
+    AutoRerollAvatar:OnChanged(function(state)
+        getgenv().AutoRerollAvatar = state
+        while getgenv().AutoRerollAvatar do
+            task.wait()
+            local selectedAvatars = AvatarsDropdown:GetSelectedValues()
+            if selectedAvatars then
+                local AvatarsFolder = player:FindFirstChild("Avatars")
+                local currentAvatarslist = getExistingAvatars(AvatarsFolder)
+    
+                local foundAvatar = false -- Флаг для отслеживания, найден ли аватар
+    
+                -- Проверяем, есть ли хотя бы один выбранный аватар в текущем списке
+                if containsValueTable(selectedAvatars, currentAvatarslist) then
+                    AutoRerollAvatar:SetValue(false)
+                    AvatarsDropdown:SetValue({})
+                    getgenv().AutoRerollAvatar = false
+                    foundAvatar = true -- Устанавливаем флаг, если аватар найден
+                    break -- Выходим из цикла, если нашли
+                end
+    
+                -- Если ни один аватар не найден, вызываем rerollAvatar
+                if not foundAvatar and getgenv().AutoRerollAvatar then
+                    rerollAvatar()
+                end
+            end
+        end
+    end)
+
+    Tabs.AutoBuy:CreateParagraph("Aligned Paragraph", {
+        Title = "Attention!",
+        Content = "You must buy at least 1 of each item in merchant to use this feature!\n(If you buy ruby - ruby will appear in the list after script re-execute)",
+        TitleAlignment = "Middle",
+        ContentAlignment = Enum.TextXAlignment.Center
+    })
+
+    local StockFolder = player:FindFirstChild("Stock")
+    local AvailableStock = getExistingStock(StockFolder)
+    local StockDropdown = Tabs.AutoBuy:CreateDropdown("Stock Dropdown", {Title = "Select Item For Auto Buy From Merchant", Description = "Allows Multi", Values = AvailableStock , Multi = true, Default = {}})
+
+    local AutoBuyStock = Tabs.AutoBuy:CreateToggle("Auto Buy Stock", {Title= "Auto Buy Selected From Merchant", Description = "Auto Buy Stock", Default = false})
+
+    local function buystock(nameofstock)
+        local args = {
+            [1] = "General",
+            [2] = "Merchant",
+            [3] = "Buy",
+            [4] = nameofstock,
+            [5] = 1,
+            [6] = "Trial Shard"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        
+    end
+
+
+    function StockDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    AutoBuyStock:OnChanged(function(state)
+        getgenv().AutoBuyStock = state
+
+        while getgenv().AutoBuyStock do
+            task.wait()
+            local selectedStocks = StockDropdown:GetSelectedValues()
+            if selectedStocks then
+                local StockFolder = player:FindFirstChild("Stock")
+                local currentStockList = getExistingStock(StockFolder)
+    
+                -- Проверяем, есть ли хотя бы один выбранный аватар в текущем списке
+                for i, v in pairs(currentStockList) do
+                    local currentcheck = v
+                    if containsValue(currentcheck, selectedStocks) then
+                        local valueofstock = tonumber(StockFolder:FindFirstChild(currentcheck):GetAttribute("Amount"))
+                        if valueofstock > 0 then
+                            buystock(currentcheck)
+                        end
+                    end
+                end
+            end
+        end
+
+    end)
+    
+    local AutoDisableAnimation = Tabs.Misc:CreateToggle("Auto Disable Animations + Notifications", {Title= "Disable Animations + Notifications", Description = "", Default = false})
+
+    local function disableanimation()
+        local passivegui = game:GetService("Players").LocalPlayer.PlayerGui.Passive
+            local avatargui = game:GetService("Players").LocalPlayer.PlayerGui.Avatar_Banner
+            local notifications = game:GetService("Players").LocalPlayer.PlayerGui.UI.HUD.Notifications
+            local maingui = game:GetService("Players").LocalPlayer.PlayerGui.UI
+            local egggui = game:GetService("Players").LocalPlayer.PlayerGui.Egg
+            local talentgui = game:GetService("Players").LocalPlayer.PlayerGui.Talent
+            if passivegui.Enabled == true or avatargui.Enabled == true or notifications.Visible == true or egggui.Enabled == true or talentgui.Enabled == true then
+                egggui.Enabled = false
+                passivegui.Enabled = false
+                avatargui.Enabled = false
+                notifications.Visible = false
+                talentgui.Enabled = false
+                maingui.Enabled = true
+            end
+    end
+    AutoDisableAnimation:OnChanged(function(state)
+        getgenv().AutoDisableAnimation = state
+        while getgenv().AutoDisableAnimation do
+            if not getgenv().AutoDisableAnimation then return end
+            task.wait()
+            disableanimation()
+        end
+    end)
+
+
+    getgenv().CardWaveLimit = 0
+    local CardWaveLimit = Tabs.Gamemodes:CreateInput("CardWaveLimit", {
+        Title = "Card Gamemode Wave Limit",
+        Default = 0, 
+        Description = "On this wave script will auto leave",
+        Numeric = true,
+        Finished = false,
+        Callback = function(Value)
+            getgenv().CardWaveLimit = tonumber(Value)
+        end
+    })
+    CardWaveLimit:OnChanged(function(Value)
+        getgenv().CardWaveLimit = tonumber(Value)
+    end)
+    
+    local AutoStartCards = Tabs.Gamemodes:CreateToggle("Auto Start Card Gamemode",{
+        Title = "Auto Start Card Gamemode",
+        Default = false,
+        Description = ""
+    })
+
+    AutoStartCards:OnChanged(function(state)
+        getgenv().AutoStartCards = state
+        while getgenv().AutoStartCards do
+            task.wait(5)
+            if getgenv().currentmode ~= "Cards" and getgenv().StopFarmingTrial == true and getgenv().StopFarmingCards == true then
+                local args = {
+                    [1] = "Enemies",
+                    [2] = "Cards",
+                    [3] = "Open"
+                }
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+            end
+        end
+        
+    end)
+
+    local AutoJoinCards = Tabs.Gamemodes:CreateToggle("Auto Join And Leave Card Gamemode",{
+        Title = "Auto Join And Leave Card Gamemode",
+        Default = false,
+        Description = ""
+    })
+
+    
+
+    local CardEnemiesFolder = workspace.Server:FindFirstChild("Card_HUB").Enemies
+
+    local function findNearestEnemyInCardHub()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(CardEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local distance = (rootPart.Position - enemy.Position).Magnitude
+    
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestEnemy = enemy
+                end
+            end
+        end
+    
+        return closestEnemy
+    end
+
+    local function findStrongestEnemyInCardHub()
+        local strongestenemy = nil
+        local strong = 0
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(CardEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp > strong then
+                    strong = hp
+                    strongestenemy = enemy
+                end
+            end
+        end
+    
+        return strongestenemy
+    end
+
+    local function findWeakestEnemyInCardHub()
+        local weakestenemy = nil
+        local weak = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(CardEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp < weak then
+                    weak = hp
+                    weakestenemy = enemy
+                end
+            end
+        end
+
+        return weakestenemy
+    end
+
+    local function teleportMeToNearestEnemyInCardHub()
+
+    
+        local nearestEnemy = findNearestEnemyInCardHub()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToStrongestEnemyInCardHub()
+
+    
+        local nearestEnemy = findStrongestEnemyInCardHub()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToWeakestEnemyInCardHub()
+
+    
+        local nearestEnemy = findWeakestEnemyInCardHub()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportPetsToNearestEnemyInCardHub()
+
+    
+        local nearestEnemy = findNearestEnemyInCardHub()
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getEquipedPets()
+            for i, v in pets do
+                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
+
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                    if petrootpart then
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+                end
+            end
+        end
+    end
+
+    local function sendPetsOnNearestEnemyInCardHub()
+        local nearestEnemy = findNearestEnemyInCardHub()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInCardHub()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnStrongestEnemyInCardHub()
+        local strongestenemy = findStrongestEnemyInCardHub()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not strongestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInCardHub()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = strongestenemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnWeakestEnemyInCardHub()
+        local weakestenemy = findWeakestEnemyInCardHub()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not weakestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInCardHub()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = weakestenemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+    getgenv().StopFarmingCards = true
+    AutoJoinCards:OnChanged(function(state)
+        getgenv().AutoJoinCards = state
+     
+            local function checkOpen()
+                while getgenv().AutoJoinCards == true do
+                        wait(1)
+                        local openvalue = game:GetService("ReplicatedStorage").Gamemodes.Card.Open.Value
+                        if openvalue == true then
+                        if getgenv().currentmode == "None" then
+                        local mapsf = workspace.Client.Maps
+                        getgenv().StopFarmingCards = false
+                        for i ,v in ipairs(mapsf:GetChildren()) do
+                            if v.Name ~= "Lobby" and tostring(player:GetAttribute("Mode")) ~= "Trial_Easy" then
+                                wait(1)
+                                local args = {
+                                    [1] = "General",
+                                    [2] = "Maps",
+                                    [3] = "Teleport",
+                                    [4] = "Lobby"
+                                }
+                        
+                                -- Отправляем запрос на телепортацию
+                                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                                wait(2)
+                                local args = {
+                                    [1] = "General",
+                                    [2] = "Maps",
+                                    [3] = "Teleport",
+                                    [4] = "Lobby"
+                                }
+                        
+                                -- Отправляем запрос на телепортацию
+                                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                            end
+                        end
+                        wait(2)
+                        if tostring(player:GetAttribute("Mode")) ~= "Trial_Easy" then
+                        local args = {
+                            [1] = "Enemies",
+                            [2] = "Cards",
+                            [3] = "Join"
+                        }
+
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+
+                        wait(1)
+                        local args = {
+                            [1] = "Enemies",
+                            [2] = "Cards",
+                            [3] = "Join"
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                        end
+                    end
+                end
+        
+                    -- Ждем 1 секунду перед следующей проверкой
+                    wait(1)
+                end
+            end
+
+            coroutine.wrap(checkOpen)()
+            
+            local function checkcurrentwaveinCardHub()
+                while getgenv().AutoJoinCards do
+                    task.wait(10)
+                    local waveNumber = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Card.Wave.Value)
+                    local cardwavelimitrn = tonumber(getgenv().CardWaveLimit)
+                    if waveNumber and cardwavelimitrn and waveNumber >= cardwavelimitrn and getgenv().currentmode == "Cards" then
+                        print("Достигнут лимит волн, телепортируем...")
+                        getgenv().StopFarmingCards = true
+                        wait(1)
+                        teleportToSavedPosition()
+                    end
+                end
+            end
+            
+            -- Запускаем корутину
+            coroutine.wrap(checkcurrentwaveinCardHub)()
+
+    end)
+
+    local TypeOfFarmInCardHub = Tabs.Gamemodes:CreateDropdown("Type of Auto Attack In Card Hub", {
+        Title = "Select Type of Auto Attack",
+        Values = {"Strongest", "Weakest", "Nearest"},
+        Multi = false,
+        Default = "Nearest",
+    })
+    local AutoAttackInCardHub = Tabs.Gamemodes:CreateToggle("Auto Attack in Card Gamemode", {
+        Title = "Auto Attack Enemies In Card Gamemode",
+        Description = "Auto Attack Enemies In Card Gamemode with Selected Type of Farm",
+        Default = false
+    })
+
+    function TypeOfFarmInCardHub:GetSelectedValue()
+        local selected = self.Value
+        return selected
+    end
+
+    AutoAttackInCardHub:OnChanged(function(state)
+        getgenv().AutoAttackInCardHub = state
+        while getgenv().AutoAttackInCardHub do
+            task.wait()
+            for _, enemy in ipairs(CardEnemiesFolder:GetChildren()) do
+                if enemy:IsA("Part") then
+                    -- Проверяем здоровье и состояние врага
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoAttackInCardHub == true and getgenv().StopFarmingCards == false then
+                        local typeofFarm = TypeOfFarmInCardHub:GetSelectedValue()
+                        if typeofFarm == "Strongest" then
+                            pcall(teleportMeToStrongestEnemyInCardHub)
+                            pcall(sendPetsOnStrongestEnemyInCardHub)
+                        elseif typeofFarm == "Weakest" then
+                            pcall(teleportMeToWeakestEnemyInCardHub)
+                            pcall(sendPetsOnWeakestEnemyInCardHub)
+                        elseif typeofFarm == "Nearest" then
+                            pcall(teleportMeToNearestEnemyInCardHub)
+                            pcall(sendPetsOnNearestEnemyInCardHub)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    
+    local Cardslist = {}
+    if require then
+    local function UpdateCardsList()
+        local Cards = {}
+        local Players = game:GetService("Players")
+        local sigma = Players.LocalPlayer
+        local success, sigma2 = pcall(function()
+            return require(sigma.PlayerScripts.Shalom)
+        end)
+
+        if not success then
+            return
+        end
+
+        local CardsData = sigma2.Shared.Cards
+
+        if type(CardsData) == "table" then
+            for cardname, d in pairs(CardsData) do
+                table.insert(Cards, tostring(cardname))
+            end
+        end
+
+        -- Сортируем Passives по алфавиту, ставя "Fairy" в самый верх
+        table.sort(Cards)
+
+        return Cards
+    end
+
+
+    Cardslist = UpdateCardsList()
+    else
+        Cardslist = {}
+    end
+
+    local CardsDropdown = Tabs.Gamemodes:CreateDropdown("Cards Dropdown", {Title = "Select Cards For Auto Sell", Description = "Allows Multi", Values = Cardslist, Multi = true, Default = {}})
+
+    function CardsDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    local function sellCard(cardid)
+        local args = {
+            [1] = "General",
+            [2] = "Cards",
+            [3] = "Delete_Table",
+            [4] = {
+                [1] = cardid
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        
+    end
+
+    local AutoSellCards = Tabs.Gamemodes:CreateToggle("Auto Sell Cards",{Title = "Auto Sell Selected Cards", Description = "", Default = false})
+
+    AutoSellCards:OnChanged(function(state)
+        getgenv().AutoSellCards = state
+        while getgenv().AutoSellCards do
+            task.wait()
+            local selectedCards = CardsDropdown:GetSelectedValues()
+            local myCards = game:GetService("Players").LocalPlayer.Cards
+            if myCards then
+                pcall(function()
+                for i , v in pairs(myCards:GetChildren()) do
+                    local currentcard = tostring(v:GetAttribute("Name"))
+                    if containsValue(currentcard, selectedCards) then
+                        print("deleting: "..tostring(v).." | ".. tostring(currentcard))
+                        sellCard(tostring(v))
+                    end
+                end
+                end)
+            end
+        end
+
+    end)
+local function spawnteamtab()
+
+    local TeamsDropdown = Tabs.Teams:CreateDropdown("Teams Dropdown",{
+        Title = "Select Team for saving",
+        Description = "",
+        Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+        Multi = false,
+        Default = "Team 1"
+    })
+    
+    local SaveTeamButton = Tabs.Teams:CreateButton({
+        Title = "Save Team",
+        Description = "Saving selected team",
+        Callback = function()
+            local selectedTeam = TeamsDropdown.Value
+            local equippedpets = getEquipedPets()
+            if selectedTeam then
+                if selectedTeam == "Team 1" then
+                    writefile(Team1Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team1Path, v..'\n')
+                    end
+                elseif selectedTeam == "Team 2" then
+                    writefile(Team2Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team2Path, v..'\n')
+                    end
+                elseif selectedTeam == "Team 3" then
+                    writefile(Team3Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team3Path, v..'\n')
+                    end
+                elseif selectedTeam == "Team 4" then
+                    writefile(Team4Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team4Path, v..'\n')
+                    end
+                elseif selectedTeam == "Team 5" then
+                    writefile(Team5Path, "")
+                    for i, v in pairs(equippedpets) do
+                        appendfile(Team5Path, v..'\n')
+                    end
+                end
+            end
+        end
+    })
+    local function equippet(id)
+        local args = {
+            [1] = "General",
+            [2] = "Pets",
+            [3] = "Equip_Pet",
+            [4] = id
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+    
+    local function UnequipAllPets()
+        local args = {
+            [1] = "General",
+            [2] = "Pets",
+            [3] = "Unequip_All"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+
+    local function getTeamIds(path)
+        local fileContent = readfile(path)
+
+        -- Создаем таблицу для хранения идентификаторов
+        local idsTable = {}
+
+        -- Разбиваем содержимое файла на строки
+        for line in fileContent:gmatch("[^\r\n]+") do
+            table.insert(idsTable, line) -- Добавляем каждую строку в таблицу
+        end
+        return idsTable
+    end
+
+    local function loadteam(path)
+        wait()
+        UnequipAllPets()
+        wait()
+        local idsTable = getTeamIds(path)
+        for _, id in ipairs(idsTable) do
+            equippet(id)
+        end
+    end
+    local function returnselectedteamPath(path)
+        local selectedTeam = path.Value
+        local selectedpath = nil
+        if selectedTeam == "Team 1" then
+            selectedpath = Team1Path
+        elseif selectedTeam == "Team 2" then
+            selectedpath = Team2Path
+        elseif selectedTeam == "Team 3" then
+            selectedpath = Team3Path
+        elseif selectedTeam == "Team 4" then
+            selectedpath = Team4Path
+        elseif selectedTeam == "Team 5" then
+            selectedpath = Team5Path
+        end
+        return selectedpath
+    end
+    local EquipSelectedTeam = Tabs.Teams:CreateButton({
+        Title = "Equip Selected Team",
+        Description = "Equipping selected team",
+        Callback = function()
+            local selectedTeam = returnselectedteamPath(TeamsDropdown)
+            loadteam(selectedTeam)
+            end
+    })
+
+    local function isAnyIdMissing(equipped, selected)
+        for _, id in ipairs(selected) do
+            if not table.find(equipped, id) then
+                return true -- Если хотя бы один id отсутствует, возвращаем true
+            end
+        end
+        return false -- Все id найдены
+    end
+    local function spawnnormalteam()
+
+        local NormalTeamDropdown = Tabs.Teams:CreateDropdown("Normal Teams Dropdown",{
+            Title = "Select Team for Equip in Normal World",
+            Description = "",
+            Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+            Multi = false,
+            Default = ""
+        })
+
+        local NormalTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Normal Team",{
+            Title = "Equip Selected Team for Normal World",
+            Description = "Auto Equipping selected Team for Normal World",
+            Default = false
+        })
+
+        NormalTeamEquip:OnChanged(function(state)
+            getgenv().AutoEquipNormalTeam = state
+            while getgenv().AutoEquipNormalTeam do
+                task.wait()
+                if getgenv().currentmode == "None" then
+                    task.wait(1)
+                    local equippedIds = getEquipedPets()
+                    local selectedTeam = returnselectedteamPath(NormalTeamDropdown)
+                    local selectedTeamIds = getTeamIds(selectedTeam)
+
+                    -- Проверяем, есть ли отсутствующие id
+                    if isAnyIdMissing(equippedIds, selectedTeamIds) then
+                        loadteam(selectedTeam) -- Вызываем функцию, если есть отсутствующие id
+                    end
+                end
+            end
+        end)
+    end
+
+    spawnnormalteam()
+
+    local function spawntrialteam()
+        local TrialTeamsDropdown = Tabs.Teams:CreateDropdown("Trial Teams Dropdown",{
+            Title = "Select Trial Team for Equip",
+            Description = "",
+            Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+            Multi = false,
+            Default = ""
+        })
+
+        local TrialTeamsEquip = Tabs.Teams:CreateToggle("Auto Equip Trial Team",{
+            Title = "Equip Selected Trial Team",
+            Description = "Auto Equipping selected trial team",
+            Default = false
+        })
+
+        TrialTeamsEquip:OnChanged(function(state)
+            getgenv().AutoEquipTrialTeam = state
+            while getgenv().AutoEquipTrialTeam do
+                task.wait()
+                if getgenv().currentmode == "Trial_Easy" then
+                    task.wait(1)
+                    local equippedIds = getEquipedPets()
+                    local selectedTeam = returnselectedteamPath(TrialTeamsDropdown)
+                    local selectedTeamIds = getTeamIds(selectedTeam)
+
+                    
+                    -- Проверяем, есть ли отсутствующие id
+                    if isAnyIdMissing(equippedIds, selectedTeamIds) then
+                        loadteam(selectedTeam) -- Вызываем функцию, если есть отсутствующие id
+                    end
+                end
+            end
+        end)
+    end
+
+    spawntrialteam()
+
+    local function spawnCardTeam()
+        local CardTeamDropdown = Tabs.Teams:CreateDropdown("Cards Teams Dropdown",{
+            Title = "Select Cards Team for Equip",
+            Description = "",
+            Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+            Multi = false,
+            Default = ""
+        })
+    
+        local CardTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Card Team",{
+            Title = "Equip Selected Card Team",
+            Description = "Auto Equipping selected Card team",
+            Default = false
+        })
+    
+        CardTeamEquip:OnChanged(function(state)
+            getgenv().AutoEquipCardTeam = state
+            while getgenv().AutoEquipCardTeam do
+                task.wait()
+                if getgenv().currentmode == "Cards" then
+                    task.wait(1)
+                    local equippedIds = getEquipedPets()
+                    local selectedTeam = returnselectedteamPath(CardTeamDropdown)
+                    local selectedTeamIds = getTeamIds(selectedTeam)
+                    -- Проверяем, есть ли отсутствующие id
+                    if isAnyIdMissing(equippedIds, selectedTeamIds) then
+                        loadteam(selectedTeam) -- Вызываем функцию, если есть отсутствующие id
+                    end
+                end
+            end
+        end)
+    end
+    
+    spawnCardTeam()
+
+    local function spawnPortalTeam()
+        local PortalTeamDropdown = Tabs.Teams:CreateDropdown("Portal Teams Dropdown",{
+            Title = "Select Portal Team for Equip",
+            Description = "",
+            Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+            Multi = false,
+            Default = ""
+        })
+    
+        local PortalTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Portal Team",{
+            Title = "Equip Selected Portal Team",
+            Description = "Auto Equipping selected Portal team",
+            Default = false
+        })
+    
+        PortalTeamEquip:OnChanged(function(state)
+            getgenv().AutoEquipPortalTeam = state
+            while getgenv().AutoEquipPortalTeam do
+                task.wait()
+                if getgenv().currentmode == "Portal" then
+                    task.wait(1)
+                    local equippedIds = getEquipedPets()
+                    local selectedTeam = returnselectedteamPath(PortalTeamDropdown)
+                    local selectedTeamIds = getTeamIds(selectedTeam)
+                    -- Проверяем, есть ли отсутствующие id
+                    if isAnyIdMissing(equippedIds, selectedTeamIds) then
+                        loadteam(selectedTeam) -- Вызываем функцию, если есть отсутствующие id
+                    end
+                end
+            end
+        end)
+    end
+
+    spawnPortalTeam()
+
+    local function spawnReEquipTeam()
+        local AutoReEquipTeamDropdown = Tabs.Teams:CreateDropdown("Auto Re Equip Teams Dropdown",{
+            Title = "Select Team for Auto Re Equip",
+            Description = "IT WILL RE EQUIP SELECTED TEAM EVERY 20 MINS",
+            Values = {"Team 1", "Team 2", "Team 3", "Team 4", "Team 5"},
+            Multi = false,
+            Default = ""
+        })
+    
+        local AutoReEquipTeamEquip = Tabs.Teams:CreateToggle("Auto Equip Re Equip Team",{
+            Title = "Equip Selected Team for Auto Re Equip",
+            Description = "IT WILL RE EQUIP SELECTED TEAM EVERY 20 MINS",
+            Default = false
+        })
+    
+        AutoReEquipTeamEquip:OnChanged(function(state)
+            getgenv().AutoEquipReEquip = state
+            while getgenv().AutoEquipReEquip do
+                task.wait(10)
+                    local selectedTeam = returnselectedteamPath(AutoReEquipTeamDropdown)
+                    loadteam(selectedTeam)
+                task.wait(1200)
+            end
+        end)
+    end
+
+
+    spawnReEquipTeam()
+end
+spawnteamtab()
+
+    
+    
+    local PortalRanksDropdown = Tabs.Portals:CreateDropdown("Portal Ranks Dropdown", {
+        Title = "Choose Ranks of Portals For Farming",
+        Description = "",
+        Values = {"S", "A", "B", "C", "D", "E"},
+        Multi = true,
+        Default = {}
+    })
+
+    function PortalRanksDropdown:GetSelectedValues()
+        local selected = {}
+        for value, state in pairs(self.Value) do
+            if state then
+                table.insert(selected, value)
+            end
+        end
+        return selected
+    end
+
+    local function joinportal()
+        local args = {
+            [1] = "Enemies",
+            [2] = "Portal",
+            [3] = "Join"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))        
+    end
+
+    local TypeOfFarmInPortal = Tabs.Portals:CreateDropdown("Type of Auto Attack In Portal", {
+        Title = "Select Type of Auto Attack",
+        Values = {"Strongest", "Weakest", "Nearest"},
+        Multi = false,
+        Default = "Nearest",
+    })
+
+    local PortalJoin = Tabs.Portals:CreateToggle("Auto Join Portals",{
+        Title = "Auto Join Portals",
+        Description = "",
+        Default = false
+    })
+
+    PortalJoin:OnChanged(function(state)
+        getgenv().PortalJoin = state
+        local function CheckPortalAndJoin()
+            while getgenv().PortalJoin == true do
+                task.wait(5)
+                local openValueForPortal = game:GetService("ReplicatedStorage").Gamemodes.Portal.Open.Value
+                local timerofPortal = math.huge
+                if openValueForPortal == true then
+                local selectedPortalRanks = PortalRanksDropdown:GetSelectedValues()
+                local currentRank = tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Rank.Value)
+                wait(5)
+                timerofPortal = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Card.Timer.Value)
+                    if timerofPortal < 60 then
+                        if containsValue(currentRank, selectedPortalRanks) then
+                            if getgenv().currentmode == "None" then
+                                wait(2)
+                                local args = {
+                                    [1] = "General",
+                                    [2] = "Maps",
+                                    [3] = "Teleport",
+                                    [4] = "Leveling City"
+                                }
+                                
+                                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+                                wait(2)                            
+                                joinportal()
+                            end
+                        end
+                    end
+                end
+                timerofPortal = math.huge
+            end
+        end
+
+        coroutine.wrap(CheckPortalAndJoin)()
+    end)
+
+    local PortalLeave = Tabs.Portals:CreateToggle("Auto Leave Portals",{
+        Title = "Auto Leave Portals",
+        Description = "",
+        Default = false
+    })
+
+    PortalLeave:OnChanged(function(state)
+        getgenv().LeavePortal = state
+        local previousMode = getgenv().currentmode
+
+        local function trackCurrentMode()
+            while getgenv().LeavePortal do
+                local currentMode = getgenv().currentmode
+                
+
+                if currentMode ~= previousMode then
+                    print("Текущий режим изменился на:", currentMode) 
+                    if previousMode == "Portal"  then
+                        task.wait(2)
+                        teleportToSavedPosition()
+                    end
+                    previousMode = currentMode
+                end
+                
+                task.wait(5)
+            end
+        end
+
+        coroutine.wrap(trackCurrentMode)()
+    end)
+    local PortalEnemiesFolder = workspace.Server.Portal.Enemies
+    local function findNearestEnemyInPortal()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(PortalEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local distance = (rootPart.Position - enemy.Position).Magnitude
+    
+                if distance < closestDistance then
+                    closestDistance = distance
+                    closestEnemy = enemy
+                end
+            end
+        end
+    
+        return closestEnemy
+    end
+
+    local function findStrongestEnemyInPortal()
+        local strongestenemy = nil
+        local strong = 0
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(PortalEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp > strong then
+                    strong = hp
+                    strongestenemy = enemy
+                end
+            end
+        end
+    
+        return strongestenemy
+    end
+
+    local function findWeakestEnemyInPortal()
+        local weakestenemy = nil
+        local weak = math.huge
+        local rootPart = findHumanoidRootPart()
+        for _, enemy in pairs(PortalEnemiesFolder:GetChildren()) do
+            if enemy:IsA("Part") and tonumber(enemy:GetAttribute("Health")) > 0 then
+                local hp = tonumber(enemy:GetAttribute("MaxHealth"))
+
+                if hp < weak then
+                    weak = hp
+                    weakestenemy = enemy
+                end
+            end
+        end
+
+        return weakestenemy
+    end
+
+    local function teleportMeToNearestEnemyInPortal()
+
+    
+        local nearestEnemy = findNearestEnemyInPortal()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToStrongestEnemyInPortal()
+
+    
+        local nearestEnemy = findStrongestEnemyInPortal()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportMeToWeakestEnemyInPortal()
+
+    
+        local nearestEnemy = findWeakestEnemyInPortal()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируемся за врага
+            end
+        end
+    end
+
+    local function teleportPetsToNearestEnemyInPortal()
+
+    
+        local nearestEnemy = findNearestEnemyInPortal()
+
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getEquipedPets()
+            for i, v in pets do
+                    local petrootpart = workspace.Client.Pets:FindFirstChild(v):FindFirstChild("HumanoidRootPart")
+
+                    local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                    if petrootpart then
+                    if distanceToPet > teleportRadiusForPet then
+                        petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position) -- Телепортируем питомца за врага
+                    end
+                end
+            end
+        end
+    end
+
+    local function sendPetsOnNearestEnemyInPortal()
+        local nearestEnemy = findNearestEnemyInPortal()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not nearestEnemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInPortal()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = nearestEnemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnStrongestEnemyInPortal()
+        local strongestenemy = findStrongestEnemyInPortal()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not strongestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInPortal()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = strongestenemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local function sendPetsOnWeakestEnemyInPortal()
+        local weakestenemy = findWeakestEnemyInPortal()
+        local EquipedPets = getEquipedPets()
+        for i, v in EquipedPets do
+            local rnpetcheck = tostring(game:GetService("Players").LocalPlayer).."---"..v
+            if not weakestenemy:FindFirstChild("Info"):FindFirstChild("Pets"):FindFirstChild(rnpetcheck) then
+            teleportPetsToNearestEnemyInPortal()
+            local args = {
+                [1] = "General",
+                [2] = "Pets",
+                [3] = "Attack",
+                [4] = v,
+                [5] = weakestenemy
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+        end
+        end
+    end
+
+    local AutoAttackInPortal = Tabs.Portals:CreateToggle("Auto Attack in Portal", {
+        Title = "Auto Attack Enemies In Portal",
+        Description = "Auto Attack Enemies In Portal with Selected Type of Farm",
+        Default = false
+    })
+
+    function TypeOfFarmInPortal:GetSelectedValue()
+        local selected = self.Value
+        return selected
+    end
+
+    AutoAttackInPortal:OnChanged(function(state)
+        getgenv().AutoAttackInPortal = state
+        while getgenv().AutoAttackInPortal do
+            task.wait()
+            for _, enemy in ipairs(PortalEnemiesFolder:GetChildren()) do
+                if enemy:IsA("Part") then
+                    -- Проверяем здоровье и состояние врага
+                    if tonumber(enemy:GetAttribute("Health")) > 0 and getgenv().AutoAttackInPortal == true and getgenv().currentmode == "Portal" then
+                        local typeofFarm = TypeOfFarmInPortal:GetSelectedValue()
+                        if typeofFarm == "Strongest" then
+                            pcall(teleportMeToStrongestEnemyInPortal)
+                            pcall(sendPetsOnStrongestEnemyInPortal)
+                        elseif typeofFarm == "Weakest" then
+                            pcall(teleportMeToWeakestEnemyInPortal)
+                            pcall(sendPetsOnWeakestEnemyInPortal)
+                        elseif typeofFarm == "Nearest" then
+                            pcall(teleportMeToNearestEnemyInPortal)
+                            pcall(sendPetsOnNearestEnemyInPortal)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    
+
+    local ultcancel = Tabs.ADMINUSE:AddToggle("Ult cancel", {Title = "Ult Cancel", Default = false})
+    local function equippet(id)
+        local args = {
+            [1] = "General",
+            [2] = "Pets",
+            [3] = "Equip_Pet",
+            [4] = id
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+    local function equipbest()
+        local args = {
+            [1] = "General",
+            [2] = "Pets",
+            [3] = "Equip_Best"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))        
+    end
+    local function UnequipAllPets()
+        local args = {
+            [1] = "General",
+            [2] = "Pets",
+            [3] = "Unequip_All"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+    end
+    ultcancel:OnChanged(function(state)
+        getgenv().ultcancel = state
+        while getgenv().ultcancel == true do
+            task.wait()
+            local ep = getEquipedPets()
+            local numberofult = 0
+            for i,v  in ipairs(ep) do
+                local rnpet = workspace.Server.Pets:FindFirstChild(v)
+                if rnpet then
+                    local checkult = rnpet:GetAttribute("Ult_Enemy")
+                    if checkult ~= "" and checkult ~= nil then
+                        numberofult += 1
+                    end
+                end
+            end
+            if numberofult == 7 then
+                print("CANCELING ULT")
+                task.wait()
+                equipbest()
+            end
+        end
+    end)
+    --[[local function delayedTeleport()
+        task.wait(10)
+        teleportToSavedPosition()
+    end
+    coroutine.wrap(delayedTeleport)()]]
+
+end
+
+do
+
+local function checkOpenValueForWeb()
+    local openvalue = game:GetService("ReplicatedStorage").Gamemodes.Portal.Open.Value
+
+    return openvalue
+end
+
+local function checkRankOfPortal()
+    local RankOfPortal = game:GetService("ReplicatedStorage").Gamemodes.Portal.Rank.Value
+    return RankOfPortal
+end
+
+local request = http_request or request or HttpPost or syn.request
+
+local function SendMessage(url, message, embed)
+    local http = game:GetService("HttpService")
+    local headers = {
+        ["Content-Type"] = "application/json"
+    }
+    
+    local data = {
+        ["content"] = message, -- Устанавливаем обычное сообщение
+        ["embeds"] = {} -- Инициализируем пустой массив для вложений
+    }
+    
+    -- Проверяем, если embed передан
+    if embed then
+        table.insert(data["embeds"], {
+            ["title"] = embed.title,
+            ["description"] = embed.description,
+            ["color"] = embed.color,
+            ["fields"] = embed.fields,
+            ["footer"] = {
+                ["text"] = embed.footer.text
+            }
+        })
+    end
+
+    local body = http:JSONEncode(data)
+    local response = request({
+        Url = url,
+        Method = "POST",
+        Headers = headers,
+        Body = body
+    })
+end
+
+-- Пример использования
+local TeleportService = game:GetService("TeleportService")
+local gameid = 123498993729957
+
+
+getgenv().CheckForWeb = true
+
+        local previousOpen = checkOpenValueForWeb()
+
+        local function trackCurrentOpen()
+            while getgenv().CheckForWeb == true do
+                local sgg = game:GetService("ReplicatedStorage"):GetAttribute("VIP_ID")
+                if sgg == "" then
+                local currentOpen = checkOpenValueForWeb()
+                if currentOpen ~= previousOpen then
+                    if previousOpen == false  then
+                        local RankOfPortal = checkRankOfPortal()
+                        if RankOfPortal == "S" or RankOfPortal == "A" or RankOfPortal == "B" then
+                            local jobId = game.JobId
+                            local playername = tostring(game:GetService("Players").LocalPlayer)
+
+                            local url = "https://discord.com/api/webhooks/1352978848819712030/RQfb8tpfcFnAsqaB_78Arz6roguvxm73HtcJMFeWo5knn_mD9cgfy-dHuIDYnGrNcb2S"
+                            local scriptForJoin = string.format(
+                                'game:GetService("TeleportService"):TeleportToPlaceInstance(%d, "%s", game:GetService("Players").LocalPlayer)',
+                                gameid,
+                                jobId
+                            )
+                            local embed = {
+                                title = "Portal spawned: ".."Rank - "..tostring(checkRankOfPortal()),
+                                description = "",
+                                color = 16711680, -- Красный цвет в десятичном формате
+                                fields = {
+                                    { name = "SCRIPT FOR JOIN", value = "```"..scriptForJoin.."```", inline = false}
+                                },
+                                footer = {
+                                    text = "Time left: "..tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Timer.Value).."    Username - "..tostring(playername)
+                                }
+                            }
+
+                            SendMessage(url, "@everyone", embed)
+                        end
+                    end
+                    previousOpen = currentOpen
+                end
+            end
+                
+                task.wait(1)
+            end
+        end
+
+        coroutine.wrap(trackCurrentOpen)()
+end
+
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("Apel Hub")
+SaveManager:SetFolder("Apel Hub/".."Anime Spirits Journey")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+SaveManager:LoadAutoloadConfig()
+
+local Menu = game:GetService("CoreGui"):FindFirstChild("Menu")
+if Menu then
+    print("Найдено меню")
+else
+    local Menu = Instance.new("ScreenGui")
+Menu.Name = "Menu"
+local Frame = Instance.new("Frame")
+Frame.Name = "Menu Button"
+local ImageButton = Instance.new("ImageButton")
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
+
+--Properties:
+local coreGui = game:GetService("CoreGui")
+Menu.Parent = coreGui
+Menu.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame.Parent = Menu
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.167999998, 0, 0.230493277, 0)
+Frame.Size = UDim2.new(0.040533334, 0, 0.0681614354, 0)
+
+ImageButton.Parent = Frame
+ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ImageButton.BorderSizePixel = 0
+ImageButton.Size = UDim2.new(1, 0, 1, 0)
+ImageButton.Image = "http://www.roblox.com/asset/?id=181239831"
+ImageButton.MouseButton1Up:Connect(function()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true,"LeftControl",false,game)
+end)
+
+UIAspectRatioConstraint.Parent = ImageButton
+
+UIAspectRatioConstraint_2.Parent = Frame
+end
