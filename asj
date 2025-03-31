@@ -2814,7 +2814,8 @@ end)
             while getgenv().PortalJoin == true do
                 task.wait(5)
                 local openValueForPortal = game:GetService("ReplicatedStorage").Gamemodes.Portal.Open.Value
-                if openValueForPortal == true then
+                local timerofPortal = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Card.Timer.Value)
+                if openValueForPortal == true and timerofPortal < 60 then
                 local selectedPortalRanks = PortalRanksDropdown:GetSelectedValues()
                 local currentRank = tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Rank.Value)
                     if containsValue(currentRank, selectedPortalRanks) then
