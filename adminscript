@@ -3129,17 +3129,20 @@ spawnteamtab()
             task.wait()
             local ep = getEquipedPets()
             local numberofult = 0
+            local numberofpets = 0
             for i,v  in ipairs(ep) do
                 local rnpet = workspace.Server.Pets:FindFirstChild(v)
                 if rnpet then
+                    numberofpets += 1
                     local checkult = rnpet:GetAttribute("Ult_Enemy")
                     if checkult ~= "" and checkult ~= nil then
                         numberofult += 1
                     end
                 end
             end
-            if numberofult == 7 then
+            if numberofult == numberofpets and numberofpets > 0 and numberofult>0 then
                 print("CANCELING ULT")
+                UnequipAllPets()
                 task.wait()
                 equipbest()
             end
