@@ -2822,7 +2822,7 @@ spawnteamtab()
                 local selectedPortalRanks = PortalRanksDropdown:GetSelectedValues()
                 local currentRank = tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Rank.Value)
                 wait(5)
-                timerofPortal = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Card.Timer.Value)
+                timerofPortal = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Portal.Timer.Value)
                     if timerofPortal < 60 then
                         if containsValue(currentRank, selectedPortalRanks) then
                             if getgenv().currentmode == "None" then
