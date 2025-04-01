@@ -3123,7 +3123,7 @@ spawnteamtab()
         
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
     end
-    
+
     ultcancel:OnChanged(function(state)
         getgenv().ultcancel = state
         while getgenv().ultcancel == true do
@@ -3161,11 +3161,14 @@ spawnteamtab()
                 local rnpet = workspace.Server.Pets:FindFirstChild(v)
                 if rnpet then
                     local checkult = rnpet:GetAttribute("Ult_Enemy")
-                    if checkult ~= "" and checkult ~= nil then
-                        print("Ult cancel for"..tostring(v))
-                        equippet(v)
-                        task.wait()
-                        equippet(v)
+                    local petname = tostring(rnpet.Value)
+                    if petname ~= "Okare Evolved" then
+                        if checkult ~= "" and checkult ~= nil then
+                            print("Ult cancel for"..tostring(v))
+                            equippet(v)
+                            task.wait()
+                            equippet(v)
+                        end
                     end
                 end
             end
