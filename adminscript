@@ -3094,7 +3094,7 @@ spawnteamtab()
     end)
     
 
-    local ultcancel = Tabs.ADMINUSE:AddToggle("Ult cancel", {Title = "Ult Cancel", Default = false})
+    local ultcancel = Tabs.ADMINUSE:AddToggle("Ult cancel", {Title = "Ult Cancel for team", Default = false})
     local function equippet(id)
         local args = {
             [1] = "General",
@@ -3123,6 +3123,7 @@ spawnteamtab()
         
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
     end
+    
     ultcancel:OnChanged(function(state)
         getgenv().ultcancel = state
         while getgenv().ultcancel == true do
@@ -3148,6 +3149,29 @@ spawnteamtab()
             end
         end
     end)
+
+    local ultcancel2 = Tabs.ADMINUSE:AddToggle("Ult cancel 2", {Title = "Ult Cancel for pet", Default = false})
+
+    ultcancel2:OnChanged(function(state)
+        getgenv().ultcancel2 = state
+        while getgenv().ultcancel2 == true do
+            task.wait()
+            local ep = getEquipedPets()
+            for i,v  in ipairs(ep) do
+                local rnpet = workspace.Server.Pets:FindFirstChild(v)
+                if rnpet then
+                    local checkult = rnpet:GetAttribute("Ult_Enemy")
+                    if checkult ~= "" and checkult ~= nil then
+                        print("Ult cancel for"..tostring(v))
+                        equippet(v)
+                        task.wait()
+                        equippet(v)
+                    end
+                end
+            end
+        end
+    end)
+
     --[[local function delayedTeleport()
         task.wait(10)
         teleportToSavedPosition()
