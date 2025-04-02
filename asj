@@ -1943,7 +1943,7 @@ end)
                 table.insert(bannerlist, tostring(v))
             end
         end
-
+        return bannerlist
     end
     AutoRerollAvatar:OnChanged(function(state)
         getgenv().AutoRerollAvatar = state
