@@ -964,6 +964,7 @@ do
             end
         end
     end
+    table.insert(egglist, "Jeju Island 2nd Egg")
 
     local currenteggforfarm = nil
     local EggsDropDown = Tabs.Eggs:CreateDropdown("Eggs", {Title = "Select Egg For Auto Open", Description = "", Values = egglist, Multi = false, Default = 1,})
@@ -979,16 +980,27 @@ do
         while getgenv().AutoOpenEggs do
             task.wait(0.01)
 
-            local args = {
-                [1] = "General",
-                [2] = "Eggs",
-                [3] = "Multi",
-                [4] = currenteggforfarm,
-                [5] = "Yen"
-            }
-            
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
-            
+            if tostring(EggsDropDown.Value) == "Jeju Island 2nd Egg" then
+                local args = {
+                    [1] = "General",
+                    [2] = "Eggs",
+                    [3] = "Multi",
+                    [4] = "Jeju Island",
+                    [5] = "Yen2"
+                }
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+            else
+                local args = {
+                    [1] = "General",
+                    [2] = "Eggs",
+                    [3] = "Multi",
+                    [4] = currenteggforfarm,
+                    [5] = "Yen"
+                }
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer(unpack(args))
+            end
         end
     end)
     local function loadRarities()
@@ -2823,7 +2835,7 @@ spawnteamtab()
                 local selectedPortalRanks = PortalRanksDropdown:GetSelectedValues()
                 local currentRank = tostring(game:GetService("ReplicatedStorage").Gamemodes.Portal.Rank.Value)
                 wait(5)
-                timerofPortal = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Portal.Timer.Value)
+                timerofPortal = tonumber(game:GetService("ReplicatedStorage").Gamemodes.Card.Timer.Value)
                     if timerofPortal < 60 then
                         if containsValue(currentRank, selectedPortalRanks) then
                             if getgenv().currentmode == "None" then
