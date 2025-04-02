@@ -1932,7 +1932,20 @@ end)
         end
         return false -- Если совпадений не найдено, возвращаем false
     end
-    
+
+    function getCurrentBanner()
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+        local Shalom = require(player.PlayerScripts.Shalom)
+        local bannerlist = {}
+        local AvatarsData = Shalom.Data["Avatar_Banner"].List
+        if type(AvatarsData) == "table" then
+            for i,v in pairs(AvatarsData) do
+                table.insert(bannerlist, tostring(v))
+            end
+        end
+
+    end
     AutoRerollAvatar:OnChanged(function(state)
         getgenv().AutoRerollAvatar = state
         while getgenv().AutoRerollAvatar do
@@ -1943,7 +1956,7 @@ end)
                 local currentAvatarslist = getExistingAvatars(AvatarsFolder)
     
                 local foundAvatar = false -- Флаг для отслеживания, найден ли аватар
-    
+                currentbannerlist = {}
                 -- Проверяем, есть ли хотя бы один выбранный аватар в текущем списке
                 if containsValueTable(selectedAvatars, currentAvatarslist) then
                     AutoRerollAvatar:SetValue(false)
@@ -1952,10 +1965,12 @@ end)
                     foundAvatar = true -- Устанавливаем флаг, если аватар найден
                     break -- Выходим из цикла, если нашли
                 end
-    
+                currentbannerlist = getCurrentBanner()
                 -- Если ни один аватар не найден, вызываем rerollAvatar
                 if not foundAvatar and getgenv().AutoRerollAvatar then
-                    rerollAvatar()
+                    if containsValueTable(selectedAvatars, currentbannerlist) then
+                        rerollAvatar()
+                    end
                 end
             end
         end
