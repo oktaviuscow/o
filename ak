@@ -508,7 +508,7 @@ do
                     if getgenv().AutoFarmWithTeleport == true then
                         teleportMeToNearestEnemyWithoutContains()
                     end
-                    wait(0.5)
+                    wait(0.25)
                 end
 
         end
@@ -561,6 +561,53 @@ do
             
         end
     end)
+
+    local AutoOpenEggsWhileFarm = Tabs.Eggs:CreateToggle("Auto Open Eggs While Farm", {Title = "Auto Open Selected Egg While Auto Farming", Default = false, Description = ""})
+
+    AutoOpenEggsWhileFarm:OnChanged(function(state)
+        getgenv().AutoOpenEggsWhileFarm = state
+        while getgenv().AutoOpenEggsWhileFarm do
+            local eggpart
+
+
+            for _, v in pairs(workspace._MAP:GetDescendants()) do
+                if v:IsA("Folder") and v.Name == "Eggs" then
+                    local egg = v:FindFirstChild(currenteggforfarm)
+                    if egg and egg:IsA("Model") and egg.PrimaryPart then
+                        print(currenteggforfarm)
+                        eggpart = egg.PrimaryPart
+                        print(eggpart, egg)
+                        break
+                    else
+                        print('sosal')
+                    end
+                end
+            end
+            if eggpart then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(eggpart.Position)
+            end
+            task.wait(0.1)
+            for i = 1, 25 do
+                task.wait()
+                local args = {
+                    [1] = {
+                        [1] = {
+                            [1] = "PetSystem",
+                            [2] = "Open",
+                            [3] = currenteggforfarm,
+                            [4] = "Three",
+                            ["n"] = 4
+                        },
+                        [2] = "\2"
+                    }
+                }
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+            end
+            wait(1)
+        end
+    end)
+
 
     local Slider = Tabs.Misc:CreateSlider("Walk Speed Slider", {
         Title = "Walkspeed",
