@@ -22,8 +22,8 @@ local Window = Library:CreateWindow({
 local Tabs = {
     Credits = Window:CreateTab({Title = "Credits", Icon = "book"}),
     Farm = Window:CreateTab({ Title = "Farming", Icon = "align-center" }),
-    --Gamemodes = Window:CreateTab({Title = "Card Gamemode", Icon = "credit-card"}),
-    --Trials = Window:CreateTab({Title = "Trial", Icon = "apple"}),
+    Dungeons = Window:CreateTab({Title = "Dungeons", Icon = "globe"}),
+    Raids = Window:CreateTab({Title = "Raids", Icon = "apple"}),
     --Portals = Window:CreateTab({Title = "Portals", Icon = "globe"}),
     Eggs = Window:CreateTab({Title = "Eggs", Icon = "egg"}),
     --AutoBuy = Window:CreateTab({Title = "Auto Buy", Icon = "shopping-cart"}),
@@ -172,6 +172,7 @@ do
         end
         EnemyDropdown:SetValues(EnemyDrop)
     end
+    
     Tabs.Farm:CreateButton({
         Title = "Refresh Enemies",
         Description = "Update Enemies Dropdown with your current enemies on map",
@@ -232,12 +233,14 @@ do
         local rootPart = findHumanoidRootPart()
             for _, enemy in pairs(ServerEnemiesFolder:GetDescendants()) do
                 if enemy:IsA("Part") and tonumber(enemy:GetAttribute("HP")) > 0 then
-                    if rootPart then
-                        local distance = (rootPart.Position - enemy.Position).Magnitude
-            
-                        if distance < closestDistance then
-                            closestDistance = distance
-                            closestEnemy = enemy
+                    if  enemy:GetAttribute("Shield") == false or enemy:GetAttribute("Shield") == nil then
+                        if rootPart then
+                            local distance = (rootPart.Position - enemy.Position).Magnitude
+                
+                            if distance < closestDistance then
+                                closestDistance = distance
+                                closestEnemy = enemy
+                            end
                         end
                     end
                 end
@@ -487,11 +490,13 @@ do
             for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
                 table.insert(Values, value)
             end
-            if getgenv().AutoFarm == true then
-                if getgenv().AutoFarmWithTeleport == true then
-                    teleportMeToNearestEnemyWithContains()
+            if player:GetAttribute("Mode") == nil or player:GetAttribute("Mode") == "" then
+                if getgenv().AutoFarm == true then
+                    if getgenv().AutoFarmWithTeleport == true then
+                        teleportMeToNearestEnemyWithContains()
+                    end
+                    sendPetsOnEnemy()
                 end
-                sendPetsOnEnemy()
             end
             wait(0.25)
 
@@ -503,6 +508,7 @@ do
         getgenv().AutoFarmNearest = state
         while getgenv().AutoFarmNearest do
             task.wait()
+            if player:GetAttribute("Mode") == nil or player:GetAttribute("Mode") == "" then
                 if getgenv().AutoFarmNearest == true then
                     sendPetsOnNearestEnemy()
                     if getgenv().AutoFarmWithTeleport == true then
@@ -510,7 +516,7 @@ do
                     end
                     wait(0.25)
                 end
-
+            end
         end
         
     end)
@@ -574,35 +580,36 @@ do
                 if v:IsA("Folder") and v.Name == "Eggs" then
                     local egg = v:FindFirstChild(currenteggforfarm)
                     if egg and egg:IsA("Model") and egg.PrimaryPart then
-                        print(currenteggforfarm)
                         eggpart = egg.PrimaryPart
-                        print(eggpart, egg)
                         break
                     else
                         print('sosal')
                     end
                 end
             end
-            if eggpart then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(eggpart.Position)
-            end
-            task.wait(0.1)
-            for i = 1, 25 do
-                task.wait()
-                local args = {
-                    [1] = {
+            local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
+            if atr == "" or atr == nil then
+                if eggpart then
+                    player.Character.HumanoidRootPart.CFrame = CFrame.new(eggpart.Position)
+                end
+                task.wait(0.1)
+                for i = 1, 25 do
+                    task.wait()
+                    local args = {
                         [1] = {
-                            [1] = "PetSystem",
-                            [2] = "Open",
-                            [3] = currenteggforfarm,
-                            [4] = "Three",
-                            ["n"] = 4
-                        },
-                        [2] = "\2"
+                            [1] = {
+                                [1] = "PetSystem",
+                                [2] = "Open",
+                                [3] = currenteggforfarm,
+                                [4] = "Three",
+                                ["n"] = 4
+                            },
+                            [2] = "\2"
+                        }
                     }
-                }
-                
-                game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                end
             end
             wait(1)
         end
@@ -670,7 +677,491 @@ do
         end
     end)
 
+    -- AUTO DUNGEON
 
+    local function findNearestEnemyInDungeon()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+        local rootPart = findHumanoidRootPart()
+            for _, enemy in pairs(workspace._ENEMIES.Server.Dungeon:GetDescendants()) do
+                if enemy:IsA("Part") and tonumber(enemy:GetAttribute("HP")) > 0 then
+                    if  enemy:GetAttribute("Shield") == false or enemy:GetAttribute("Shield") == nil then
+                        if rootPart then
+                            local distance = (rootPart.Position - enemy.Position).Magnitude
+                
+                            if distance < closestDistance then
+                                closestDistance = distance
+                                closestEnemy = enemy
+                            end
+                        end
+                    end
+                end
+            end
+
+    
+        return closestEnemy
+    end
+
+    local function teleportMeToNearestEnemyInDungeon()
+
+    
+        local nearestEnemy = findNearestEnemyInDungeon()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
+            end
+        end
+    end
+
+    local function teleportPetsToNearestEnemyInDungeon()
+        local nearestEnemy = findNearestEnemyInDungeon()
+    
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getEquipedPets()
+    
+            local petsFolder = workspace._PETS:FindFirstChild(tostring(player.UserId))
+            if not petsFolder then
+                warn("Pets folder not found in workspace.Client")
+                return
+            end
+            
+            for i, petName in ipairs(pets) do
+                local pet = petsFolder:FindFirstChild(petName):FindFirstChildOfClass("Model")
+                if pet then
+                    local petrootpart = pet:FindFirstChild("HumanoidRootPart")
+    
+                    if petrootpart then
+                        local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                        
+                        if distanceToPet > teleportRadiusForPet then
+                            petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
+                        end
+                    else
+                        warn("HumanoidRootPart not found for pet:", petName)
+                    end
+                else
+                    warn("Pet not found:", petName)
+                end
+            end
+        end
+    end
+
+    local function sendPetsOnNearestEnemyInDungeon()
+        local nearestEnemy = findNearestEnemyInDungeon()
+        local EquipedPets = getEquipedPets()
+        if nearestEnemy then 
+            for i, v in ipairs(EquipedPets) do
+                local rnpetcheck = v
+                if nearestEnemy then
+                    local success, petsAttribute = pcall(function()
+                        return nearestEnemy:GetAttribute("Pets")
+                    end)
+                    if not success then
+                        print("Ошибка при получении атрибута 'Pets':", petsAttribute) -- petsAttribute здесь будет сообщением об ошибке
+                    else
+                        if petsAttribute then
+                            -- Убираем квадратные скобки и разбиваем строку на элементы
+                            petsAttribute = petsAttribute:sub(2, -2) -- Убираем первую и последнюю скобку
+                            local petsList = {}
+                            for pet in petsAttribute:gmatch('"%s*([^"]+)%s*"') do
+                                table.insert(petsList, pet)
+                            end
+                            -- Проверяем, содержится ли rnpetcheck в petsList
+                            local petFound = false
+                            for _, pet in ipairs(petsList) do
+                                if pet == rnpetcheck then
+                                    petFound = true
+                                    break
+                                end
+                            end
+                            if not petFound then
+                                teleportPetsToNearestEnemyInDungeon()
+                                local args = {
+                                    [1] = {
+                                        [1] = {
+                                            [1] = "PetSystem",
+                                            [2] = "Attack",
+                                            [3] = nearestEnemy.Name,
+                                            [4] = false,
+                                            ["n"] = 4
+                                        },
+                                        [2] = "\2"
+                                    }
+                                }
+                
+                                game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            print("Ближайший враг не найден.")
+        end
+    end
+
+
+    local listofdungeon = game:GetService("ReplicatedStorage").Assets.Dungeons:GetChildren()
+    local AreaDungeonList = Tabs.Dungeons:CreateDropdown("Area Dungeon List",{
+        Title = "Select Area of Dungeon",
+        Description = "",
+        Values = listofdungeon,
+        Multi = false,
+        Default = 1,
+    })
+
+    local DifficultyDungeonList = Tabs.Dungeons:CreateDropdown("Difficulty Dungeon List", {
+        Title = "Select Difficulty of Dungeon",
+        Description = "",
+        Values = {"Easy", "Medium", "Hard", "Insane", "Extreme", "Impossible"},
+        Multi = false,
+        Default = 1,
+    })
+    local PrivateDungeon = Tabs.Dungeons:CreateToggle("Auto Private Dungeon", {Title = "Auto Private Dungeon", Default = false, Description = "Enable if you want your Dungeon to be private"})
+    PrivateDungeon:OnChanged(function(state)
+        getgenv().PrivateDungeon = state
+    end)
+    local AutoCreateDungeon = Tabs.Dungeons:CreateToggle("Auto Create Dungeon", {Title = "Auto Create Dungeon", Default = false, Description = ""})
+    AutoCreateDungeon:OnChanged(function(state)
+        getgenv().AutoCreateDungeon = state
+        while getgenv().AutoCreateDungeon do
+            task.wait()
+            local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
+                if getgenv().AutoCreateDungeon == true then
+                    if atr ~= "Dungeon" then
+                        local args = {
+                            [1] = {
+                                [1] = {
+                                    [1] = "DungeonSystem",
+                                    [2] = "Create",
+                                    ["n"] = 2
+                                },
+                                [2] = "\2"
+                            }
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                        task.wait(0.25)
+                        local args = {
+                            [1] = {
+                                [1] = {
+                                    [1] = "DungeonSystem",
+                                    [2] = "SelectMap",
+                                    [3] = tostring(AreaDungeonList.Value),
+                                    ["n"] = 3
+                                },
+                                [2] = "\2"
+                            }
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                        task.wait(0.25)
+                        local args = {
+                            [1] = {
+                                [1] = {
+                                    [1] = "DungeonSystem",
+                                    [2] = "SelectDiff",
+                                    [3] = tostring(DifficultyDungeonList.Value),
+                                    ["n"] = 3
+                                },
+                                [2] = "\2"
+                            }
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                        task.wait(0.25)
+                        if getgenv().PrivateDungeon == true then
+                            local args = {
+                                [1] = {
+                                    [1] = {
+                                        [1] = "DungeonSystem",
+                                        [2] = "MakePrivate",
+                                        ["n"] = 2
+                                    },
+                                    [2] = "\2"
+                                }
+                            }
+                            
+                            game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))                            
+                            task.wait(0.25)
+                        end
+                        local args = {
+                            [1] = {
+                                [1] = {
+                                    [1] = "DungeonSystem",
+                                    [2] = "Start",
+                                    ["n"] = 2
+                                },
+                                [2] = "\2"
+                            }
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                        task.wait(10)                        
+                    end
+                end
+
+        end
+        
+    end)
+
+    local AutoAttackInDungeon = Tabs.Dungeons:CreateToggle("Auto Attack Dungeon", {Title = "Auto Attack In Dungeon", Default = false, Description = ""})
+    AutoAttackInDungeon:OnChanged(function(state)
+        getgenv().AutoAttackInDungeon = state
+        while getgenv().AutoAttackInDungeon do
+            task.wait()
+            local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
+                if getgenv().AutoAttackInDungeon == true then
+                    if atr == "Dungeon" then
+                        teleportMeToNearestEnemyInDungeon()
+                        sendPetsOnNearestEnemyInDungeon()
+                        wait(0.25)
+                    end
+                end
+
+        end
+        
+    end)
+
+    -- AUTO RAIDS
+
+
+    local function findNearestEnemyInRaid()
+        local closestEnemy = nil
+        local closestDistance = math.huge
+        local rootPart = findHumanoidRootPart()
+            for _, enemy in pairs(workspace._ENEMIES.Server.Raid:GetDescendants()) do
+                if enemy:IsA("Part") and tonumber(enemy:GetAttribute("HP")) > 0 then
+                    if  enemy:GetAttribute("Shield") == false or enemy:GetAttribute("Shield") == nil then
+                        if rootPart then
+                            local distance = (rootPart.Position - enemy.Position).Magnitude
+                
+                            if distance < closestDistance then
+                                closestDistance = distance
+                                closestEnemy = enemy
+                            end
+                        end
+                    end
+                end
+            end
+
+    
+        return closestEnemy
+    end
+
+    local function teleportMeToNearestEnemyInRaid()
+
+    
+        local nearestEnemy = findNearestEnemyInRaid()
+        local rootPart = findHumanoidRootPart()
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local distanceToEnemy = (rootPart.Position - targetRootPart.Position).Magnitude
+            if distanceToEnemy > teleportRadius then
+                rootPart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
+            end
+        end
+    end
+
+    local function teleportPetsToNearestEnemyInRaid()
+        local nearestEnemy = findNearestEnemyInRaid()
+    
+        if nearestEnemy then
+            local targetRootPart = nearestEnemy
+            local pets = getEquipedPets()
+    
+            local petsFolder = workspace._PETS:FindFirstChild(tostring(player.UserId))
+            if not petsFolder then
+                warn("Pets folder not found in workspace.Client")
+                return
+            end
+            
+            for i, petName in ipairs(pets) do
+                local pet = petsFolder:FindFirstChild(petName):FindFirstChildOfClass("Model")
+                if pet then
+                    local petrootpart = pet:FindFirstChild("HumanoidRootPart")
+    
+                    if petrootpart then
+                        local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
+                        
+                        if distanceToPet > teleportRadiusForPet then
+                            petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
+                        end
+                    else
+                        warn("HumanoidRootPart not found for pet:", petName)
+                    end
+                else
+                    warn("Pet not found:", petName)
+                end
+            end
+        end
+    end
+
+    local function sendPetsOnNearestEnemyInRaid()
+        local nearestEnemy = findNearestEnemyInRaid()
+        local EquipedPets = getEquipedPets()
+        if nearestEnemy then 
+            for i, v in ipairs(EquipedPets) do
+                local rnpetcheck = v
+                if nearestEnemy then
+                    local success, petsAttribute = pcall(function()
+                        return nearestEnemy:GetAttribute("Pets")
+                    end)
+                    if not success then
+                        print("Ошибка при получении атрибута 'Pets':", petsAttribute) -- petsAttribute здесь будет сообщением об ошибке
+                    else
+                        if petsAttribute then
+                            -- Убираем квадратные скобки и разбиваем строку на элементы
+                            petsAttribute = petsAttribute:sub(2, -2) -- Убираем первую и последнюю скобку
+                            local petsList = {}
+                            for pet in petsAttribute:gmatch('"%s*([^"]+)%s*"') do
+                                table.insert(petsList, pet)
+                            end
+                            -- Проверяем, содержится ли rnpetcheck в petsList
+                            local petFound = false
+                            for _, pet in ipairs(petsList) do
+                                if pet == rnpetcheck then
+                                    petFound = true
+                                    break
+                                end
+                            end
+                            if not petFound then
+                                teleportPetsToNearestEnemyInRaid()
+                                local args = {
+                                    [1] = {
+                                        [1] = {
+                                            [1] = "PetSystem",
+                                            [2] = "Attack",
+                                            [3] = nearestEnemy.Name,
+                                            [4] = false,
+                                            ["n"] = 4
+                                        },
+                                        [2] = "\2"
+                                    }
+                                }
+                
+                                game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            print("Ближайший враг не найден.")
+        end
+    end
+
+    local listofraids = game:GetService("ReplicatedStorage").Assets.Raids:GetChildren()
+
+    table.sort(listofraids, function(a, b)
+        return a.Name < b.Name
+    end)
+    
+    local AreaRaidList = Tabs.Raids:CreateDropdown("Area Raids List", {
+        Title = "Select Area of Raid",
+        Description = "NUMBER IS A NUMBER OF LOCATION",
+        Values = listofraids,
+        Multi = false,
+        Default = 1,
+    })
+
+    local PrivateRaid = Tabs.Raids:CreateToggle("Auto Private Raid", {Title = "Auto Private Raid", Default = false, Description = "Enable if you want your Raid to be private"})
+    PrivateRaid:OnChanged(function(state)
+        getgenv().PrivateRaid = state
+    end)
+    local AutoCreateRaid = Tabs.Raids:CreateToggle("Auto Create Raid", {Title = "Auto Create Raid", Default = false, Description = ""})
+    AutoCreateRaid:OnChanged(function(state)
+        getgenv().AutoCreateRaid = state
+        while getgenv().AutoCreateRaid do
+            task.wait()
+            local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
+                if getgenv().AutoCreateRaid == true then
+                    if atr ~= "Raid" then
+                        local args = {
+                            [1] = {
+                                [1] = {
+                                    [1] = "RaidSystem",
+                                    [2] = "Create",
+                                    ["n"] = 2
+                                },
+                                [2] = "\2"
+                            }
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                        task.wait(0.25)
+                        local sf = AreaRaidList.Value
+                        local s3 = tostring(sf)
+                        local sf2 = tonumber(s3)
+                        local args = {
+                            [1] = {
+                                [1] = {
+                                    [1] = "RaidSystem",
+                                    [2] = "SelectMap",
+                                    [3] = sf2,
+                                    ["n"] = 3
+                                },
+                                [2] = "\2"
+                            }
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                        task.wait(0.25)
+                        if getgenv().PrivateDungeon == true then
+                            local args = {
+                                [1] = {
+                                    [1] = {
+                                        [1] = "RaidSystem",
+                                        [2] = "MakePrivate",
+                                        ["n"] = 2
+                                    },
+                                    [2] = "\2"
+                                }
+                            }
+                            
+                            game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))                            
+                            task.wait(0.25)
+                        end
+                        local args = {
+                            [1] = {
+                                [1] = {
+                                    [1] = "RaidSystem",
+                                    [2] = "Start",
+                                    ["n"] = 2
+                                },
+                                [2] = "\2"
+                            }
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                        task.wait(10)                        
+                    end
+                end
+
+        end
+        
+    end)
+
+    local AutoAttackInRaid = Tabs.Raids:CreateToggle("Auto Attack Raid", {Title = "Auto Attack In Raid", Default = false, Description = ""})
+    AutoAttackInRaid:OnChanged(function(state)
+        getgenv().AutoAttackInRaid = state
+        while getgenv().AutoAttackInRaid do
+            task.wait()
+            local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
+                if getgenv().AutoAttackInRaid == true then
+                    if atr == "Raid" then
+                        teleportMeToNearestEnemyInRaid()
+                        sendPetsOnNearestEnemyInRaid()
+                        wait(0.25)
+                    end
+                end
+        end
+        
+    end)
     --[[local function delayedTeleport()
         task.wait(10)
         teleportToSavedPosition()
@@ -729,4 +1220,4 @@ end)
 UIAspectRatioConstraint.Parent = ImageButton
 
 UIAspectRatioConstraint_2.Parent = Frame
-end
+end 
