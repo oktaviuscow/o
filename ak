@@ -298,20 +298,26 @@ do
         for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
             table.insert(selectedEnemies, value)
         end
-    
+        local petsFolder = workspace._PETS:FindFirstChild(tostring(player.UserId))
         local nearestEnemy = findNearestEnemy(selectedEnemies)
+        local targetRootPart = nearestEnemy
+        local pets = getEquipedPets()
+        for i, petName in ipairs(pets) do
+            local pet = petsFolder:FindFirstChild(petName):FindFirstChildOfClass("Model")
+            if pet then
+                local petrootpart = pet:FindFirstChild("HumanoidRootPart")
 
-        if nearestEnemy then
-            local targetRootPart = nearestEnemy
-            local pets = getEquipedPets()
-            for i, v in pets do
-                    local petrootpart = workspace._PETS:FindFirstChild(tostring(player.UserId)):FindFirstChild(v):FindFirstChildOfClass("Model"):FindFirstChild("HumanoidRootPart")
+                if petrootpart then
                     local distanceToPet = (targetRootPart.Position - petrootpart.Position).Magnitude
-                    if petrootpart then
+                    
                     if distanceToPet > teleportRadiusForPet then
                         petrootpart.CFrame = CFrame.new(targetRootPart.Position + Vector3.new(0, 0, 3), targetRootPart.Position)
                     end
+                else
+                    warn("HumanoidRootPart not found for pet:", petName)
                 end
+            else
+                warn("Pet not found:", petName)
             end
         end
     end
