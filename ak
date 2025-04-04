@@ -362,60 +362,50 @@ do
     
         for i, v in ipairs(EquipedPets) do
             local rnpetcheck = v
-            local petsAttribute = nearestEnemy:GetAttribute("Pets")
-    
-            -- Проверяем, есть ли атрибут "Pets" и не является ли он пустым
-            if petsAttribute then
-                -- Убираем квадратные скобки и разбиваем строку на элементы
-                petsAttribute = petsAttribute:sub(2, -2) -- Убираем первую и последнюю скобку
-                local petsList = {}
-                for pet in petsAttribute:gmatch('"%s*([^"]+)%s*"') do
-                    table.insert(petsList, pet)
-                end
-    
-                -- Проверяем, содержится ли rnpetcheck в petsList
-                local petFound = false
-                for _, pet in ipairs(petsList) do
-                    if pet == rnpetcheck then
-                        petFound = true
-                        break
+            if nearestEnemy then
+                local success, petsAttribute = pcall(function()
+                    return nearestEnemy:GetAttribute("Pets")
+                end)
+                if not success then
+                    print("Ошибка при получении атрибута 'Pets':", petsAttribute) -- petsAttribute здесь будет сообщением об ошибке
+                else
+                    -- Проверяем, есть ли атрибут "Pets" и не является ли он пустым
+                    if petsAttribute then
+                        -- Убираем квадратные скобки и разбиваем строку на элементы
+                        petsAttribute = petsAttribute:sub(2, -2) -- Убираем первую и последнюю скобку
+                        local petsList = {}
+                        for pet in petsAttribute:gmatch('"%s*([^"]+)%s*"') do
+                            table.insert(petsList, pet)
+                        end
+            
+                        -- Проверяем, содержится ли rnpetcheck в petsList
+                        local petFound = false
+                        for _, pet in ipairs(petsList) do
+                            if pet == rnpetcheck then
+                                petFound = true
+                                break
+                            end
+                        end
+            
+                        if not petFound then
+                            teleportPetsToNearestEnemyWithContains()
+                            local args = {
+                                [1] = {
+                                    [1] = {
+                                        [1] = "PetSystem",
+                                        [2] = "Attack",
+                                        [3] = nearestEnemy.Name,
+                                        [4] = false,
+                                        ["n"] = 4
+                                    },
+                                    [2] = "\2"
+                                }
+                            }
+            
+                            game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                        end
                     end
                 end
-    
-                if not petFound then
-                    teleportPetsToNearestEnemyWithContains()
-                    local args = {
-                        [1] = {
-                            [1] = {
-                                [1] = "PetSystem",
-                                [2] = "Attack",
-                                [3] = nearestEnemy.Name,
-                                [4] = false,
-                                ["n"] = 4
-                            },
-                            [2] = "\2"
-                        }
-                    }
-    
-                    game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
-                end
-            else
-                -- Если атрибут "Pets" не установлен, выполняем действие
-                teleportPetsToNearestEnemyWithContains()
-                local args = {
-                    [1] = {
-                        [1] = {
-                            [1] = "PetSystem",
-                            [2] = "Attack",
-                            [3] = nearestEnemy.Name,
-                            [4] = false,
-                            ["n"] = 4
-                        },
-                        [2] = "\2"
-                    }
-                }
-    
-                game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
             end
         end
     end
@@ -426,38 +416,46 @@ do
         if nearestEnemy then 
             for i, v in ipairs(EquipedPets) do
                 local rnpetcheck = v
-                local petsAttribute = nearestEnemy:GetAttribute("Pets")
-                if petsAttribute then
-                    -- Убираем квадратные скобки и разбиваем строку на элементы
-                    petsAttribute = petsAttribute:sub(2, -2) -- Убираем первую и последнюю скобку
-                    local petsList = {}
-                    for pet in petsAttribute:gmatch('"%s*([^"]+)%s*"') do
-                        table.insert(petsList, pet)
-                    end
-                    -- Проверяем, содержится ли rnpetcheck в petsList
-                    local petFound = false
-                    for _, pet in ipairs(petsList) do
-                        if pet == rnpetcheck then
-                            petFound = true
-                            break
+                if nearestEnemy then
+                    local success, petsAttribute = pcall(function()
+                        return nearestEnemy:GetAttribute("Pets")
+                    end)
+                    if not success then
+                        print("Ошибка при получении атрибута 'Pets':", petsAttribute) -- petsAttribute здесь будет сообщением об ошибке
+                    else
+                        if petsAttribute then
+                            -- Убираем квадратные скобки и разбиваем строку на элементы
+                            petsAttribute = petsAttribute:sub(2, -2) -- Убираем первую и последнюю скобку
+                            local petsList = {}
+                            for pet in petsAttribute:gmatch('"%s*([^"]+)%s*"') do
+                                table.insert(petsList, pet)
+                            end
+                            -- Проверяем, содержится ли rnpetcheck в petsList
+                            local petFound = false
+                            for _, pet in ipairs(petsList) do
+                                if pet == rnpetcheck then
+                                    petFound = true
+                                    break
+                                end
+                            end
+                            if not petFound then
+                                teleportPetsToNearestEnemyWithoutContains()
+                                local args = {
+                                    [1] = {
+                                        [1] = {
+                                            [1] = "PetSystem",
+                                            [2] = "Attack",
+                                            [3] = nearestEnemy.Name,
+                                            [4] = false,
+                                            ["n"] = 4
+                                        },
+                                        [2] = "\2"
+                                    }
+                                }
+                
+                                game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                            end
                         end
-                    end
-                    if not petFound then
-                        teleportPetsToNearestEnemyWithoutContains()
-                        local args = {
-                            [1] = {
-                                [1] = {
-                                    [1] = "PetSystem",
-                                    [2] = "Attack",
-                                    [3] = nearestEnemy.Name,
-                                    [4] = false,
-                                    ["n"] = 4
-                                },
-                                [2] = "\2"
-                            }
-                        }
-        
-                        game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
                     end
                 end
             end
