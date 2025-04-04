@@ -509,13 +509,6 @@ do
         
     end)
 
-    Tabs.Farm:CreateButton({
-        Title = "Refresh Enemies",
-        Description = "Update Enemies Dropdown with your current enemies on map",
-        Callback = function()
-            RefreshEnemyDropdownWithNewEnemies()
-        end
-    })
 
     local eggfolder = workspace._MAP
     local egglist = {}
@@ -566,9 +559,9 @@ do
     local Slider = Tabs.Misc:CreateSlider("Walk Speed Slider", {
         Title = "Walkspeed",
         Description = "This is a slider",
-        Default = 15,
+        Default = 0,
         Min = 0,
-        Max = 100,
+        Max = 25,
         Rounding = 1,
         Callback = function(Value)
             -- Останавливаем предыдущий цикл, если он существует
@@ -599,6 +592,31 @@ do
             end
         end
     })
+
+
+    local AutoClick = Tabs.Misc:CreateToggle("Auto Click", {Title = "Auto Click", Default = false, Description = ""})
+
+    AutoClick:OnChanged(function(State)-- Auto Click
+        getgenv().AutoClicking = State
+        while getgenv().AutoClicking == true do
+            if not getgenv().AutoClicking == true then return end
+                task.wait()
+                local args = {
+                    [1] = {
+                        [1] = {
+                            [1] = "PetSystem",
+                            [2] = "Click",
+                            ["n"] = 2
+                        },
+                        [2] = "\2"
+                    }
+                }
+                
+                game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+                
+        end
+    end)
+
 
     --[[local function delayedTeleport()
         task.wait(10)
