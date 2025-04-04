@@ -3127,7 +3127,7 @@ spawnteamtab()
 
 end
 
-do
+--[[do
 
 local function checkOpenValueForWeb()
     local openvalue = game:GetService("ReplicatedStorage").Gamemodes.Portal.Open.Value
@@ -3226,7 +3226,7 @@ getgenv().CheckForWeb = true
         end
 
         coroutine.wrap(trackCurrentOpen)()
-end
+end]]
 
 
 SaveManager:SetLibrary(Library)
