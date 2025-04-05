@@ -22,9 +22,9 @@ local Window = Library:CreateWindow({
 local Tabs = {
     Credits = Window:CreateTab({Title = "Credits", Icon = "book"}),
     Farm = Window:CreateTab({ Title = "Farming", Icon = "align-center" }),
+    Teleport = Window:CreateTab({Title = "Teleport", Icon = "users"}),
     Dungeons = Window:CreateTab({Title = "Dungeons", Icon = "globe"}),
     Raids = Window:CreateTab({Title = "Raids", Icon = "apple"}),
-    --Portals = Window:CreateTab({Title = "Portals", Icon = "globe"}),
     Eggs = Window:CreateTab({Title = "Eggs", Icon = "egg"}),
     --AutoBuy = Window:CreateTab({Title = "Auto Buy", Icon = "shopping-cart"}),
     --Rerolls = Window:CreateTab({Title = "Auto Rolls", Icon = "refresh-ccw"}),
@@ -62,8 +62,8 @@ local character = player.Character
     bb:CaptureController()bb:ClickButton2(Vector2.new())end)
 
 folderName = "Apel Hub"
-PositionfileName = "Saved Position.txt"
-WorldfileName = "Saved World.txt"    
+PositionfileName = "Saved Position2.txt"
+WorldfileName = "Saved World2.txt"    
 PositionfolderPath = folderName .. "\\" .. PositionfileName
 WorldfolderPath = folderName .. "\\" .. WorldfileName
 
@@ -77,8 +77,8 @@ end
 
 -- Проверяем, существует ли файл
 if not isfile(PositionfolderPath) or not isfile(WorldfolderPath) then
-    local positionforsave = "139.8529052734375, 377.14923095703125, 3295.7548828125"
-    local worldforsave = "Piece Village"
+    local positionforsave = "2682.995361328125, 102.79471588134766, 84.51563262939453"
+    local worldforsave = "1"
     if not isfile(PositionfolderPath) then
     writefile(PositionfolderPath, tostring(positionforsave))
     end
@@ -91,19 +91,27 @@ else
 end
 
 
+local function checkgamemode()
+    local player = game:GetService("Players").LocalPlayer
+    local atr = player:GetAttribute("Mode")
+    if atr == "Raid" then
+        getgenv().currentmode = atr
+    elseif  atr == "Dungeon" then
+        getgenv().currentmode = atr
+    elseif not atr then
+        getgenv().currentmode = "None"
+    end
+end
+
+coroutine.wrap(function()
+    while true do
+        checkgamemode()
+        task.wait()
+    end
+end)()
+
+
 do
-
-    --[[local AutoClick = Tabs.Misc:CreateToggle("Auto Click", {Title = "Auto Click", Default = false, Description = ""})
-
-    AutoClick:OnChanged(function(State)-- Auto Click
-        getgenv().AutoClicking = State
-        while getgenv().AutoClicking == true do
-            if not getgenv().AutoClicking == true then return end
-                task.wait(0.01)
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Bridge"):FireServer("Enemies", "World", "Click")
-        end
-    end)]]
-
 
     local EnemiesFolder = workspace._ENEMIES.Client
     local ServerEnemiesFolder = workspace._ENEMIES.Server
@@ -821,6 +829,80 @@ do
         Multi = false,
         Default = 1,
     })
+
+    getgenv().DungeonWaveLimit = 1
+    local DungeonWaveLimit = Tabs.Dungeons:CreateInput("DungeonWaveLimit", {
+        Title = "Dungeon Wave Limit",
+        Default = 1, 
+        Description = "On this wave script will auto leave",
+        Numeric = true,
+        Finished = false,
+        Callback = function(Value)
+            getgenv().DungeonWaveLimit = tonumber(Value)
+        end
+    })
+    DungeonWaveLimit:OnChanged(function(Value)
+        getgenv().DungeonWaveLimit = tonumber(Value)
+    end)
+
+
+    local AutoLeaveDungeon = Tabs.Dungeons:CreateToggle("Auto Leave Dungeon",{
+        Title = "Auto Leave Dungeon",
+        Default = false,
+        Description = ""
+    })
+
+    local function teleportToSavedPosition()
+        if getgenv().SavedPosition and getgenv().SavedWorld then
+            local args = {
+                [1] = {
+                    [1] = {
+                        [1] = "TeleportSystem",
+                        [2] = "To",
+                        [3] = tonumber(getgenv().SavedWorld),
+                        ["n"] = 3
+                    },
+                    [2] = "\2"
+                }
+            }
+            
+            game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+            
+            wait(2)
+    
+            local HumanoidRootPart = findHumanoidRootPart()
+            -- Телепортируем персонажа на сохраненную позицию
+            HumanoidRootPart.CFrame = getgenv().SavedPosition
+        else
+            warn("Saved world or position is not set.")
+        end
+    end
+
+    AutoLeaveDungeon:OnChanged(function(state)
+        getgenv().AutoLeaveDungeon = state
+            local function checkcurrentwave()
+                while getgenv().AutoLeaveDungeon do
+                    task.wait(10)
+                    local UserId = player.UserId
+                    local waveNumber = tonumber(game:GetService("ReplicatedStorage").Server.Dungeon:FindFirstChild(tostring(UserId)):GetAttribute("Stage"))
+                    local DungeonWaveLimit = tonumber(getgenv().DungeonWaveLimit)
+                    if waveNumber and DungeonWaveLimit and waveNumber >= DungeonWaveLimit and getgenv().currentmode == "Dungeon" then
+                        print("Достигнут лимит волн, телепортируем...")
+                        wait(3)
+                        teleportToSavedPosition()
+                        wait(1)
+                        teleportToSavedPosition()
+                        wait(1)
+                        teleportToSavedPosition()
+                    end
+                end
+            end
+            
+            -- Запускаем корутину
+            coroutine.wrap(checkcurrentwave)()
+
+    end)
+
     local PrivateDungeon = Tabs.Dungeons:CreateToggle("Auto Private Dungeon", {Title = "Auto Private Dungeon", Default = false, Description = "Enable if you want your Dungeon to be private"})
     PrivateDungeon:OnChanged(function(state)
         getgenv().PrivateDungeon = state
@@ -1162,6 +1244,111 @@ do
         end
         
     end)
+
+
+    local savedWolrdString = readfile(WorldfolderPath)
+    getgenv().SavedWorld = tostring(savedWolrdString)
+        -- Чтение сохраненной позиции из файла
+    local savedPositionString = readfile(PositionfolderPath)
+    local positionValues = {}
+
+    -- Разделяем строку на отдельные координаты
+    for value in string.gmatch(savedPositionString, "[^,]+") do
+        table.insert(positionValues, tonumber(value))
+    end
+
+    -- Проверяем, что у нас есть три координаты
+    if #positionValues == 3 then
+        -- Создаем CFrame из координат
+        getgenv().SavedPosition = CFrame.new(positionValues[1], positionValues[2], positionValues[3])
+        print("Сохраненная позиция установлена:", getgenv().SavedPosition)
+    else
+        warn("Ошибка: неверное количество координат в файле.")
+    end
+
+    local currentPositionParagraph = Tabs.Teleport:CreateParagraph("Current pos paragraph", {
+        Title = "Current Position",
+        Content = "World: "..savedWolrdString.."\nPosition: "..savedPositionString
+    })
+    
+    local function updatePositionAndMap()
+        for _, v in ipairs(workspace._ENEMIES.Server:GetChildren()) do
+            -- Проверяем, является ли v папкой (Model или Folder)
+            if v:IsA("Folder") then
+                local hasParts = false
+                
+                -- Проверяем, есть ли в папке дочерние элементы, которые являются частями
+                for _, child in ipairs(v:GetChildren()) do
+                    if child:IsA("Part") then
+                        hasParts = true
+                        break
+                    end
+                end
+                
+                -- Если в папке есть части, сохраняем ее имя
+                if hasParts then
+                    getgenv().SavedWorld = v.Name
+                    writefile(WorldfolderPath, v.Name)
+                    break
+                end
+            end
+        end
+    
+        -- Получаем новую позицию
+        local HumanoidRootPart = findHumanoidRootPart()
+        getgenv().SavedPosition = CFrame.new(HumanoidRootPart.Position)
+        writefile(PositionfolderPath, tostring(getgenv().SavedPosition.x)..","..tostring(getgenv().SavedPosition.y)..","..tostring(getgenv().SavedPosition.z))
+        -- Обновляем содержимое параграфа
+        currentPositionParagraph:SetValue("World: " .. tostring(getgenv().SavedWorld) .. "\nPosition: " .. tostring(getgenv().SavedPosition))
+    end
+    
+    Tabs.Teleport:CreateButton({
+        Title = "Save New Position",
+        Description = "Change your position for auto teleport",
+        Callback = function()
+            -- Вызываем функцию обновления позиции и карты
+            updatePositionAndMap()
+        end
+    })
+    
+    Tabs.Teleport:CreateButton({
+        Title = "Teleport To Saved Position",
+        Description = "",
+        Callback = function()
+            -- Вызываем функцию обновления позиции и карты
+            teleportToSavedPosition()
+        end
+    })
+
+    local TeleportBack = Tabs.Teleport:CreateToggle("Auto Teleport Back",{
+        Title = "Auto Teleport Back",
+        Description = "",
+        Default = false
+    })
+
+    TeleportBack:OnChanged(function(state)
+        getgenv().TeleportBack = state
+        local previousMode = getgenv().currentmode
+
+        local function trackCurrentMode()
+            while getgenv().TeleportBack do
+                local currentMode = getgenv().currentmode
+                if currentMode ~= previousMode then
+                    print("Текущий режим изменился на:", currentMode) 
+                    if previousMode ~= "None"  then
+                        task.wait(2)
+                        teleportToSavedPosition()
+                    end
+                    previousMode = currentMode
+                end
+                
+                task.wait(5)
+            end
+        end
+
+        coroutine.wrap(trackCurrentMode)()
+    end)
+
     --[[local function delayedTeleport()
         task.wait(10)
         teleportToSavedPosition()
