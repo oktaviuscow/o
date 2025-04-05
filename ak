@@ -624,12 +624,12 @@ do
     end)
 
 
-    local Slider = Tabs.Misc:CreateSlider("Walk Speed Slider", {
+    local WalkSpeedSlider = Tabs.Misc:CreateSlider("Walk Speed Slider", {
         Title = "Walkspeed",
-        Description = "This is a slider",
+        Description = "",
         Default = 0,
         Min = 0,
-        Max = 25,
+        Max = 10,
         Rounding = 1,
         Callback = function(Value)
             -- Останавливаем предыдущий цикл, если он существует
