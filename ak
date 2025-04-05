@@ -76,6 +76,7 @@ else
 end
 
 coroutine.wrap(function()
+    while true do
     task.wait(5)
     game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
     task.wait()
@@ -89,6 +90,7 @@ coroutine.wrap(function()
     task.wait()
     game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
     task.wait(120)
+    end
 end)()
 
 -- Проверяем, существует ли файл
@@ -902,6 +904,7 @@ do
                     local UserId = player.UserId
                     local waveNumber = tonumber(game:GetService("ReplicatedStorage").Server.Dungeon:FindFirstChild(tostring(UserId)):GetAttribute("Stage"))
                     local DungeonWaveLimit = tonumber(getgenv().DungeonWaveLimit)
+                    print(tostring(waveNumber).." | "..tostring(DungeonWaveLimit))
                     if waveNumber and DungeonWaveLimit and waveNumber >= DungeonWaveLimit and getgenv().currentmode == "Dungeon" then
                         print("Достигнут лимит волн, телепортируем...")
                         wait(3)
