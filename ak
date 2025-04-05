@@ -75,6 +75,22 @@ else
     print("Папка '" .. folderName .. "' уже существует.")
 end
 
+coroutine.wrap(function()
+    task.wait(5)
+    game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
+    task.wait()
+    game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
+    task.wait(1)
+    game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
+    task.wait()
+    game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
+    task.wait(1)
+    game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
+    task.wait()
+    game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
+    task.wait(120)
+end)()
+
 -- Проверяем, существует ли файл
 if not isfile(PositionfolderPath) or not isfile(WorldfolderPath) then
     local positionforsave = "2682.995361328125, 102.79471588134766, 84.51563262939453"
