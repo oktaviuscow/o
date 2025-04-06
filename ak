@@ -499,6 +499,7 @@ do
         end
     end
     local AutoFarmSelectedMobs = Tabs.Farm:CreateToggle("Auto Farm Selected Mobs", {Title = "Auto Farm Selected Mobs", Default = false, Description = ""})
+    local FastAutoFarmSelectedMobs = Tabs.Farm:CreateToggle("Fast Auto Farm Selected Mobs", {Title = "Fast Auto Farm Selected Mobs", Default = false, Description = ""})
 
     local AutoFarmWithTeleport = Tabs.Farm:CreateToggle("Auto Farm With Teleport", {Title = "Auto Farm With Teleport", Default = false, Description = ""})
 
@@ -528,6 +529,59 @@ do
 
         end
     end)
+
+    FastAutoFarmSelectedMobs:OnChanged(function(state)
+        getgenv().FastAutoFarm = state
+    
+        while getgenv().FastAutoFarm do
+            task.wait(0)
+            if player:GetAttribute("Mode") == nil or player:GetAttribute("Mode") == "" then
+                if getgenv().FastAutoFarm == true then
+                    local selectedEnemies = {}
+                    for _, value in ipairs(EnemyDropdown:GetSelectedValues()) do
+                        table.insert(selectedEnemies, value)
+                    end
+                    local nearestEnemy = findNearestEnemy(selectedEnemies)
+                    local pets = getEquipedPets()
+                
+                    if getgenv().AutoFarmWithTeleport == true then
+                        teleportMeToNearestEnemyWithContains()
+                    end
+                    if nearestEnemy then
+                        local args = {
+                            [1] = {
+                                [1] = {
+                                    [1] = "PetSystem",
+                                    [2] = "Attack",
+                                    [3] = nearestEnemy.Name,
+                                    [4] = true,
+                                    ["n"] = 4
+                                },
+                                [2] = "\2"
+                            }
+                        }
+                        
+                        game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))  
+                        for i, v in ipairs(pets) do
+                            local args = {
+                                [1] = {
+                                    [1] = {
+                                        [1] = "PetSystem",
+                                        [2] = "Closest",
+                                        [3] = v,
+                                        ["n"] = 3
+                                    },
+                                    [2] = "\2"
+                                }
+                            }
+                            
+                            game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))                            
+                        end                     
+                    end
+                end
+            end
+        end
+    end)
     
     local AutoFarmNearest = Tabs.Farm:CreateToggle("Auto Farm Nearest", {Title = "Auto Farm Nearest", Default = false, Description = ""})
     AutoFarmNearest:OnChanged(function(state)
@@ -551,7 +605,7 @@ do
     AutoFarmNearestFast:OnChanged(function(state)
         getgenv().AutoFarmNearestFast = state
         while getgenv().AutoFarmNearestFast do
-            task.wait()
+            task.wait(0)
             if player:GetAttribute("Mode") == nil or player:GetAttribute("Mode") == "" then
                 if getgenv().AutoFarmNearestFast == true then
                     if getgenv().AutoFarmWithTeleport == true then
@@ -574,7 +628,6 @@ do
                         }
                         
                         game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))  
-                        task.wait()
                         for i, v in ipairs(pets) do
                             local args = {
                                 [1] = {
@@ -591,7 +644,6 @@ do
                             game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))                            
                         end                     
                     end
-                    task.wait()
                 end
             end
         end
@@ -1099,7 +1151,7 @@ do
     FastAutoAttackInDungeon:OnChanged(function(state)
         getgenv().AutoAttackInDungeon = state
         while getgenv().AutoAttackInDungeon do
-            task.wait()
+            task.wait(0)
             local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
                 if getgenv().AutoAttackInDungeon == true then
                     if atr == "Dungeon" then
@@ -1121,7 +1173,6 @@ do
                             }
                             
                             game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))  
-                            task.wait()
                             for i, v in ipairs(pets) do
                                 local args = {
                                     [1] = {
@@ -1138,7 +1189,6 @@ do
                                 game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))                            
                             end                     
                         end
-                        task.wait()
                     end
                 end
         end
@@ -1386,7 +1436,7 @@ do
     FastAutoAttackInRaid:OnChanged(function(state)
         getgenv().FastAutoAttackInRaid = state
         while getgenv().FastAutoAttackInRaid do
-            task.wait()
+            task.wait(0)
             local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
                 if getgenv().FastAutoAttackInRaid == true then
                     if atr == "Raid" then
@@ -1408,7 +1458,6 @@ do
                             }
                             
                             game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))  
-                            task.wait()
                             for i, v in ipairs(pets) do
                                 local args = {
                                     [1] = {
@@ -1425,7 +1474,6 @@ do
                                 game:GetService("ReplicatedStorage"):WaitForChild("ffrostflame_bridgenet2@1.0.0"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))                            
                             end                     
                         end
-                        task.wait()
                     end
                 end
         end
