@@ -88,7 +88,7 @@ coroutine.wrap(function()
     game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
     task.wait()
     game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
-    task.wait(120)
+    task.wait(600)
     end
 end)()
 
