@@ -89,7 +89,7 @@ coroutine.wrap(function()
     game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
     task.wait()
     game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
-    task.wait(600)
+    task.wait(120)
     end
 end)()
 
@@ -898,26 +898,39 @@ do
 
     AutoLeaveDungeon:OnChanged(function(state)
         getgenv().AutoLeaveDungeon = state
-            local function checkcurrentwave()
-                while getgenv().AutoLeaveDungeon do
-                    task.wait(10)
-                    local UserId = player.UserId
-                    local waveNumber = tonumber(game:GetService("ReplicatedStorage").Server.Dungeon:FindFirstChild(tostring(UserId)):GetAttribute("Stage"))
-                    local DungeonWaveLimit = tonumber(getgenv().DungeonWaveLimit)
-                    print(tostring(waveNumber).." | "..tostring(DungeonWaveLimit))
-                    if waveNumber and DungeonWaveLimit and waveNumber >= DungeonWaveLimit and getgenv().currentmode == "Dungeon" then
-                        print("Достигнут лимит волн, телепортируем...")
-                        wait(3)
-                        teleportToSavedPosition()
-                        wait(1)
-                        teleportToSavedPosition()
-                        wait(1)
-                        teleportToSavedPosition()
+        local function checkcurrentwave()
+            while getgenv().AutoLeaveDungeon == true do
+                task.wait(10)
+                local UserId = player.UserId
+                local dungeon = game:GetService("ReplicatedStorage").Server.Dungeon:FindFirstChild(tostring(UserId))
+        
+                -- Проверяем, существует ли объект dungeon
+                if dungeon then
+                    -- Проверяем, есть ли атрибут "Stage"
+                    local waveNumber = dungeon:GetAttribute("Stage")
+                    if waveNumber then
+                        waveNumber = tonumber(waveNumber)
+                        local DungeonWaveLimit = tonumber(getgenv().DungeonWaveLimit)
+                        print(tostring(waveNumber) .. " | " .. tostring(DungeonWaveLimit))
+        
+                        if DungeonWaveLimit and waveNumber >= DungeonWaveLimit and getgenv().currentmode == "Dungeon" then
+                            print("Достигнут лимит волн, телепортируем...")
+                            wait(3)
+                            teleportToSavedPosition()
+                            wait(1)
+                            teleportToSavedPosition()
+                            wait(1)
+                            teleportToSavedPosition()
+                        end
+                    else
+                        print("Атрибут 'Stage' не найден для UserId: " .. tostring(UserId))
                     end
+                else
+                    print("Объект для UserId не найден: " .. tostring(UserId))
                 end
             end
+        end
             
-            -- Запускаем корутину
             coroutine.wrap(checkcurrentwave)()
 
     end)
@@ -933,7 +946,7 @@ do
             task.wait()
             local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
                 if getgenv().AutoCreateDungeon == true then
-                    if atr ~= "Dungeon" then
+                    if getgenv().currentmode == "None" then
                         local args = {
                             [1] = {
                                 [1] = {
@@ -1181,7 +1194,7 @@ do
             task.wait()
             local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
                 if getgenv().AutoCreateRaid == true then
-                    if atr ~= "Raid" then
+                    if getgenv().currentmode == "None" then
                         local args = {
                             [1] = {
                                 [1] = {
