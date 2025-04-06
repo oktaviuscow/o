@@ -17,7 +17,7 @@ local Window = Library:CreateWindow({
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
 })
-
+getgenv().waiter = 0
 
 local Tabs = {
     Credits = Window:CreateTab({Title = "Credits", Icon = "book"}),
@@ -534,7 +534,7 @@ do
         getgenv().FastAutoFarm = state
     
         while getgenv().FastAutoFarm do
-            task.wait(0)
+            task.wait(getgenv().waiter)
             if player:GetAttribute("Mode") == nil or player:GetAttribute("Mode") == "" then
                 if getgenv().FastAutoFarm == true then
                     local selectedEnemies = {}
@@ -605,7 +605,7 @@ do
     AutoFarmNearestFast:OnChanged(function(state)
         getgenv().AutoFarmNearestFast = state
         while getgenv().AutoFarmNearestFast do
-            task.wait(0)
+            task.wait(getgenv().waiter)
             if player:GetAttribute("Mode") == nil or player:GetAttribute("Mode") == "" then
                 if getgenv().AutoFarmNearestFast == true then
                     if getgenv().AutoFarmWithTeleport == true then
@@ -1151,7 +1151,7 @@ do
     FastAutoAttackInDungeon:OnChanged(function(state)
         getgenv().AutoAttackInDungeon = state
         while getgenv().AutoAttackInDungeon do
-            task.wait(0)
+            task.wait(getgenv().waiter)
             local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
                 if getgenv().AutoAttackInDungeon == true then
                     if atr == "Dungeon" then
@@ -1436,7 +1436,7 @@ do
     FastAutoAttackInRaid:OnChanged(function(state)
         getgenv().FastAutoAttackInRaid = state
         while getgenv().FastAutoAttackInRaid do
-            task.wait(0)
+            task.wait(getgenv().waiter)
             local atr = game:GetService("Players").LocalPlayer:GetAttribute("Mode")
                 if getgenv().FastAutoAttackInRaid == true then
                     if atr == "Raid" then
