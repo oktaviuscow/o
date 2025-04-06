@@ -17,7 +17,6 @@ local Window = Library:CreateWindow({
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
 })
-getgenv().waiter = 0
 
 local Tabs = {
     Credits = Window:CreateTab({Title = "Credits", Icon = "book"}),
@@ -130,6 +129,21 @@ end)()
 
 
 do
+    getgenv().waiter = 0
+    local WaiterLimit = Tabs.Misc:CreateInput("Waiter", {
+        Title = "Time for wait for Fast attack",
+        Default = 0, 
+        Description = "",
+        Numeric = true,
+        Finished = false,
+        Callback = function(Value)
+            getgenv().waiter = tonumber(Value)
+        end
+    })
+    WaiterLimit:OnChanged(function(Value)
+        getgenv().waiter = tonumber(Value)
+    end)
+
 
     local EnemiesFolder = workspace._ENEMIES.Client
     local ServerEnemiesFolder = workspace._ENEMIES.Server
