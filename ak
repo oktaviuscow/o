@@ -547,7 +547,7 @@ do
         
     end)
 
-    local AutoFarmNearestFast = Tabs.Farm:CreateToggle("Auto Farm Nearest Fast", {Title = "Auto Farm Nearest Fast", Default = false, Description = ""})
+    local AutoFarmNearestFast = Tabs.Farm:CreateToggle("Auto Farm Nearest Fast", {Title = "Auto Farm Nearest Fast", Default = false, Description = "YOU MUST HAVE SET DISABLE RETREAT IN SETTINGS ON OFF "})
     AutoFarmNearestFast:OnChanged(function(state)
         getgenv().AutoFarmNearestFast = state
         while getgenv().AutoFarmNearestFast do
@@ -1095,7 +1095,7 @@ do
         
     end)
 
-    local FastAutoAttackInDungeon = Tabs.Dungeons:CreateToggle("Fast Auto Attack Dungeon", {Title = "Fast Auto Attack In Dungeon", Default = false, Description = ""})
+    local FastAutoAttackInDungeon = Tabs.Dungeons:CreateToggle("Fast Auto Attack Dungeon", {Title = "Fast Auto Attack In Dungeon", Default = false, Description = "YOU MUST HAVE SET DISABLE RETREAT IN SETTINGS ON OFF "})
     FastAutoAttackInDungeon:OnChanged(function(state)
         getgenv().AutoAttackInDungeon = state
         while getgenv().AutoAttackInDungeon do
@@ -1382,7 +1382,7 @@ do
         
     end)
 
-    local FastAutoAttackInRaid = Tabs.Raids:CreateToggle("Fast Auto Attack Raid", {Title = "Fast Auto Attack In Raid", Default = false, Description = ""})
+    local FastAutoAttackInRaid = Tabs.Raids:CreateToggle("Fast Auto Attack Raid", {Title = "Fast Auto Attack In Raid", Default = false, Description = "YOU MUST HAVE SET DISABLE RETREAT IN SETTINGS ON OFF "})
     FastAutoAttackInRaid:OnChanged(function(state)
         getgenv().FastAutoAttackInRaid = state
         while getgenv().FastAutoAttackInRaid do
