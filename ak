@@ -129,10 +129,10 @@ end)()
 
 
 do
-    getgenv().waiter = 0.01
+    getgenv().waiter = 0.005
     local WaiterLimit = Tabs.Misc:CreateInput("Waiter", {
         Title = "Time for wait for Fast attack",
-        Default = 0.01, 
+        Default = 0.005, 
         Description = "",
         Numeric = true,
         Finished = false,
