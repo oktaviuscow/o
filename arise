@@ -27,6 +27,12 @@ local Tabs = {
 
 local Options = Library.Options
 
+Library:Notify{
+    Title = "Notification",
+    Content = "This is a notification",
+    SubContent = "SubContent",
+    Duration = 5
+}
 
 local function parseHP(healthText)
     local number = tonumber(healthText:match("([%d%.]+)"))
@@ -347,12 +353,7 @@ Dropdown:OnChanged(function(Value)
                 end
 
                 if currentTarget then
-                    local rayOrigin = humanoidRootPart.Position
-                    local rayDirection = Vector3.new(0, -100, 0)
-                    local raycastResult = workspace:Raycast(rayOrigin, rayDirection)
-                    local groundHeight = raycastResult and raycastResult.Position.Y or humanoidRootPart.Position.Y
-                    local targetY = groundHeight + 3 -- Фиксированная высота над землей
-                    
+                    local targetY = currentTarget.Position.Y + 3
                     local targetPosition = Vector3.new(currentTarget.Position.X, targetY, currentTarget.Position.Z)
                     humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
                     humanoidRootPart.CFrame = humanoidRootPart.CFrame:Lerp(CFrame.new(targetPosition), 0.1)
@@ -414,7 +415,7 @@ local RefreshButton = Tabs.Main:CreateButton{
     end
 }
 
--- Toggle 4: Fly to Near Enemy
+-- Toggle 4: Fly to Near Enemy (Improved with farming)
 local Toggle4 = Tabs.Main:CreateToggle("MyToggle4", {Title = "Fly to Near Enemy", Default = false })
 local flyRunning = false
 
@@ -428,7 +429,6 @@ Toggle4:OnChanged(function()
         local character = player.Character or player.CharacterAdded:Wait()
         local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
         local humanoid = character:WaitForChild("Humanoid")
-        local lastTeleportedEnemy = nil
         
         humanoid.PlatformStand = true
         humanoidRootPart.CanCollide = false
@@ -511,48 +511,33 @@ Toggle4:OnChanged(function()
             local currentTarget = nil
             while flyRunning do
                 updateNameTable()
-                local closestEnemy = findClosestValidEnemy()
                 
-                if closestEnemy and (not currentTarget or currentTarget.Name ~= closestEnemy.Name or 
-                   (humanoidRootPart.Position - currentTarget.Position).Magnitude > 5) then
-                    currentTarget = closestEnemy
-                    lastTeleportedEnemy = nil
+                if not currentTarget or not currentTarget.Instance.Parent or currentTarget.Health <= 0 then
+                    currentTarget = findClosestValidEnemy()
                 end
-                
+
                 if currentTarget then
-                    local rayOrigin = humanoidRootPart.Position
-                    local rayDirection = Vector3.new(0, -100, 0)
-                    local raycastResult = workspace:Raycast(rayOrigin, rayDirection)
-                    local groundHeight = raycastResult and raycastResult.Position.Y or humanoidRootPart.Position.Y
-                    local targetY = groundHeight + 3 -- Фиксированная высота над землей
-                    
+                    local targetY = currentTarget.Position.Y + 3
                     local targetPosition = Vector3.new(currentTarget.Position.X, targetY, currentTarget.Position.Z)
                     humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
                     humanoidRootPart.CFrame = humanoidRootPart.CFrame:Lerp(CFrame.new(targetPosition), 0.1)
                     
-                    local playerDistanceToEnemy = (humanoidRootPart.Position - currentTarget.Position).Magnitude
-                    if playerDistanceToEnemy <= 10 then
-                        lastTeleportedEnemy = currentTarget
-                    end
-                    if not currentTarget.Instance.Parent or currentTarget.Health <= 0 then
-                        currentTarget = nil
-                        lastTeleportedEnemy = nil
-                    end
-                elseif #nameTable > 0 then
-                    local fallbackEnemy, minDistance = nil, math.huge
-                    local playerPosition = humanoidRootPart.Position
-                    for _, entry in ipairs(nameTable) do
-                        local distance = (playerPosition - entry.Position).Magnitude
-                        if distance < minDistance then
-                            minDistance = distance
-                            fallbackEnemy = entry
-                        end
-                    end
-                    if fallbackEnemy then
-                        currentTarget = fallbackEnemy
-                    end
+                    local punchTable = {
+                        [1] = {["Event"] = "PunchAttack", ["Enemy"] = currentTarget.Name},
+                        [2] = utf8.char(4)
+                    }
+                    game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer(punchTable)
+
+                    local healthAmount = currentTarget.Instance and 
+                                        currentTarget.Instance:FindFirstChild("HealthBar") and 
+                                        currentTarget.Instance.HealthBar:FindFirstChild("Main") and 
+                                        currentTarget.Instance.HealthBar.Main:FindFirstChild("Bar") and 
+                                        currentTarget.Instance.HealthBar.Main.Bar:FindFirstChild("Amount")
+                    local healthText = healthAmount and healthAmount.Text or "0"
+                    currentTarget.Health = parseHP(healthText)
                 end
-                task.wait(0.01)
+                
+                task.wait(0.05)
             end
             humanoid.PlatformStand = false
             humanoidRootPart.CanCollide = true
