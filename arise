@@ -1,0 +1,767 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+
+local Window = Library:CreateWindow{
+    Title = `Apel Hub {Library.Version}`,
+    SubTitle = "by Apel Hub",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(830, 525),
+    Resize = true,
+    MinSize = Vector2.new(470, 380),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
+}
+
+local Tabs = {
+    Main = Window:CreateTab{
+        Title = "Main",
+        Icon = "phosphor-users-bold"
+    },
+    Settings = Window:CreateTab{
+        Title = "Settings",
+        Icon = "settings"
+    }
+}
+
+local Options = Library.Options
+
+
+local function parseHP(healthText)
+    local number = tonumber(healthText:match("([%d%.]+)"))
+    if not number then return 0 end
+    if healthText:find("K") then
+        number = number * 1000
+    elseif healthText:find("M") then
+        number = number * 1000000
+    end
+    return math.floor(number)
+end
+
+-- Toggle 1: Fast Auto Click
+local Toggle = Tabs.Main:CreateToggle("MyToggle", {Title = "Fast Auto Click", Default = false })
+local autoClickRunning = false
+
+Toggle:OnChanged(function()
+    autoClickRunning = Options.MyToggle.Value
+    
+    if autoClickRunning then
+        local nameTable = {}
+        local enemies = workspace.__Main.__Enemies.Client
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local function updateNameTable()
+            nameTable = {}
+            for _, client in pairs(enemies:GetChildren()) do
+                if client:FindFirstChild("HealthBar") and 
+                   client.HealthBar:FindFirstChild("Main") and 
+                   client.HealthBar.Main:FindFirstChild("Title") then
+                    local clientName = client.Name
+                    local clientPosition = client:FindFirstChild("HumanoidRootPart") and client.HumanoidRootPart.Position
+                    local healthAmount = client.HealthBar:FindFirstChild("Main") and 
+                                       client.HealthBar.Main:FindFirstChild("Bar") and 
+                                       client.HealthBar.Main.Bar:FindFirstChild("Amount")
+                    local healthText = healthAmount and healthAmount.Text or "0"
+                    local healthValue = parseHP(healthText)
+                    
+                    if clientPosition and healthValue > 0 then
+                        table.insert(nameTable, {
+                            Name = clientName,
+                            Position = clientPosition,
+                            Health = healthValue
+                        })
+                    end
+                end
+            end
+        end
+
+        local function findClosestEnemy()
+            if not humanoidRootPart then return nil end
+            local playerPosition = humanoidRootPart.Position
+            local closestEnemy, minDistance = nil, math.huge
+            for _, entry in ipairs(nameTable) do
+                local distance = (playerPosition - entry.Position).Magnitude
+                if distance < minDistance then
+                    minDistance = distance
+                    closestEnemy = entry
+                end
+            end
+            return closestEnemy
+        end
+
+        spawn(function()
+            while autoClickRunning do
+                updateNameTable()
+                local closestEnemy = findClosestEnemy()
+                if closestEnemy then
+                    local punchTable = {
+                        [1] = {["Event"] = "PunchAttack", ["Enemy"] = closestEnemy.Name},
+                        [2] = utf8.char(4)
+                    }
+                    game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer(punchTable)
+                end
+                task.wait(0.01)
+            end
+        end)
+    end
+end)
+
+-- Toggle 2: Fast Enemy Attack + Pet TP
+local Toggle1 = Tabs.Main:CreateToggle("MyToggle1", {Title = "Fast Enemy Attack + Pet TP", Default = false })
+local enemyAttackRunning = false
+
+Toggle1:OnChanged(function()
+    enemyAttackRunning = Options.MyToggle1.Value
+    
+    if enemyAttackRunning then
+        local nameTable = {}
+        local enemies = workspace.__Main.__Enemies.Client
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        local lastTeleportedEnemy = nil
+
+        local function updateNameTable()
+            nameTable = {}
+            for _, client in pairs(enemies:GetChildren()) do
+                if client:FindFirstChild("HealthBar") and 
+                   client.HealthBar:FindFirstChild("Main") and 
+                   client.HealthBar.Main:FindFirstChild("Title") then
+                    local clientName = client.Name
+                    local clientPosition = client:FindFirstChild("HumanoidRootPart") and client.HumanoidRootPart.Position
+                    local healthAmount = client.HealthBar:FindFirstChild("Main") and 
+                                       client.HealthBar.Main:FindFirstChild("Bar") and 
+                                       client.HealthBar.Main.Bar:FindFirstChild("Amount")
+                    local healthText = healthAmount and healthAmount.Text or "0"
+                    local healthValue = parseHP(healthText)
+                    
+                    if clientPosition and healthValue > 0 then
+                        table.insert(nameTable, {
+                            Name = clientName,
+                            Position = clientPosition,
+                            Health = healthValue
+                        })
+                    end
+                end
+            end
+        end
+
+        local function findClosestEnemy()
+            if not humanoidRootPart then return nil end
+            local playerPosition = humanoidRootPart.Position
+            local closestEnemy, minDistance = nil, math.huge
+            for _, entry in ipairs(nameTable) do
+                local distance = (playerPosition - entry.Position).Magnitude
+                if distance < minDistance then
+                    minDistance = distance
+                    closestEnemy = entry
+                end
+            end
+            return closestEnemy
+        end
+
+        local function getPetPositions()
+            local petPositions = {}
+            local petFolder = workspace.__Main.__Pets[tostring(player.UserId)]
+            if petFolder then
+                for _, pet in pairs(petFolder:GetChildren()) do
+                    local petRoot = pet:FindFirstChild("HumanoidRootPart")
+                    if petRoot then
+                        petPositions[pet.Name] = petRoot.CFrame
+                    end
+                end
+            end
+            return petPositions
+        end
+
+        local function teleportPetsToEnemy(enemyPosition)
+            local petFolder = workspace.__Main.__Pets[tostring(player.UserId)]
+            if petFolder then
+                for _, pet in pairs(petFolder:GetChildren()) do
+                    local petRoot = pet:FindFirstChild("HumanoidRootPart")
+                    if petRoot then
+                        local distance = (petRoot.Position - enemyPosition).Magnitude
+                        if distance > 10 then
+                            petRoot.CFrame = CFrame.new(enemyPosition)
+                        end
+                    end
+                end
+            end
+        end
+
+        spawn(function()
+            while enemyAttackRunning do
+                updateNameTable()
+                local closestEnemy = findClosestEnemy()
+                if closestEnemy then
+                    local petPositions = getPetPositions()
+                    local attackTable = {
+                        [1] = {
+                            ["PetPos"] = petPositions,
+                            ["AttackType"] = "All",
+                            ["Event"] = "Attack",
+                            ["Enemy"] = closestEnemy.Name
+                        },
+                        [2] = utf8.char(5)
+                    }
+                    game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer(attackTable)
+                end
+                task.wait(0.07)
+            end
+        end)
+
+        spawn(function()
+            while enemyAttackRunning do
+                updateNameTable()
+                local closestEnemy = findClosestEnemy()
+                if closestEnemy and (not lastTeleportedEnemy or lastTeleportedEnemy.Name ~= closestEnemy.Name) then
+                    teleportPetsToEnemy(closestEnemy.Position)
+                    lastTeleportedEnemy = closestEnemy
+                end
+                task.wait(2)
+            end
+        end)
+    end
+end)
+
+-- Dropdown: Select Enemy and Farm until 0 HP with Flying
+local Dropdown = Tabs.Main:CreateDropdown("EnemySelector", {
+    Title = "Select Enemy to Farm",
+    Values = {"None"},
+    Multi = false,
+    Default = "None",
+})
+
+local moveRunning = false
+local selectedEnemyText = "None"
+local currentTarget = nil
+
+local function updateDropdownValues()
+    local enemies = workspace.__Main.__Enemies.Client
+    local uniqueNames = {["None"] = true}
+    local nameTable = {"None"}
+    
+    for _, client in pairs(enemies:GetChildren()) do
+        if client:FindFirstChild("HealthBar") and 
+           client.HealthBar:FindFirstChild("Main") and 
+           client.HealthBar.Main:FindFirstChild("Title") then
+            local titleText = client.HealthBar.Main.Title.Text
+            if not uniqueNames[titleText] then
+                uniqueNames[titleText] = true
+                table.insert(nameTable, titleText)
+            end
+        end
+    end
+    Dropdown:SetValues(nameTable)
+end
+
+updateDropdownValues()
+
+Dropdown:OnChanged(function(Value)
+    selectedEnemyText = Value
+    moveRunning = Value ~= "None"
+    currentTarget = nil
+    
+    if moveRunning then
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        local humanoid = character:WaitForChild("Humanoid")
+        
+        humanoid.PlatformStand = true
+        humanoidRootPart.CanCollide = false
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+
+        spawn(function()
+            while moveRunning and selectedEnemyText == Value do
+                if humanoidRootPart.CanCollide or not humanoid.PlatformStand then
+                    humanoid.PlatformStand = true
+                    humanoidRootPart.CanCollide = false
+                    for _, part in pairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+            humanoid.PlatformStand = false
+            humanoidRootPart.CanCollide = true
+            humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end)
+
+        spawn(function()
+            while moveRunning and selectedEnemyText == Value do
+                local enemies = workspace.__Main.__Enemies.Client
+                local nameTable = {}
+                
+                for _, client in pairs(enemies:GetChildren()) do
+                    if client:FindFirstChild("HealthBar") and 
+                       client.HealthBar:FindFirstChild("Main") and 
+                       client.HealthBar.Main:FindFirstChild("Title") then
+                        local titleText = client.HealthBar.Main.Title.Text
+                        local clientPosition = client:FindFirstChild("HumanoidRootPart") and client.HumanoidRootPart.Position
+                        local healthAmount = client.HealthBar:FindFirstChild("Main") and 
+                                           client.HealthBar.Main:FindFirstChild("Bar") and 
+                                           client.HealthBar.Main.Bar:FindFirstChild("Amount")
+                        local healthText = healthAmount and healthAmount.Text or "0"
+                        local healthValue = parseHP(healthText)
+                        
+                        if clientPosition and healthValue > 0 and titleText == selectedEnemyText then
+                            table.insert(nameTable, {
+                                Name = client.Name,
+                                Position = clientPosition,
+                                Instance = client,
+                                Health = healthValue,
+                                TitleText = titleText
+                            })
+                        end
+                    end
+                end
+
+                if not currentTarget or not currentTarget.Instance.Parent or currentTarget.Health <= 0 then
+                    local closestEnemy = nil
+                    local minDistance = math.huge
+                    local playerPosition = humanoidRootPart.Position
+                    
+                    for _, entry in ipairs(nameTable) do
+                        local distance = (playerPosition - entry.Position).Magnitude
+                        if distance < minDistance then
+                            minDistance = distance
+                            closestEnemy = entry
+                        end
+                    end
+                    currentTarget = closestEnemy
+                end
+
+                if currentTarget then
+                    local rayOrigin = humanoidRootPart.Position
+                    local rayDirection = Vector3.new(0, -100, 0)
+                    local raycastResult = workspace:Raycast(rayOrigin, rayDirection)
+                    local groundHeight = raycastResult and raycastResult.Position.Y or humanoidRootPart.Position.Y
+                    local targetY = groundHeight + 3 -- Фиксированная высота над землей
+                    
+                    local targetPosition = Vector3.new(currentTarget.Position.X, targetY, currentTarget.Position.Z)
+                    humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                    humanoidRootPart.CFrame = humanoidRootPart.CFrame:Lerp(CFrame.new(targetPosition), 0.1)
+                    
+                    local punchTable = {
+                        [1] = {["Event"] = "PunchAttack", ["Enemy"] = currentTarget.Name},
+                        [2] = utf8.char(4)
+                    }
+                    game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer(punchTable)
+
+                    local healthAmount = currentTarget.Instance and 
+                                        currentTarget.Instance:FindFirstChild("HealthBar") and 
+                                        currentTarget.Instance.HealthBar:FindFirstChild("Main") and 
+                                        currentTarget.Instance.HealthBar.Main:FindFirstChild("Bar") and 
+                                        currentTarget.Instance.HealthBar.Main.Bar:FindFirstChild("Amount")
+                    local healthText = healthAmount and healthAmount.Text or "0"
+                    currentTarget.Health = parseHP(healthText)
+                end
+                
+                task.wait(0.05)
+            end
+            humanoid.PlatformStand = false
+            humanoidRootPart.CanCollide = true
+            humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end)
+    end
+end)
+
+-- Refresh Button
+local RefreshButton = Tabs.Main:CreateButton{
+    Title = "Refresh Enemy List",
+    Callback = function()
+        local enemies = workspace.__Main.__Enemies.Client
+        local uniqueNames = {["None"] = true}
+        local nameTable = {"None"}
+        
+        for _, client in pairs(enemies:GetChildren()) do
+            if client:FindFirstChild("HealthBar") and 
+               client.HealthBar:FindFirstChild("Main") and 
+               client.HealthBar.Main:FindFirstChild("Title") then
+                local titleText = client.HealthBar.Main.Title.Text
+                if not uniqueNames[titleText] then
+                    uniqueNames[titleText] = true
+                    table.insert(nameTable, titleText)
+                end
+            end
+        end
+        Dropdown:SetValues(nameTable)
+        Library:Notify{
+            Title = "Refresh",
+            Content = "Enemy list has been updated!",
+            Duration = 3
+        }
+    end
+}
+
+-- Toggle 4: Fly to Near Enemy
+local Toggle4 = Tabs.Main:CreateToggle("MyToggle4", {Title = "Fly to Near Enemy", Default = false })
+local flyRunning = false
+
+Toggle4:OnChanged(function()
+    flyRunning = Options.MyToggle4.Value
+    
+    if flyRunning then
+        local nameTable = {}
+        local enemies = workspace.__Main.__Enemies.Client
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        local humanoid = character:WaitForChild("Humanoid")
+        local lastTeleportedEnemy = nil
+        
+        humanoid.PlatformStand = true
+        humanoidRootPart.CanCollide = false
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+        
+        local function updateNameTable()
+            nameTable = {}
+            for _, client in pairs(enemies:GetChildren()) do
+                if client:FindFirstChild("HealthBar") and 
+                   client.HealthBar:FindFirstChild("Main") and 
+                   client.HealthBar.Main:FindFirstChild("Title") then
+                    local clientName = client.Name
+                    local clientPosition = client:FindFirstChild("HumanoidRootPart") and client.HumanoidRootPart.Position
+                    local healthAmount = client.HealthBar:FindFirstChild("Main") and 
+                                       client.HealthBar.Main:FindFirstChild("Bar") and 
+                                       client.HealthBar.Main.Bar:FindFirstChild("Amount")
+                    local healthText = healthAmount and healthAmount.Text or "0"
+                    local healthValue = parseHP(healthText)
+                    
+                    if clientPosition and healthValue > 0 then
+                        table.insert(nameTable, {
+                            Name = clientName,
+                            Position = clientPosition,
+                            Instance = client,
+                            Health = healthValue
+                        })
+                    end
+                end
+            end
+        end
+
+        local function findClosestValidEnemy()
+            if not humanoidRootPart then return nil end
+            local playerPosition = humanoidRootPart.Position
+            local closestEnemy, minDistance = nil, math.huge
+            
+            for _, entry in ipairs(nameTable) do
+                local hasNameFrame = entry.Instance:FindFirstChild("HealthBar") and 
+                                  entry.Instance.HealthBar:FindFirstChild("Main") and 
+                                  entry.Instance.HealthBar.Main:FindFirstChild("Title")
+                if hasNameFrame then
+                    local distance = (playerPosition - entry.Position).Magnitude
+                    if distance < minDistance then
+                        minDistance = distance
+                        closestEnemy = entry
+                    end
+                end
+            end
+            return closestEnemy
+        end
+
+        spawn(function()
+            while flyRunning do
+                if humanoidRootPart.CanCollide or not humanoid.PlatformStand then
+                    humanoid.PlatformStand = true
+                    humanoidRootPart.CanCollide = false
+                    for _, part in pairs(character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+            humanoid.PlatformStand = false
+            humanoidRootPart.CanCollide = true
+            humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end)
+
+        spawn(function()
+            local currentTarget = nil
+            while flyRunning do
+                updateNameTable()
+                local closestEnemy = findClosestValidEnemy()
+                
+                if closestEnemy and (not currentTarget or currentTarget.Name ~= closestEnemy.Name or 
+                   (humanoidRootPart.Position - currentTarget.Position).Magnitude > 5) then
+                    currentTarget = closestEnemy
+                    lastTeleportedEnemy = nil
+                end
+                
+                if currentTarget then
+                    local rayOrigin = humanoidRootPart.Position
+                    local rayDirection = Vector3.new(0, -100, 0)
+                    local raycastResult = workspace:Raycast(rayOrigin, rayDirection)
+                    local groundHeight = raycastResult and raycastResult.Position.Y or humanoidRootPart.Position.Y
+                    local targetY = groundHeight + 3 -- Фиксированная высота над землей
+                    
+                    local targetPosition = Vector3.new(currentTarget.Position.X, targetY, currentTarget.Position.Z)
+                    humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+                    humanoidRootPart.CFrame = humanoidRootPart.CFrame:Lerp(CFrame.new(targetPosition), 0.1)
+                    
+                    local playerDistanceToEnemy = (humanoidRootPart.Position - currentTarget.Position).Magnitude
+                    if playerDistanceToEnemy <= 10 then
+                        lastTeleportedEnemy = currentTarget
+                    end
+                    if not currentTarget.Instance.Parent or currentTarget.Health <= 0 then
+                        currentTarget = nil
+                        lastTeleportedEnemy = nil
+                    end
+                elseif #nameTable > 0 then
+                    local fallbackEnemy, minDistance = nil, math.huge
+                    local playerPosition = humanoidRootPart.Position
+                    for _, entry in ipairs(nameTable) do
+                        local distance = (playerPosition - entry.Position).Magnitude
+                        if distance < minDistance then
+                            minDistance = distance
+                            fallbackEnemy = entry
+                        end
+                    end
+                    if fallbackEnemy then
+                        currentTarget = fallbackEnemy
+                    end
+                end
+                task.wait(0.01)
+            end
+            humanoid.PlatformStand = false
+            humanoidRootPart.CanCollide = true
+            humanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+        end)
+    end
+end)
+
+-- Toggle 5: Enemy Capture (0 HP)
+local Toggle5 = Tabs.Main:CreateToggle("MyToggle5", {Title = "Enemy Auto Arise", Default = false })
+local captureRunning = false
+
+Toggle5:OnChanged(function()
+    captureRunning = Options.MyToggle5.Value
+    
+    if captureRunning then
+        local nameTable = {}
+        local enemies = workspace.__Main.__Enemies.Client
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local function updateNameTable()
+            nameTable = {}
+            for _, client in pairs(enemies:GetChildren()) do
+                if client:FindFirstChild("HealthBar") and 
+                   client.HealthBar:FindFirstChild("Main") and 
+                   client.HealthBar.Main:FindFirstChild("Title") then
+                    local clientName = client.Name
+                    local clientPosition = client:FindFirstChild("HumanoidRootPart") and client.HumanoidRootPart.Position
+                    local healthAmount = client.HealthBar:FindFirstChild("Main") and 
+                                       client.HealthBar.Main:FindFirstChild("Bar") and 
+                                       client.HealthBar.Main.Bar:FindFirstChild("Amount")
+                    local healthText = healthAmount and healthAmount.Text or "0"
+                    local healthValue = parseHP(healthText)
+                    
+                    if clientPosition then
+                        table.insert(nameTable, {
+                            Name = clientName,
+                            Position = clientPosition,
+                            Health = healthValue
+                        })
+                    end
+                end
+            end
+        end
+
+        local function findClosestEnemyWithZeroHP()
+            if not humanoidRootPart then return nil end
+            local playerPosition = humanoidRootPart.Position
+            local closestEnemy, minDistance = nil, math.huge
+            for _, entry in ipairs(nameTable) do
+                if entry.Health <= 0 then
+                    local distance = (playerPosition - entry.Position).Magnitude
+                    if distance < minDistance then
+                        minDistance = distance
+                        closestEnemy = entry
+                    end
+                end
+            end
+            return closestEnemy
+        end
+
+        spawn(function()
+            while captureRunning do
+                updateNameTable()
+                local closestEnemy = findClosestEnemyWithZeroHP()
+                if closestEnemy then
+                    local captureTable = {
+                        [1] = {
+                            ["Event"] = "EnemyCapture",
+                            ["Enemy"] = closestEnemy.Name
+                        },
+                        [2] = utf8.char(4)
+                    }
+                    game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer(captureTable)
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- Toggle 6: Enemy Destroy (0 HP)
+local Toggle6 = Tabs.Main:CreateToggle("MyToggle6", {Title = "Enemy sell for gems", Default = false })
+local destroyRunning = false
+
+Toggle6:OnChanged(function()
+    destroyRunning = Options.MyToggle6.Value
+    
+    if destroyRunning then
+        local nameTable = {}
+        local enemies = workspace.__Main.__Enemies.Client
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local function updateNameTable()
+            nameTable = {}
+            for _, client in pairs(enemies:GetChildren()) do
+                if client:FindFirstChild("HealthBar") and 
+                   client.HealthBar:FindFirstChild("Main") and 
+                   client.HealthBar.Main:FindFirstChild("Title") then
+                    local clientName = client.Name
+                    local clientPosition = client:FindFirstChild("HumanoidRootPart") and client.HumanoidRootPart.Position
+                    local healthAmount = client.HealthBar:FindFirstChild("Main") and 
+                                       client.HealthBar.Main:FindFirstChild("Bar") and 
+                                       client.HealthBar.Main.Bar:FindFirstChild("Amount")
+                    local healthText = healthAmount and healthAmount.Text or "0"
+                    local healthValue = parseHP(healthText)
+                    
+                    if clientPosition then
+                        table.insert(nameTable, {
+                            Name = clientName,
+                            Position = clientPosition,
+                            Health = healthValue
+                        })
+                    end
+                end
+            end
+        end
+
+        local function findClosestEnemyWithZeroHP()
+            if not humanoidRootPart then return nil end
+            local playerPosition = humanoidRootPart.Position
+            local closestEnemy, minDistance = nil, math.huge
+            for _, entry in ipairs(nameTable) do
+                if entry.Health <= 0 then
+                    local distance = (playerPosition - entry.Position).Magnitude
+                    if distance < minDistance then
+                        minDistance = distance
+                        closestEnemy = entry
+                    end
+                end
+            end
+            return closestEnemy
+        end
+
+        spawn(function()
+            while destroyRunning do
+                updateNameTable()
+                local closestEnemy = findClosestEnemyWithZeroHP()
+                if closestEnemy then
+                    local destroyTable = {
+                        [1] = {
+                            ["Event"] = "EnemyDestroy",
+                            ["Enemy"] = closestEnemy.Name
+                        },
+                        [2] = utf8.char(4)
+                    }
+                    game:GetService("ReplicatedStorage").BridgeNet2.dataRemoteEvent:FireServer(destroyTable)
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+
+SaveManager:SetLibrary(Library)
+InterfaceManager:SetLibrary(Library)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("Apel Hub")
+SaveManager:SetFolder("Apel Hub/".."Arise Crossover")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+SaveManager:LoadAutoloadConfig()
+
+local Menu = game:GetService("CoreGui"):FindFirstChild("Menu")
+if Menu then
+    print("Найдено меню")
+else
+    local Menu = Instance.new("ScreenGui")
+Menu.Name = "Menu"
+local Frame = Instance.new("Frame")
+Frame.Name = "Menu Button"
+local ImageButton = Instance.new("ImageButton")
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint")
+local UIAspectRatioConstraint_2 = Instance.new("UIAspectRatioConstraint")
+
+--Properties:
+local coreGui = game:GetService("CoreGui")
+Menu.Parent = coreGui
+Menu.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+Frame.Parent = Menu
+Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.167999998, 0, 0.230493277, 0)
+Frame.Size = UDim2.new(0.040533334, 0, 0.0681614354, 0)
+
+ImageButton.Parent = Frame
+ImageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ImageButton.BorderSizePixel = 0
+ImageButton.Size = UDim2.new(1, 0, 1, 0)
+ImageButton.Image = "http://www.roblox.com/asset/?id=181239831"
+ImageButton.MouseButton1Up:Connect(function()
+    game:GetService("VirtualInputManager"):SendKeyEvent(true,"LeftControl",false,game)
+end)
+
+UIAspectRatioConstraint.Parent = ImageButton
+
+UIAspectRatioConstraint_2.Parent = Frame
+end
