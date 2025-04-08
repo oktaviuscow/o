@@ -76,19 +76,11 @@ end
 
 coroutine.wrap(function()
     while true do
-    task.wait(5)
-    game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
-    task.wait()
-    game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
-    task.wait(1)
-    game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
-    task.wait()
-    game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
-    task.wait(1)
-    game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
-    task.wait()
-    game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
-    task.wait(600)
+        task.wait(60)
+        local humanoid = character:WaitForChild("Humanoid")
+        if humanoid then
+            humanoid.Jump = true
+        end
     end
 end)()
 
