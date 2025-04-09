@@ -1590,6 +1590,33 @@ do
         coroutine.wrap(trackCurrentMode)()
     end)
 
+    local AntiAfkJump = Tabs.Misc:CreateToggle("Anti Afk Jump",{
+        Title = "Anti Afk Jumping",
+        Description = "",
+        Default = false
+    })
+
+    AntiAfkJump:OnChanged(function(state)
+        getgenv().AntiAfkJump = state
+        coroutine.wrap(function()
+            while getgenv().AntiAfkJump == true do
+            task.wait(5)
+            game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
+            task.wait()
+            game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
+            task.wait(1)
+            game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
+            task.wait()
+            game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
+            task.wait(1)
+            game:GetService("VirtualInputManager"):SendKeyEvent(true,"Space",false,game)
+            task.wait()
+            game:GetService("VirtualInputManager"):SendKeyEvent(false,"Space",false,game)
+            task.wait(300)
+            end
+        end)()
+    end)
+
     --[[local function delayedTeleport()
         task.wait(10)
         teleportToSavedPosition()
