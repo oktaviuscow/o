@@ -607,7 +607,7 @@ do
         
     end)
 
-    local AutoFarmNearestFast = Tabs.Farm:CreateToggle("Auto Farm Nearest Fast", {Title = "Auto Farm Nearest Fast", Default = false, Description = "YOU MUST HAVE SET DISABLE RETREAT IN SETTINGS ON OFF "})
+    local AutoFarmNearestFast = Tabs.Farm:CreateToggle("Auto Farm Nearest Fast", {Title = "Auto Farm Nearest Fast", Default = false, Description = "YOU MUST HAVE SET DISABLE RETREAT IN SETTINGS ON OFF (!!! ITS A RISKY FUNCTION )"})
     AutoFarmNearestFast:OnChanged(function(state)
         getgenv().AutoFarmNearestFast = state
         while getgenv().AutoFarmNearestFast do
